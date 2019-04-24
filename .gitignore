@@ -1,0 +1,28 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Self defined
+.idea
+
+# golang
+golang/bin
+golang/pkg
+
+# experiment/bin
+experiment/bin
+
+# experiment/prometheus
+experiment/prometheus/federation/data/node*
+experiment/prometheus/federation/data/master
+experiment/prometheus/federation/data/grafana/public
+experiment/prometheus/federation/log
