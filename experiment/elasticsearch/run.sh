@@ -52,7 +52,17 @@ function start_kibana() {
     nohup ${KIBANA} >${LOGFILE}&
 }
 
+function start_filebeat() {
+    FILEBEAT=${FULLPATH}/../bin/filebeat/filebeat
+
+    nohup ${FILEBEAT} run \
+        --path.config ${FULLPATH}/conf/filebeat \
+        --path.data ${FULLPATH}/data/filebeat \
+        --path.logs ${FULLPATH}/log/filebeat >/dev/null&
+}
+
 #start_nginx
 #start_elasticsearch
 #start_kibana
+#start_filebeat
 
