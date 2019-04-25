@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-BASEDIR=$(dirname "$0")
 FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 function start_nginx() {
@@ -29,6 +28,31 @@ function start_nginx() {
     return 0
 }
 
-#ES_PATH_CONF=/path/to/my/config ./bin/elasticsearch
+function start_elasticsearch() {
+    ELSTICSEARCH=${FULLPATH}/../bin/elasticsearch/bin/elasticsearch
 
-start_nginx
+    ES_PATH_CONF=${FULLPATH}/conf/elasticsearch ${ELSTICSEARCH} \
+        -d \
+        -E discovery.type=single-node \
+        -E path.data=${FULLPATH}/data/elasticsearch \
+        -E path.logs=${FULLPATH}/log/elasticsearch \
+        -E cluster.routing.allocation.disk.threshold_enabled=false
+}
+
+function start_kibana() {
+    KIBANA=${FULLPATH}/../bin/kibana/bin/kibana
+    LOGFILE=${FULLPATH}/log/kibana/kibana.log
+
+    if [[ ! -f ${LOGFILE} ]]; then
+        mkdir -p "$(dirname ${LOGFILE})"
+        touch ${LOGFILE}
+    fi
+
+    export CONFIG_PATH=${FULLPATH}/conf/kibana/kibana.yml
+    nohup ${KIBANA} >${LOGFILE}&
+}
+
+#start_nginx
+#start_elasticsearch
+#start_kibana
+

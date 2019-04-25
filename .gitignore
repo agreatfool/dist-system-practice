@@ -22,6 +22,9 @@ golang/pkg
 experiment/bin
 
 # experiment/elasticsearch
+experiment/elasticsearch/conf/elasticsearch/elasticsearch.keystore
+experiment/elasticsearch/data
+experiment/elasticsearch/log
 experiment/elasticsearch/nginx/log
 
 # experiment/prometheus
