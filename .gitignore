@@ -21,6 +21,9 @@ golang/pkg
 # experiment/bin
 experiment/bin
 
+# experiment/elasticsearch
+experiment/elasticsearch/nginx/log
+
 # experiment/prometheus
 experiment/prometheus/federation/data/node*
 experiment/prometheus/federation/data/master
