@@ -14,3 +14,5 @@ fi
 if [[ -f ${NGINX_ERROR} ]]; then
     > ${NGINX_ERROR}
 fi
+
+docker rm nginx
