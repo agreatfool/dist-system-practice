@@ -37,6 +37,7 @@ function start_elasticsearch() {
         -E path.data=${FULLPATH}/data/elasticsearch \
         -E path.logs=${FULLPATH}/log/elasticsearch \
         -E cluster.routing.allocation.disk.threshold_enabled=false
+    echo "Elasticsearch started"
 }
 
 function start_kibana() {
@@ -50,6 +51,7 @@ function start_kibana() {
 
     export CONFIG_PATH=${FULLPATH}/conf/kibana/kibana.yml
     nohup ${KIBANA} >${LOGFILE}&
+    echo "Kibana started"
 }
 
 function start_filebeat() {
@@ -59,10 +61,11 @@ function start_filebeat() {
         --path.config ${FULLPATH}/conf/filebeat \
         --path.data ${FULLPATH}/data/filebeat \
         --path.logs ${FULLPATH}/log/filebeat >/dev/null&
+    echo "Filebeat started"
 }
 
-#start_nginx
-#start_elasticsearch
-#start_kibana
-#start_filebeat
+start_nginx
+start_elasticsearch
+start_kibana
+start_filebeat
 
