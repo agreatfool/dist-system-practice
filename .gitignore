@@ -27,6 +27,10 @@ experiment/elasticsearch/data
 experiment/elasticsearch/log
 experiment/elasticsearch/nginx/log
 
+# experiment/kafka
+experiment/kafka/data
+experiment/kafka/log
+
 # experiment/prometheus
 experiment/prometheus/federation/data/node*
 experiment/prometheus/federation/data/master
