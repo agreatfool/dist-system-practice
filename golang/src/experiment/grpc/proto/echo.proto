@@ -3,9 +3,14 @@ syntax = "proto3";
 package message;
 
 message EchoRequest {
-    string info = 1;
+    int64 id = 1;
 }
 
 message EchoResponse {
-    string info = 1;
+    int64 id = 1;
+}
+
+service EchoService {
+    rpc Echo (EchoRequest) returns (EchoResponse) {
+    }
 }

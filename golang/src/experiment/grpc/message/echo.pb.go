@@ -4,8 +4,10 @@
 package message
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	grpc "google.golang.org/grpc"
 	math "math"
 )
 
@@ -21,7 +23,7 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type EchoRequest struct {
-	Info                 string   `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`
+	Id                   int64    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -52,15 +54,15 @@ func (m *EchoRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EchoRequest proto.InternalMessageInfo
 
-func (m *EchoRequest) GetInfo() string {
+func (m *EchoRequest) GetId() int64 {
 	if m != nil {
-		return m.Info
+		return m.Id
 	}
-	return ""
+	return 0
 }
 
 type EchoResponse struct {
-	Info                 string   `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`
+	Id                   int64    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -91,11 +93,11 @@ func (m *EchoResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EchoResponse proto.InternalMessageInfo
 
-func (m *EchoResponse) GetInfo() string {
+func (m *EchoResponse) GetId() int64 {
 	if m != nil {
-		return m.Info
+		return m.Id
 	}
-	return ""
+	return 0
 }
 
 func init() {
@@ -106,11 +108,85 @@ func init() {
 func init() { proto.RegisterFile("echo.proto", fileDescriptor_08134aea513e0001) }
 
 var fileDescriptor_08134aea513e0001 = []byte{
-	// 96 bytes of a gzipped FileDescriptorProto
+	// 128 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4a, 0x4d, 0xce, 0xc8,
 	0xd7, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0xcf, 0x4d, 0x2d, 0x2e, 0x4e, 0x4c, 0x4f, 0x55,
-	0x52, 0xe4, 0xe2, 0x76, 0x4d, 0xce, 0xc8, 0x0f, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0x11, 0x12,
-	0xe2, 0x62, 0xc9, 0xcc, 0x4b, 0xcb, 0x97, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x02, 0xb3, 0x95,
-	0x94, 0xb8, 0x78, 0x20, 0x4a, 0x8a, 0x0b, 0xf2, 0xf3, 0x8a, 0x53, 0xb1, 0xa9, 0x49, 0x62, 0x03,
-	0x1b, 0x6b, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0x9d, 0x78, 0xa1, 0x2b, 0x64, 0x00, 0x00, 0x00,
+	0x92, 0xe5, 0xe2, 0x76, 0x4d, 0xce, 0xc8, 0x0f, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0x11, 0xe2,
+	0xe3, 0x62, 0xca, 0x4c, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x0e, 0x62, 0xca, 0x4c, 0x51, 0x92,
+	0xe3, 0xe2, 0x81, 0x48, 0x17, 0x17, 0xe4, 0xe7, 0x15, 0xa7, 0xa2, 0xcb, 0x1b, 0xb9, 0x40, 0xb4,
+	0x07, 0xa7, 0x16, 0x95, 0x65, 0x26, 0xa7, 0x0a, 0x99, 0x72, 0xb1, 0x80, 0xb8, 0x42, 0x22, 0x7a,
+	0x50, 0xf3, 0xf5, 0x90, 0x0c, 0x97, 0x12, 0x45, 0x13, 0x85, 0x98, 0xa9, 0xc4, 0x90, 0xc4, 0x06,
+	0x76, 0x94, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0x1d, 0xe4, 0x1f, 0x35, 0xa2, 0x00, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// EchoServiceClient is the client API for EchoService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type EchoServiceClient interface {
+	Echo(ctx context.Context, in *EchoRequest, opts ...grpc.CallOption) (*EchoResponse, error)
+}
+
+type echoServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewEchoServiceClient(cc *grpc.ClientConn) EchoServiceClient {
+	return &echoServiceClient{cc}
+}
+
+func (c *echoServiceClient) Echo(ctx context.Context, in *EchoRequest, opts ...grpc.CallOption) (*EchoResponse, error) {
+	out := new(EchoResponse)
+	err := c.cc.Invoke(ctx, "/message.EchoService/Echo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// EchoServiceServer is the server API for EchoService service.
+type EchoServiceServer interface {
+	Echo(context.Context, *EchoRequest) (*EchoResponse, error)
+}
+
+func RegisterEchoServiceServer(s *grpc.Server, srv EchoServiceServer) {
+	s.RegisterService(&_EchoService_serviceDesc, srv)
+}
+
+func _EchoService_Echo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EchoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EchoServiceServer).Echo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/message.EchoService/Echo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EchoServiceServer).Echo(ctx, req.(*EchoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _EchoService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "message.EchoService",
+	HandlerType: (*EchoServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Echo",
+			Handler:    _EchoService_Echo_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "echo.proto",
 }
