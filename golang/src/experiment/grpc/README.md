@@ -13,3 +13,10 @@ go的安装本质上都是在命令行下使用git进行安装，因此需要设
 代理服务器必须是http和https的
 export http_proxy=http://127.0.0.1:6152
 export https_proxy=http://127.0.0.1:6152
+
+文件夹：
+bash
+book
+message
+pool
+proto
