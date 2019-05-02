@@ -6,4 +6,4 @@ BASEPATH="${FULLPATH}/.."
 protoc \
     --go_out=plugins=grpc:${BASEPATH}/message \
     -I ${BASEPATH}/proto \
-    ${BASEPATH}/proto/book.proto
+    ${BASEPATH}/proto/*.proto
