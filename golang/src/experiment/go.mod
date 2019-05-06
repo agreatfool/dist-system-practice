@@ -9,6 +9,7 @@ require (
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/google/pprof v0.0.0-20190404155422-f8f10df84213 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
+	github.com/processout/grpc-go-pool v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734 // indirect
 	golang.org/x/exp v0.0.0-20190429183610-475c5042d3f1 // indirect
 	golang.org/x/image v0.0.0-20190501045829-6d32002ffd75 // indirect
