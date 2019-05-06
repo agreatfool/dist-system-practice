@@ -66,12 +66,6 @@ func main() {
 	}
 	defer conn.Close()
 
-	// TODO 制作一个计数器，存储并汇报固定时间内消息完成数量
-	// TODO 使用工具测试网卡带宽
-	// TODO localhost回环的网络请求是会走网卡的嘛？还是直接如何处理掉的
-	// TODO 根据带宽以及echo消息的protobuf体积，计算理论固定时间消息数量上限
-	// TODO 比对数值，查看是否达到上限
-	// TODO 如果达到，测试看看双网卡？我电脑没双网卡双连接的可能性
 	client := pb.NewEchoServiceClient(conn)
 
 	for i := 0; i < cores*routines; i++ {
