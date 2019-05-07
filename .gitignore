@@ -27,6 +27,9 @@ experiment/elasticsearch/data
 experiment/elasticsearch/log
 experiment/elasticsearch/nginx/log
 
+# experiment/envoy
+experiment/envoy/log
+
 # experiment/kafka
 experiment/kafka/data
 experiment/kafka/log
