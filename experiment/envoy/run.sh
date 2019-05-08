@@ -37,3 +37,7 @@ docker run --rm -it -d \
     -v ${FULLPATH}/conf:/etc/envoy \
     -v ${FULLPATH}/log:/tmp \
     envoyproxy/envoy:v1.10.0
+
+sleep 2
+
+curl -v "http://127.0.0.1:9988"

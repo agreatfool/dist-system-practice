@@ -18,7 +18,7 @@ static_resources:
               typed_config:
                 "@type": type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager
                 stat_prefix: ingress_http
-                codec_type: AUTO
+                codec_type: auto
                 access_log:
                   - name: envoy.file_access_log
                     config:
