@@ -36,7 +36,7 @@ $ ACT=testPointer go run channel.go
 ## testSlice
 * 测试对象：切片
 * 测试目的：测试`切片`在进出channel之后的地址变化
-* 测试结论：进出channel之后，`切片`保持`原地址`
+* 测试结论：进出channel之后，`切片`保持`原地址`；注意，这里的切片用的是值，而不是指针
 
 运行：
 
