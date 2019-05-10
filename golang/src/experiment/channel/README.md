@@ -140,3 +140,16 @@ $ ACT=testWriteExceedHangNoCap go run channel.go
 #         /.../dist-system-practice/golang/src/experiment/channel/channel.go:165 +0x31e
 # exit status 2
 ```
+
+# testReadClosed
+* 测试对象：读关闭通道
+* 测试目的：测试向关闭的通道读取数据
+* 测试结论：获得通道类型的默认值
+
+运行：
+
+```bash
+$ ACT=testReadClosed go run channel.go 
+
+# testReadClosed: 0
+```

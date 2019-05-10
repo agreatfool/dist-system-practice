@@ -143,6 +143,13 @@ func testWriteExceedHangNoCap() {
 	channel <- 1
 }
 
+func testReadClosed() {
+	channel := make(chan int)
+	close(channel)
+
+	fmt.Printf("testReadClosed: %d\n", <-channel)
+}
+
 func main() {
 	act := os.Getenv("ACT")
 
@@ -163,6 +170,8 @@ func main() {
 		testReadExceedCheck()
 	case "testWriteExceedHangNoCap":
 		testWriteExceedHangNoCap()
+	case "testReadClosed":
+		testReadClosed()
 	default:
 		fmt.Println("No env ACT specified, do nothing")
 	}
