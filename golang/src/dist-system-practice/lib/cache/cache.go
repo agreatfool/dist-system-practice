@@ -12,7 +12,7 @@ import (
 // Global
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-var instance *Cache
+var instance *memcache.Client
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Types
@@ -23,21 +23,17 @@ type Config struct {
 	Servers []string `json:"servers" yaml:"servers"`
 }
 
-type Cache struct {
-	Client *memcache.Client
-}
-
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Instance
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 // Get Cache instance.
-func Get() *Cache {
+func Get() *memcache.Client {
 	return instance
 }
 
 // Initialize Cache instance.
-func New() *Cache {
+func New() *memcache.Client {
 	config := Config{}
 
 	// get config path string
@@ -58,18 +54,7 @@ func New() *Cache {
 	}
 
 	// init memcached client
-	mc := memcache.New(config.Servers...)
-	instance = &Cache{
-		Client: mc,
-	}
+	instance = memcache.New(config.Servers...)
 
 	return instance
-}
-
-// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-// Api
-// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-
-func (c *Cache) GetItem() {
-
 }
