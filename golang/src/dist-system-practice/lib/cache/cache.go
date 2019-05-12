@@ -10,6 +10,5 @@ type Cache struct {
 
 func New() *Cache {
 
-
 	return nil
 }
