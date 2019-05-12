@@ -39,3 +39,7 @@ experiment/prometheus/federation/data/node*
 experiment/prometheus/federation/data/master
 experiment/prometheus/federation/data/grafana/public
 experiment/prometheus/federation/log
+
+# dist-system-practice
+golang/src/dist-system-practice/mysql/data
+golang/src/dist-system-practice/mysql/log
