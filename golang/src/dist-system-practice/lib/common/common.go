@@ -1,7 +1,51 @@
 package common
 
-func Test(a int) int {
-	return a * 10
+import (
+	"os"
+	"path"
+)
+
+// Get env via os.Getenv, return fallback if specified one is empty.
+func GetEnv(key, fallback string) string {
+	value := os.Getenv(key)
+
+	if len(value) == 0 {
+		return fallback
+	}
+
+	return value
+}
+
+// Ensure a file exists, if not create an empty one.
+func FileEnsure(filepath string) error {
+	// exist when file exists
+	if FileExists(filepath) {
+		return nil
+	}
+
+	// make sure dir exists
+	dirErr := os.MkdirAll(path.Dir(filepath), os.ModePerm)
+	if dirErr != nil {
+		return dirErr
+	}
+
+	// make sure file exists
+	file, fileErr := os.OpenFile(filepath, os.O_RDONLY|os.O_CREATE, 0666)
+	if fileErr != nil {
+		return fileErr
+	}
+	defer file.Close()
+
+	return nil
+}
+
+// Check whether file exists.
+func FileExists(filepath string) bool {
+	info, err := os.Stat(filepath)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
 
 func Consume(n int) int { // ok: 37-39, edge: 40

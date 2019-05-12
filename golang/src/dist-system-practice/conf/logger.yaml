@@ -1,0 +1,21 @@
+level: "info"
+encoding: "json"
+development: true
+outputPaths: ["stdout", "/tmp/logs/default.log"]
+errorOutputPaths: ["stderr", "/tmp/logs/error.log"]
+sampling: null
+encoderConfig:
+  messageKey: "message"
+  levelKey: "level"
+  levelEncoder: "capital"
+  nameKey: "name"
+  nameEncoder: "short"
+  timeKey: "time"
+  timeEncoder: "iso8601"
+  callerKey: "logger"
+  callerEncoder: "short"
+  errorKey: "error"
+  stacktraceKey: "stacktrace"
+  callstackKey: "callstack"
+  fileKey: "file"
+  durationEncoder: "second"

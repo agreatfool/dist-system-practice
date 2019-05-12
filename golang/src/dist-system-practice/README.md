@@ -1,4 +1,7 @@
 
+## ENV
+* APP_NAME：应用名称：web、service、consumer，etc...
+* LOGGER_CONF_PATH：日志配置文件位置
 
 ## Versions
 ```bash
