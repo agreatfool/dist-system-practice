@@ -3,6 +3,7 @@
 * APP_NAME：应用名称：web、service、consumer，etc...
 * LOGGER_CONF_PATH：日志配置文件位置
 * CACHE_CONF_PATH：缓存配置文件位置
+* MYSQL_CONF_PATH：数据库配置文件位置
 
 ## Versions
 ```bash

@@ -12,7 +12,7 @@ require (
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/google/pprof v0.0.0-20190502144155-8358a9778bd1 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
-	github.com/jinzhu/gorm v1.9.8 // indirect
+	github.com/jinzhu/gorm v1.9.8
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.6 // indirect
 	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
