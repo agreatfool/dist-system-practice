@@ -41,6 +41,15 @@ func New() *memcache.Client {
 		panic(fmt.Sprintf("[Cache] Failed to parse yaml: %s", err.Error()))
 	}
 
+	// loop & confirm servers available
+	for _, server := range config.Servers {
+		conn := memcache.New(server)
+		_, err := conn.Get("%$^#@@$") // dummy key
+		if err != memcache.ErrCacheMiss {
+			panic(fmt.Sprintf("[Cache] Failed to connect to server: %s, err: %v", server, err))
+		}
+	}
+
 	// init memcached client
 	instance = memcache.New(config.Servers...)
 
