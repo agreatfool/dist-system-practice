@@ -1,6 +1,7 @@
 package common
 
 import (
+	"math/rand"
 	"os"
 	"path"
 )
@@ -48,6 +49,11 @@ func FileExists(filepath string) bool {
 	return !info.IsDir()
 }
 
+// Make random float between min & max
+func RandomFloat(min float64, max float64) float64 {
+	return min + rand.Float64()*(max-min)
+}
+
 func Consume(n int) int { // ok: 37-39, edge: 40
 	if n == 0 {
 		return 0
@@ -55,5 +61,5 @@ func Consume(n int) int { // ok: 37-39, edge: 40
 	if n == 1 {
 		return 1
 	}
-	return Consume(n - 1) + Consume(n - 2)
+	return Consume(n-1) + Consume(n-2)
 }
