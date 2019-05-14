@@ -4,7 +4,10 @@ import (
 	"math/rand"
 	"os"
 	"path"
+	"time"
 )
+
+var seedInitialized = false
 
 // Get env via os.Getenv, return fallback if specified one is empty.
 func GetEnv(key, fallback string) string {
@@ -51,7 +54,14 @@ func FileExists(filepath string) bool {
 
 // Make random float between min & max
 func RandomFloat(min float64, max float64) float64 {
+	checkRandSeed()
 	return min + rand.Float64()*(max-min)
+}
+
+// Make random int between min & max
+func RandomInt(min int, max int) int {
+	checkRandSeed()
+	return min + rand.Intn(max-min)
 }
 
 func Consume(n int) int { // ok: 37-39, edge: 40
@@ -62,4 +72,11 @@ func Consume(n int) int { // ok: 37-39, edge: 40
 		return 1
 	}
 	return Consume(n-1) + Consume(n-2)
+}
+
+func checkRandSeed() {
+	if !seedInitialized {
+		rand.Seed(time.Now().UTC().UnixNano())
+		seedInitialized = true
+	}
 }
