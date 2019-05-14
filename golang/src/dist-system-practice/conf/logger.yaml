@@ -1,4 +1,4 @@
-level: "info"
+level: "debug"
 encoding: "json"
 development: true
 outputPaths: ["stdout", "/tmp/logs/default.log"]

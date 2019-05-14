@@ -16,6 +16,7 @@ require (
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.6 // indirect
 	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
+	github.com/wantedly/gorm-zap v0.0.0-20171015071652-372d3517a876
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0

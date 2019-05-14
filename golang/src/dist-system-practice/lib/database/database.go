@@ -2,9 +2,11 @@ package database
 
 import (
 	"dist-system-practice/lib/common"
+	"dist-system-practice/lib/logger"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/wantedly/gorm-zap"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"time"
@@ -58,11 +60,14 @@ func New() *gorm.DB {
 		panic(fmt.Sprintf("[Database] Failed to connect to mysql: %s", dbErr.Error()))
 	}
 
-	instance = db
+	db.DB().SetMaxOpenConns(config.MaxOpenConn)
+	db.DB().SetMaxIdleConns(config.MaxIdleConn)
+	db.DB().SetConnMaxLifetime(time.Second * time.Duration(config.ConnMaxLifetime))
 
-	instance.DB().SetMaxOpenConns(config.MaxOpenConn)
-	instance.DB().SetMaxIdleConns(config.MaxIdleConn)
-	instance.DB().SetConnMaxLifetime(time.Second * time.Duration(config.ConnMaxLifetime))
+	db.LogMode(true)
+	db.SetLogger(gormzap.New(logger.New()))
+
+	instance = db
 
 	return instance
 }
