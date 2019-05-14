@@ -43,10 +43,11 @@ function connect() {
 
 function stop() {
     docker stop mysqld
-    docker network rm mysqld-net
 }
 
 function clear() {
+    docker network rm mysqld-net
+
     # rm -rf ${BASEPATH}/mysql/conf/* # this is optional
     rm -rf ${BASEPATH}/mysql/data/*
     rm -rf ${BASEPATH}/mysql/log/*
