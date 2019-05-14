@@ -5,6 +5,9 @@
 * CACHE_CONF_PATH：缓存配置文件位置
 * MYSQL_CONF_PATH：数据库配置文件位置
 
+* WEB_HOST：WEB应用的监听HOST
+* WEB_PORT：WEB应用的监听PORT
+
 ## Versions
 ```bash
 $ docker --version
