@@ -9,11 +9,13 @@ import (
 	"path/filepath"
 )
 
+var instance *zap.Logger
+
 // Get the global zap.logger.
 //
 // Actually: zap.L()
 func Get() *zap.Logger {
-	return zap.L()
+	return instance
 }
 
 // Create a new zap.logger & replace the global one.
@@ -21,6 +23,10 @@ func Get() *zap.Logger {
 // Env LOGGER_CONF_PATH is used to specify the config file path.
 // Env APP_NAME is used to specify the key part of config file name.
 func New() *zap.Logger {
+	if instance != nil {
+		return instance
+	}
+
 	config := zap.Config{}
 
 	// get config path string
@@ -81,5 +87,7 @@ func New() *zap.Logger {
 	// replace global logger singleton
 	zap.ReplaceGlobals(logger)
 
-	return zap.L()
+	instance = zap.L()
+
+	return instance
 }

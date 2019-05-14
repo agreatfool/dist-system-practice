@@ -22,6 +22,10 @@ func Get() *memcache.Client {
 
 // Initialize Cache instance.
 func New() *memcache.Client {
+	if instance != nil {
+		return instance
+	}
+
 	config := Config{}
 
 	// get config path string

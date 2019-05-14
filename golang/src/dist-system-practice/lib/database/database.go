@@ -32,6 +32,10 @@ func Get() *gorm.DB {
 }
 
 func New() *gorm.DB {
+	if instance != nil {
+		return instance
+	}
+
 	config := Config{}
 
 	// get config path string
