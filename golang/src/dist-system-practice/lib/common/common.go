@@ -64,6 +64,30 @@ func RandomInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
 
+func StrToInt(str string) (int, error) {
+	i, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
+}
+
+func StrToInt64(str string) (int64, error) {
+	i, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
+}
+
+func IntToStr(i int) string {
+	return strconv.Itoa(i)
+}
+
+func Int64ToStr(i int64) string {
+	return strconv.FormatInt(i, 10)
+}
+
 func Consume(n int) int { // ok: 37-39, edge: 40
 	if n == 0 {
 		return 0
