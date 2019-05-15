@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package message;
+
+message Work {
+    uint32 id = 1;
+    uint32 viewed = 2;
+    uint32 achieved_count = 3;
+    string achievement = 4;
+    bool is_planned = 5;
+    int32 planned_at = 6;
+    int32 achieved_at = 7;
+    int32 created = 8;
+    int32 updated = 9;
+}
+
+message WorkId {
+    uint32 id = 1;
+}
+
+message WorkViewed {
+    uint32 viewed = 2;
+}
+
+message WorkAchievement {
+    string achievement = 1;
+}
+
+service WorkService {
+    rpc GetWork (WorkId) returns (Work) {
+    }
+    rpc UpdateViewed (WorkId) returns (WorkViewed) {
+    }
+    rpc GetAchievement (WorkId) returns (WorkAchievement) {
+    }
+    rpc PlanWork (WorkId) returns (Work) {
+    }
+}

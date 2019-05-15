@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-BASEPATH=${FULLPATH}/../..
+BASEPATH="${FULLPATH}/../.."
 
 DBNAME=dist
 USER=root
