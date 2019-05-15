@@ -14,8 +14,13 @@ import (
 // Global
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-var apiMap = map[int]string{
-	10: "apiSearchWork",
+var randomSelectorInitialized = false
+var randomSelector = &common.RandomSelector{}
+var randomSelectorMap = []common.RandomSelectorItem{
+	{Item: "apiSearchWork", Count: 4500},
+	{Item: "apiUpdateViewed", Count: 2500},
+	{Item: "apiGetAchievement", Count: 2500},
+	{Item: "apiPlanWork", Count: 500},
 }
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -45,44 +50,20 @@ func HandleApi(c *gin.Context) {
 	var res result
 	var err error
 
-	apiGenerated := randApi()
+	randApi := randApi()
 	workId := randWorkId()
 
-	switch apiGenerated {
+	switch randApi {
 	case "apiSearchWork":
-		recorder := common.NewTimeRecorder()
 		res, err = apiSearchWork(workId)
-		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiSearchWork.",
-			zap.String("api", "apiSearchWork"),
-			zap.Uint32("workId", workId),
-			zap.Float64("consumed", recorder.Elapsed()))
 	case "apiUpdateViewed":
-		recorder := common.NewTimeRecorder()
 		res, err = apiUpdateViewed(workId)
-		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiUpdateViewed.",
-			zap.String("api", "apiUpdateViewed"),
-			zap.Uint32("workId", workId),
-			zap.Float64("consumed", recorder.Elapsed()))
 	case "apiGetAchievement":
-		recorder := common.NewTimeRecorder()
 		res, err = apiGetAchievement(workId)
-		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiGetAchievement.",
-			zap.String("api", "apiGetAchievement"),
-			zap.Uint32("workId", workId),
-			zap.Float64("consumed", recorder.Elapsed()))
 	case "apiPlanWork":
-		recorder := common.NewTimeRecorder()
 		res, err = apiPlanWork(workId)
-		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiPlanWork.",
-			zap.String("api", "apiPlanWork"),
-			zap.Uint32("workId", workId),
-			zap.Float64("consumed", recorder.Elapsed()))
 	default:
-		err := errors.New(fmt.Sprintf("invalid api generated: %s", apiGenerated))
+		err := errors.New(fmt.Sprintf("invalid api generated: %s", randApi))
 		logger.Get().Error("[WEB.Handler] HandleApi: Invalid api generated.", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -106,21 +87,61 @@ func HandleApi(c *gin.Context) {
 
 func apiSearchWork(id uint32) (result, error) {
 	var res result
+
+	recorder := common.NewTimeRecorder()
+	defer func() {
+		recorder.End()
+		logger.Get().Info("[WEB.Handler] Api: apiSearchWork.",
+			zap.String("api", "apiSearchWork"),
+			zap.Uint32("workId", id),
+			zap.Float64("consumed", recorder.Elapsed()))
+	}()
+
 	return res, nil
 }
 
 func apiUpdateViewed(id uint32) (result, error) {
 	var res result
+
+	recorder := common.NewTimeRecorder()
+	defer func() {
+		recorder.End()
+		logger.Get().Info("[WEB.Handler] Api: apiUpdateViewed.",
+			zap.String("api", "apiUpdateViewed"),
+			zap.Uint32("workId", id),
+			zap.Float64("consumed", recorder.Elapsed()))
+	}()
+
 	return res, nil
 }
 
 func apiGetAchievement(id uint32) (result, error) {
 	var res result
+
+	recorder := common.NewTimeRecorder()
+	defer func() {
+		recorder.End()
+		logger.Get().Info("[WEB.Handler] Api: apiGetAchievement.",
+			zap.String("api", "apiGetAchievement"),
+			zap.Uint32("workId", id),
+			zap.Float64("consumed", recorder.Elapsed()))
+	}()
+
 	return res, nil
 }
 
 func apiPlanWork(id uint32) (result, error) {
 	var res result
+
+	recorder := common.NewTimeRecorder()
+	defer func() {
+		recorder.End()
+		logger.Get().Info("[WEB.Handler] Api: apiPlanWork.",
+			zap.String("api", "apiPlanWork"),
+			zap.Uint32("workId", id),
+			zap.Float64("consumed", recorder.Elapsed()))
+	}()
+
 	return res, nil
 }
 
@@ -129,7 +150,51 @@ func apiPlanWork(id uint32) (result, error) {
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 func randApi() string {
-	return "apiSearchWork"
+	initRandomSelector()
+
+	if api, err := randomSelector.Random(); err != nil {
+		return err.Error()
+	} else {
+		return api
+	}
+}
+
+func initRandomSelector() {
+	if randomSelectorInitialized {
+		return
+	}
+
+	// check env
+	if count := common.GetEnv("API_SEARCH_WORK_PERCENTAGE_COUNT", ""); count != "" {
+		converted, err := common.StrToInt(count)
+		if err == nil { // only set count value when no error
+			randomSelectorMap[0].Count = converted
+		}
+	}
+	if count := common.GetEnv("API_UPDATE_VIEWED_PERCENTAGE_COUNT", ""); count != "" {
+		converted, err := common.StrToInt(count)
+		if err == nil { // only set count value when no error
+			randomSelectorMap[1].Count = converted
+		}
+	}
+	if count := common.GetEnv("API_GET_ACHIEVEMENT_PERCENTAGE_COUNT", ""); count != "" {
+		converted, err := common.StrToInt(count)
+		if err == nil { // only set count value when no error
+			randomSelectorMap[2].Count = converted
+		}
+	}
+	if count := common.GetEnv("API_PLAN_WORK_PERCENTAGE_COUNT", ""); count != "" {
+		converted, err := common.StrToInt(count)
+		if err == nil { // only set count value when no error
+			randomSelectorMap[3].Count = converted
+		}
+	}
+
+	// initialize selector
+	randomSelector.Prepare(randomSelectorMap)
+
+	// set flag
+	randomSelectorInitialized = true
 }
 
 func randWorkId() uint32 {

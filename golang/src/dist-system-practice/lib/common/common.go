@@ -1,6 +1,7 @@
 package common
 
 import (
+	"github.com/pkg/errors"
 	"math/rand"
 	"os"
 	"path"
@@ -139,4 +140,64 @@ func checkRandSeed() {
 		rand.Seed(time.Now().UTC().UnixNano())
 		seedInitialized = true
 	}
+}
+
+type RandomSelectorItem struct {
+	Item  string
+	Count int
+}
+
+type RandomSelectorMap []RandomSelectorItem
+
+type RandomSelector struct {
+	ItemMap RandomSelectorMap
+	total   int
+	edges   []int
+	items   []string
+}
+
+func (r *RandomSelector) Prepare(itemMap RandomSelectorMap) {
+	if len(r.edges) > 0 || len(r.items) > 0 {
+		return
+	}
+
+	r.ItemMap = itemMap
+	r.edges = make([]int, len(r.ItemMap))
+	r.items = make([]string, len(r.ItemMap))
+
+	high := 0
+
+	for i := 0; i < len(r.ItemMap); i++ {
+		// handle total
+		r.total += r.ItemMap[i].Count
+
+		// handle item
+		r.items[i] = r.ItemMap[i].Item
+
+		// handle edge
+		if i == 0 {
+			high = r.ItemMap[i].Count
+		} else {
+			high += r.ItemMap[i].Count
+		}
+		r.edges[i] = high
+	}
+}
+
+func (r *RandomSelector) Random() (string, error) {
+	if len(r.edges) == 0 || len(r.items) == 0 {
+		return "", errors.New("random selector has not been initialized yet")
+	}
+
+	low := 1
+	randId := RandomInt(1, r.total)
+	for i := 0; i < len(r.edges); i++ {
+		if low <= randId && randId <= r.edges[i] {
+			return r.items[i], nil
+		} else {
+			low = r.edges[i] + 1
+		}
+	}
+
+	return "", errors.New("random selector hits empty")
 }

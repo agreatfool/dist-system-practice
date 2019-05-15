@@ -23,7 +23,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/ory/dockertest v3.3.4+incompatible // indirect
-	github.com/pkg/errors v0.8.1 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.1 // indirect
 	github.com/wantedly/gorm-zap v0.0.0-20171015071652-372d3517a876
 	go.uber.org/atomic v1.4.0 // indirect
