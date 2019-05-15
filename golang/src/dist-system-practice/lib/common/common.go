@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"os"
 	"path"
+	"strconv"
 	"time"
 )
 
@@ -86,6 +87,41 @@ func IntToStr(i int) string {
 
 func Int64ToStr(i int64) string {
 	return strconv.FormatInt(i, 10)
+}
+
+type TimeRecorder struct {
+	startPoint time.Time
+	endPoint   time.Time
+}
+
+func NewTimeRecorder() *TimeRecorder {
+	recorder := TimeRecorder{}
+	recorder.startPoint = time.Now()
+	recorder.endPoint = time.Now() // for security, just in case someone not calling End()
+
+	return &recorder
+}
+
+func (t *TimeRecorder) Start() *TimeRecorder {
+	t.startPoint = time.Now()
+	return t
+}
+
+func (t *TimeRecorder) End() *TimeRecorder {
+	t.endPoint = time.Now()
+	return t
+}
+
+// Time elapsed from t.StartPoint
+// Returned is microsecond (Nanoseconds() / 1000000)
+//
+// ps Picosecond
+// ns Nanosecond
+// μs Microsecond
+// ms Millisecond
+// s  Second
+func (t *TimeRecorder) Elapsed() float64 {
+	return float64(t.endPoint.Sub(t.startPoint).Nanoseconds()) / float64(1000) // ns nanosecond -> μs microsecond
 }
 
 func Consume(n int) int { // ok: 37-39, edge: 40
