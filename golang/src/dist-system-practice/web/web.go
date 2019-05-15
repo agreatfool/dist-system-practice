@@ -1,36 +1,41 @@
 package main
 
 import (
-	"dist-system-practice/lib/cache"
 	"dist-system-practice/lib/common"
-	"dist-system-practice/lib/dao"
-	"dist-system-practice/lib/database"
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/web/handler"
 	"fmt"
+	"github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
-	// initialize utilities
-	cache.New()
-	logger.New()
-	db := database.New()
-	dao.New()
-
-	defer db.Close()
-
 	// ensure env
+	// APP_NAME shall be ensured before logger initialized
 	if common.GetEnv("APP_NAME", "") == "" {
 		if err := os.Setenv("APP_NAME", "WEB"); err != nil {
 			panic(fmt.Sprintf("[WEB] Failed to set env APP_NAME: %s", err.Error()))
 		}
 	}
 
+	// initialize utilities
+	logger.New()
+
 	// web app
 	router := gin.Default()
+
+	// Add a ginzap middleware, which:
+	//   - Logs all requests, like a combined access and error log.
+	//   - Logs to stdout.
+	//   - RFC3339 with UTC time format.
+	router.Use(ginzap.Ginzap(logger.Get(), time.RFC3339, true))
+
+	// Logs all panic to error log
+	//   - stack means whether output the stack info.
+	router.Use(ginzap.RecoveryWithZap(logger.Get(), true))
 
 	router.GET("/", handler.HandleIndex)
 	router.GET("/api", handler.HandleApi)
