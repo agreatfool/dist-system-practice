@@ -41,6 +41,10 @@ func main() {
 
 	router.GET("/", handler.HandleIndex)
 	router.GET("/api", handler.HandleApi)
+	router.GET("/work", handler.HandleGetWork)
+	router.GET("/viewed", handler.HandleUpdateViewed)
+	router.GET("/achievement", handler.HandleGetAchievement)
+	router.GET("/plan", handler.HandlePlanWork)
 
 	host := common.GetEnv("WEB_HOST", "0.0.0.0")
 	port := common.GetEnv("WEB_PORT", "8000")

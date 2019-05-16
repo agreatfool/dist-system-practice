@@ -80,6 +80,54 @@ func HandleApi(c *gin.Context) {
 	}
 }
 
+func HandleGetWork(c *gin.Context) {
+	res, err := apiGetWork(randWorkId())
+	if err != nil {
+		logger.Get().Error("[WEB.Handler] HandleGetWork: Error.", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(res.Code, res.Data)
+	}
+}
+
+func HandleUpdateViewed(c *gin.Context) {
+	res, err := apiUpdateViewed(randWorkId())
+	if err != nil {
+		logger.Get().Error("[WEB.Handler] HandleUpdateViewed: Error.", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(res.Code, res.Data)
+	}
+}
+
+func HandleGetAchievement(c *gin.Context) {
+	res, err := apiGetAchievement(randWorkId())
+	if err != nil {
+		logger.Get().Error("[WEB.Handler] HandleGetAchievement: Error.", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(res.Code, res.Data)
+	}
+}
+
+func HandlePlanWork(c *gin.Context) {
+	res, err := apiPlanWork(randWorkId())
+	if err != nil {
+		logger.Get().Error("[WEB.Handler] HandlePlanWork: Error.", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(res.Code, res.Data)
+	}
+}
+
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Apis
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
