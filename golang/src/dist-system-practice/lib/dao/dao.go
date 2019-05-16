@@ -2,10 +2,10 @@ package dao
 
 import (
 	"dist-system-practice/lib/cache"
-	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/database"
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/lib/model"
+	"dist-system-practice/lib/random"
 	"encoding/json"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
@@ -137,7 +137,7 @@ func (d *Dao) decodeWork(value []byte, work *model.Work) error {
 }
 
 func (d *Dao) buildWorkExpireTime() int32 {
-	alter := int32(defaultWorkExpiration * (1 + common.RandomFloat(0.0, 0.1)))
+	alter := int32(defaultWorkExpiration * (1 + random.Float(0.0, 0.1)))
 
 	return int32(time.Now().Local().Add(time.Second * time.Duration(alter)).Unix())
 }

@@ -3,6 +3,8 @@ package handler
 import (
 	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/logger"
+	"dist-system-practice/lib/random"
+	"dist-system-practice/lib/timerecorder"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -15,13 +17,13 @@ import (
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 var randomSelectorInitialized = false
-var randomSelector = &common.RandomSelector{}
-var randomSelectorMap = []common.RandomSelectorItem{
+var randomSelectorMap = []*random.SelectorItem{
 	{Item: "apiSearchWork", Count: 4500},
 	{Item: "apiUpdateViewed", Count: 2500},
 	{Item: "apiGetAchievement", Count: 2500},
 	{Item: "apiPlanWork", Count: 500},
 }
+var randomSelector = random.NewSelector(randomSelectorMap)
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Structure
@@ -35,10 +37,6 @@ type result struct {
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Handlers
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-
-// WEB入口 HTTP -> DefaultHandle 随机ID 随机业务 ->
-// Service gRPC -> 逻辑处理 -> 发送消息到Kafka
-// Consumer Kafka consumer -> 从Kafka拉取消息 -> 业务处理
 
 func HandleIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
@@ -88,7 +86,7 @@ func HandleApi(c *gin.Context) {
 func apiSearchWork(id uint32) (result, error) {
 	var res result
 
-	recorder := common.NewTimeRecorder()
+	recorder := timerecorder.New()
 	defer func() {
 		recorder.End()
 		logger.Get().Info("[WEB.Handler] Api: apiSearchWork.",
@@ -103,7 +101,7 @@ func apiSearchWork(id uint32) (result, error) {
 func apiUpdateViewed(id uint32) (result, error) {
 	var res result
 
-	recorder := common.NewTimeRecorder()
+	recorder := timerecorder.New()
 	defer func() {
 		recorder.End()
 		logger.Get().Info("[WEB.Handler] Api: apiUpdateViewed.",
@@ -118,7 +116,7 @@ func apiUpdateViewed(id uint32) (result, error) {
 func apiGetAchievement(id uint32) (result, error) {
 	var res result
 
-	recorder := common.NewTimeRecorder()
+	recorder := timerecorder.New()
 	defer func() {
 		recorder.End()
 		logger.Get().Info("[WEB.Handler] Api: apiGetAchievement.",
@@ -133,7 +131,7 @@ func apiGetAchievement(id uint32) (result, error) {
 func apiPlanWork(id uint32) (result, error) {
 	var res result
 
-	recorder := common.NewTimeRecorder()
+	recorder := timerecorder.New()
 	defer func() {
 		recorder.End()
 		logger.Get().Info("[WEB.Handler] Api: apiPlanWork.",
@@ -150,7 +148,7 @@ func apiPlanWork(id uint32) (result, error) {
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 func randApi() string {
-	initRandomSelector()
+	resetSelectorWithEnv()
 
 	if api, err := randomSelector.Random(); err != nil {
 		return err.Error()
@@ -159,10 +157,12 @@ func randApi() string {
 	}
 }
 
-func initRandomSelector() {
+func resetSelectorWithEnv() {
 	if randomSelectorInitialized {
 		return
 	}
+
+	changed := false
 
 	// check env
 	if count := common.GetEnv("API_SEARCH_WORK_PERCENTAGE_COUNT", ""); count != "" {
@@ -170,28 +170,33 @@ func initRandomSelector() {
 		if err == nil { // only set count value when no error
 			randomSelectorMap[0].Count = converted
 		}
+		changed = true
 	}
 	if count := common.GetEnv("API_UPDATE_VIEWED_PERCENTAGE_COUNT", ""); count != "" {
 		converted, err := common.StrToInt(count)
 		if err == nil { // only set count value when no error
 			randomSelectorMap[1].Count = converted
 		}
+		changed = true
 	}
 	if count := common.GetEnv("API_GET_ACHIEVEMENT_PERCENTAGE_COUNT", ""); count != "" {
 		converted, err := common.StrToInt(count)
 		if err == nil { // only set count value when no error
 			randomSelectorMap[2].Count = converted
 		}
+		changed = true
 	}
 	if count := common.GetEnv("API_PLAN_WORK_PERCENTAGE_COUNT", ""); count != "" {
 		converted, err := common.StrToInt(count)
 		if err == nil { // only set count value when no error
 			randomSelectorMap[3].Count = converted
 		}
+		changed = true
 	}
 
-	// initialize selector
-	randomSelector.Prepare(randomSelectorMap)
+	if changed {
+		randomSelector = random.NewSelector(randomSelectorMap)
+	}
 
 	// set flag
 	randomSelectorInitialized = true
@@ -203,5 +208,5 @@ func randWorkId() uint32 {
 		return 10000000 // return default value when error encountered
 	}
 
-	return uint32(common.RandomInt(1, maxWorkId))
+	return uint32(random.Int(1, maxWorkId))
 }
