@@ -10,10 +10,13 @@ dist-system-practice
 * WEB_HOST：WEB应用的监听HOST
 * WEB_PORT：WEB应用的监听PORT
 * MAX_WORK_ID：最大可用WorkId，该数值是数据库中单表预建数据的数量值
-* API_SEARCH_WORK_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
+* API_GET_WORK_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * API_UPDATE_VIEWED_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * API_GET_ACHIEVEMENT_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * API_PLAN_WORK_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
+
+* RPC_CONF_PATH：RPC配置文件位置
+* RPC_SERVERS：RPC服务器地址的配置的JSON字符串，e.g "['127.0.0.1:16241','127.0.0.1:16242']"
 
 ## Versions
 ```bash

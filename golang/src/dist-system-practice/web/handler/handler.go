@@ -5,6 +5,7 @@ import (
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/lib/random"
 	"dist-system-practice/lib/timerecorder"
+	"dist-system-practice/web/rpc"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,7 @@ import (
 
 var randomSelectorInitialized = false
 var randomSelectorMap = []*random.SelectorItem{
-	{Item: "apiSearchWork", Count: 4500},
+	{Item: "apiGetWork", Count: 4500},
 	{Item: "apiUpdateViewed", Count: 2500},
 	{Item: "apiGetAchievement", Count: 2500},
 	{Item: "apiPlanWork", Count: 500},
@@ -52,8 +53,8 @@ func HandleApi(c *gin.Context) {
 	workId := randWorkId()
 
 	switch randApi {
-	case "apiSearchWork":
-		res, err = apiSearchWork(workId)
+	case "apiGetWork":
+		res, err = apiGetWork(workId)
 	case "apiUpdateViewed":
 		res, err = apiUpdateViewed(workId)
 	case "apiGetAchievement":
@@ -83,17 +84,25 @@ func HandleApi(c *gin.Context) {
 // Apis
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-func apiSearchWork(id uint32) (result, error) {
+func apiGetWork(id uint32) (result, error) {
 	var res result
 
 	recorder := timerecorder.New()
 	defer func() {
 		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiSearchWork.",
-			zap.String("api", "apiSearchWork"),
+		logger.Get().Info("[WEB.Handler] Api: apiGetWork.",
+			zap.String("api", "apiGetWork"),
 			zap.Uint32("workId", id),
 			zap.Float64("consumed", recorder.Elapsed()))
 	}()
+
+	work, err := rpc.Get().GetWork(id)
+	if err != nil {
+		return res, err
+	}
+
+	res.Code = http.StatusOK
+	res.Data = gin.H{"work": work}
 
 	return res, nil
 }
@@ -110,6 +119,14 @@ func apiUpdateViewed(id uint32) (result, error) {
 			zap.Float64("consumed", recorder.Elapsed()))
 	}()
 
+	viewed, err := rpc.Get().UpdateViewed(id)
+	if err != nil {
+		return res, err
+	}
+
+	res.Code = http.StatusOK
+	res.Data = gin.H{"viewed": viewed.Viewed}
+
 	return res, nil
 }
 
@@ -125,6 +142,14 @@ func apiGetAchievement(id uint32) (result, error) {
 			zap.Float64("consumed", recorder.Elapsed()))
 	}()
 
+	achievement, err := rpc.Get().GetAchievement(id)
+	if err != nil {
+		return res, err
+	}
+
+	res.Code = http.StatusOK
+	res.Data = gin.H{"achievement": achievement.Achievement}
+
 	return res, nil
 }
 
@@ -139,6 +164,14 @@ func apiPlanWork(id uint32) (result, error) {
 			zap.Uint32("workId", id),
 			zap.Float64("consumed", recorder.Elapsed()))
 	}()
+
+	work, err := rpc.Get().PlanWork(id)
+	if err != nil {
+		return res, err
+	}
+
+	res.Code = http.StatusOK
+	res.Data = gin.H{"work": work}
 
 	return res, nil
 }
@@ -165,7 +198,7 @@ func resetSelectorWithEnv() {
 	changed := false
 
 	// check env
-	if count := common.GetEnv("API_SEARCH_WORK_PERCENTAGE_COUNT", ""); count != "" {
+	if count := common.GetEnv("API_GET_WORK_PERCENTAGE_COUNT", ""); count != "" {
 		converted, err := common.StrToInt(count)
 		if err == nil { // only set count value when no error
 			randomSelectorMap[0].Count = converted
