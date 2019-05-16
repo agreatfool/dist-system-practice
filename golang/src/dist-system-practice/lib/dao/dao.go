@@ -7,6 +7,7 @@ import (
 	"dist-system-practice/lib/model"
 	"dist-system-practice/lib/random"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/jinzhu/gorm"
@@ -14,15 +15,27 @@ import (
 	"time"
 )
 
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// Global
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
 var instance *Dao
 
 const defaultWorkExpiration = 7 * 24 * 60 * 60 // 7 days
+
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// Structure
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 type Dao struct {
 	db     *gorm.DB
 	cache  *memcache.Client
 	logger *zap.Logger
 }
+
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// Factory
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 func Get() *Dao {
 	return instance
@@ -42,7 +55,17 @@ func New() *Dao {
 	return instance
 }
 
-func (d *Dao) GetWork(id uint32) (model.Work, error) {
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// Errors
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+var ErrNoRecordUpdated = errors.New("no record updated")
+
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// Apis
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+func (d *Dao) GetWork(id uint32) (*model.Work, error) {
 	var work model.Work
 
 	// build cache key
@@ -51,50 +74,128 @@ func (d *Dao) GetWork(id uint32) (model.Work, error) {
 	// search cache
 	cached, cacheErr := d.cache.Get(key)
 	if cacheErr != nil && cacheErr != memcache.ErrCacheMiss {
-		d.logger.Error("[Dao] GetWork: Cache get error.", zap.String("key", key), zap.Error(cacheErr))
-		return work, cacheErr
+		d.logger.Error("[Dao] GetWork: Cache get error.",
+			zap.String("api", "GetWork"), zap.Uint32("workId", id), zap.Error(cacheErr))
+		return &work, cacheErr
 	}
 
 	if cacheErr == memcache.ErrCacheMiss {
 
-		d.logger.Debug("[Dao] GetWork: Cache not found.", zap.Uint32("workId", id))
+		d.logger.Debug("[Dao] GetWork: Cache not found.",
+			zap.String("api", "GetWork"), zap.Uint32("workId", id))
 
 		// no cached value found, query database
 		err := d.db.Where("id = ?", id).First(&work).Error
 
 		if err != nil { // maybe gorm.ErrRecordNotFound
 			if err == gorm.ErrRecordNotFound {
-				d.logger.Info("[Dao] GetWork: Work not found in db.", zap.Uint32("workId", id))
+				d.logger.Warn("[Dao] GetWork: Work not found in db.",
+					zap.String("api", "GetWork"), zap.Uint32("workId", id))
 			} else {
-				d.logger.Error("[Dao] GetWork: Error in db.", zap.Uint32("workId", id), zap.Error(err))
+				d.logger.Error("[Dao] GetWork: Error in db.",
+					zap.String("api", "GetWork"), zap.Uint32("workId", id), zap.Error(err))
 			}
 
-			return work, err
+			return &work, err
 		} else {
 			// found in database, set cache
 			err := d.cacheWork(work)
 			if err != nil {
-				d.logger.Error("[Dao] GetWork: Cache set error.", zap.Error(err))
-				return work, err
+				d.logger.Error("[Dao] GetWork: Cache set error.",
+					zap.String("api", "GetWork"), zap.Uint32("workId", id), zap.Error(err))
+				return &work, err
 			}
-			return work, nil
+			return &work, nil
 		}
 
 	} else {
 
 		// decode from cached value
 		if err := d.decodeWork(cached.Value, &work); err != nil {
-			d.logger.Error("[Dao] GetWork: Work decode error.", zap.Error(err))
-			return work, err
+			d.logger.Error("[Dao] GetWork: Work decode error.",
+				zap.String("api", "GetWork"), zap.Uint32("workId", id), zap.Error(err))
+			return &work, err
 		}
-		return work, nil
+		return &work, nil
 
 	}
 }
 
-func (d *Dao) fmtWorkCacheKey(id uint32) string {
-	return fmt.Sprintf("work%08d", id)
+func (d *Dao) UpdateViewed(id uint32) (uint32, error) {
+	var work model.Work
+
+	// build cache key
+	key := d.fmtWorkCacheKey(id)
+
+	dbRes := d.db.Model(&work).Where("id = ?", id).UpdateColumn("viewed", gorm.Expr("viewed + 1"))
+	if dbRes.Error != nil {
+		// error in db
+		d.logger.Error("[Dao] UpdateViewed: Error in db.",
+			zap.String("api", "UpdateViewed"), zap.Uint32("workId", id), zap.Error(dbRes.Error))
+		return 0, dbRes.Error
+	}
+	if dbRes.RowsAffected == 0 {
+		// no record updated, invalid
+		d.logger.Error("[Dao] UpdateViewed: No record updated.",
+			zap.String("api", "UpdateViewed"), zap.Uint32("workId", id), zap.Error(ErrNoRecordUpdated))
+		return 0, ErrNoRecordUpdated
+	}
+
+	if err := d.cache.Delete(key); err != nil {
+		d.logger.Error("[Dao] UpdateViewed: Cache delete error.",
+			zap.String("api", "UpdateViewed"), zap.Uint32("workId", id), zap.Error(err))
+		return 0, err
+	}
+
+	var getErr error
+	&work, getErr = d.GetWork(id)
+	if getErr != nil {
+		return 0, getErr
+	}
+
+	return work.Viewed, nil
 }
+
+func (d *Dao) PlanWork(id uint32) (*model.Work, error) {
+	var work model.Work
+
+	// build cache key
+	key := d.fmtWorkCacheKey(id)
+
+	// isPlanned plannedAt
+	dbRes := d.db.Model(&work).Where("id = ?", id).
+		UpdateColumns(model.Work{IsPlanned: true, PlannedAt: time.Now()})
+	if dbRes.Error != nil {
+		// error in db
+		d.logger.Error("[Dao] PlanWork: Error in db.",
+			zap.String("api", "PlanWork"), zap.Uint32("workId", id), zap.Error(dbRes.Error))
+		return &work, dbRes.Error
+	}
+	if dbRes.RowsAffected == 0 {
+		// no record updated, invalid
+		d.logger.Error("[Dao] PlanWork: No record updated.",
+			zap.String("api", "PlanWork"), zap.Uint32("workId", id), zap.Error(ErrNoRecordUpdated))
+		return &work, ErrNoRecordUpdated
+	}
+
+	if err := d.cache.Delete(key); err != nil {
+		d.logger.Error("[Dao] PlanWork: Cache delete error.",
+			zap.String("api", "PlanWork"), zap.Uint32("workId", id), zap.Error(err))
+		return &work, err
+	}
+
+	var getErr error
+	&work, getErr = d.GetWork(id)
+	if getErr != nil {
+		return &work, getErr
+	}
+
+	return &work, nil
+}
+
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// Cache
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 func (d *Dao) cacheWork(work model.Work) error {
 	item := memcache.Item{}
@@ -120,6 +221,10 @@ func (d *Dao) cacheWork(work model.Work) error {
 	return nil
 }
 
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// Encoders & Decoders
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
 func (d *Dao) encodeWork(work model.Work) ([]byte, error) {
 	value, err := json.Marshal(work)
 	if err != nil {
@@ -134,6 +239,14 @@ func (d *Dao) decodeWork(value []byte, work *model.Work) error {
 		return err
 	}
 	return nil
+}
+
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+// Tools
+// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+func (d *Dao) fmtWorkCacheKey(id uint32) string {
+	return fmt.Sprintf("work%08d", id)
 }
 
 func (d *Dao) buildWorkExpireTime() int32 {

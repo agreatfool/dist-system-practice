@@ -4,6 +4,7 @@ import (
 	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/web/handler"
+	"dist-system-practice/web/rpc"
 	"fmt"
 	"github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,7 @@ func main() {
 
 	// initialize utilities
 	logger.New()
+	rpc.New()
 
 	// web app
 	router := gin.Default()

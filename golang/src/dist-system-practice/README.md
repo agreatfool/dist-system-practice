@@ -14,9 +14,10 @@ dist-system-practice
 * API_UPDATE_VIEWED_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * API_GET_ACHIEVEMENT_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * API_PLAN_WORK_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
-
 * RPC_CONF_PATH：RPC配置文件位置
-* RPC_SERVERS：RPC服务器地址的配置的JSON字符串，e.g "['127.0.0.1:16241','127.0.0.1:16242']"
+
+* SERVICE_HOST：Service应用的监听HOST
+* SERVICE_PORT：Service应用的监听PORT
 
 ## Versions
 ```bash

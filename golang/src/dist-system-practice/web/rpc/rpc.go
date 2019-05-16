@@ -108,24 +108,17 @@ func New() *Client {
 	config := Config{}
 
 	var conf []byte
-	// get env servers conf
-	envServers := common.GetEnv("RPC_SERVERS", "")
-	if envServers != "" {
-		// use env conf if exists
-		conf = []byte(fmt.Sprintf("{\"servers\":%s}", envServers))
-	} else {
-		// check config file otherwise
-		// get config path string
-		confPath := common.GetEnv("RPC_CONF_PATH", "")
-		if confPath == "" {
-			panic("[RPC] No conf path provided: RPC_CONF_PATH")
-		}
 
-		// read config into string
-		var ioErr error
-		if conf, ioErr = ioutil.ReadFile(confPath); ioErr != nil {
-			panic(fmt.Sprintf("[RPC] Failed to read conf file: %s", ioErr.Error()))
-		}
+	// get config path string
+	confPath := common.GetEnv("RPC_CONF_PATH", "")
+	if confPath == "" {
+		panic("[RPC] No conf path provided: RPC_CONF_PATH")
+	}
+
+	// read config into string
+	var ioErr error
+	if conf, ioErr = ioutil.ReadFile(confPath); ioErr != nil {
+		panic(fmt.Sprintf("[RPC] Failed to read conf file: %s", ioErr.Error()))
 	}
 
 	// parse config yaml
