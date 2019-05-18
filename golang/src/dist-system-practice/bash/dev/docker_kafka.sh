@@ -6,8 +6,8 @@ BASEPATH="${FULLPATH}/../.."
 KAFKA_LOCAL_BIN_PATH="${BASEPATH}/../../../experiment/bin/kafka/bin"
 TOPIC_NAME="work-topic"
 ZOOKEEPER="127.0.0.1:2181"
-BOOTSTRAP_SERVER="127.0.0.1:9092"
-BROKER_LIST="127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094"
+BOOTSTRAP_SERVER="127.0.0.1:19092"
+BROKER_LIST="127.0.0.1:19092,127.0.0.1:29092,127.0.0.1:39092"
 
 function start() {
     docker-compose -f ${BASEPATH}/conf/kafka.yaml up -d
@@ -17,13 +17,31 @@ function stop() {
     docker-compose -f ${BASEPATH}/conf/kafka.yaml down # also remove containers
 }
 
-function topic() {
+function logs() {
+    docker logs $1
+}
+
+#../../../experiment/bin/kafka/bin/kafka-topics.sh --describe --zookeeper 127.0.0.1:2181 --topic "work-topic"
+#../../../experiment/bin/kafka/bin/kafka-console-producer.sh --broker-list 127.0.0.1:19092 --topic "work-topic"
+#../../../experiment/bin/kafka/bin/kafka-console-consumer.sh --bootstrap-server 127.0.0.1:19092 --topic "work-topic" --from-beginning
+
+function init() {
+    ${KAFKA_LOCAL_BIN_PATH}/kafka-topics.sh \
+        --create \
+        --bootstrap-server ${BOOTSTRAP_SERVER} \
+        --replication-factor 3 \
+        --partitions 3 \
+        --topic ${TOPIC_NAME}
+    echo "Topic created: ${TOPIC_NAME}"
+
     echo "Topic info display:"
     ${KAFKA_LOCAL_BIN_PATH}/kafka-topics.sh \
         --describe \
         --zookeeper ${ZOOKEEPER} \
         --topic ${TOPIC_NAME}
+}
 
+function topic() {
     echo "Create ${TOPIC_NAME} messages from source: ${BASEPATH}/kafka/messages.txt"
     ${KAFKA_LOCAL_BIN_PATH}/kafka-console-producer.sh \
         --broker-list ${BROKER_LIST} \
@@ -41,12 +59,12 @@ function topic() {
 }
 
 function usage() {
-    echo "Usage: docker_kafka.sh start|stop"
+    echo "Usage: docker_kafka.sh start|stop|logs|init|topic"
 }
 
-if [[ $1 != "start" ]] && [[ $1 != "stop" ]] && [[ $1 != "topic" ]]; then
+if [[ $1 != "start" ]] && [[ $1 != "stop" ]] && [[ $1 != "logs" ]] && [[ $1 != "init" ]] && [[ $1 != "topic" ]]; then
     usage
     exit 0
 fi
 
-eval $1
+eval $1 $2
