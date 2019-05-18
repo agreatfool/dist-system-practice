@@ -29,6 +29,7 @@ require (
 	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/ory/dockertest v3.3.4+incompatible // indirect
 	github.com/pkg/errors v0.8.1
+	github.com/segmentio/kafka-go v0.2.4 // indirect
 	github.com/sirupsen/logrus v1.4.1 // indirect
 	github.com/wantedly/gorm-zap v0.0.0-20171015071652-372d3517a876
 	go.uber.org/atomic v1.4.0 // indirect
@@ -40,10 +41,10 @@ require (
 	golang.org/x/mobile v0.0.0-20190509164839-32b2708ab171 // indirect
 	golang.org/x/net v0.0.0-20190514140710-3ec191127204 // indirect
 	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a // indirect
-	golang.org/x/sys v0.0.0-20190516014833-cab07311ab81 // indirect
+	golang.org/x/sys v0.0.0-20190516110030-61b9204099cb // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
-	golang.org/x/tools v0.0.0-20190516015132-d1a3278ee749 // indirect
+	golang.org/x/tools v0.0.0-20190517183331-d88f79806bbd // indirect
 	google.golang.org/appengine v1.6.0 // indirect
 	google.golang.org/genproto v0.0.0-20190515210553-995ef27e003f // indirect
 	google.golang.org/grpc v1.20.1 // indirect
