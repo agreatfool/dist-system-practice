@@ -18,6 +18,10 @@ dist-system-practice
 
 * SERVICE_HOST：Service应用的监听HOST
 * SERVICE_PORT：Service应用的监听PORT
+* KAFKA_BROKERS：Kafka服务的节点列表，json数组字符串，e.g ["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]
+
+* CONSUMER_ROUTINES：在启动consumer app的时候，同时启动多少个routine并发处理message，默认为1；这个数值 = partition / consumer app count
+* CONSUMER_FACTOR：数字值，按设计consumer会计算一个值，该配置决定了运算的难度；ok: 37-39, edge: 40, default: 37
 
 ## Versions
 ```bash

@@ -2,11 +2,14 @@ package rpc
 
 import (
 	"context"
+	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/dao"
+	lkafka "dist-system-practice/lib/kafka"
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/lib/model"
 	"dist-system-practice/lib/timerecorder"
 	pb "dist-system-practice/message"
+	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 )
 
@@ -94,7 +97,12 @@ func (s *ServerImpl) PlanWork(ctx context.Context, workId *pb.WorkId) (*pb.Work,
 			zap.Float64("consumed", recorder.Elapsed()))
 	}()
 
-	// TODO message queue logic here
+	kerr := lkafka.GetWriter().WriteMessages(ctx, kafka.Message{
+		Value: []byte(common.IntToStr(int(workId.Id))),
+	})
+	if kerr != nil {
+		return nil, kerr
+	}
 
 	work, err := dao.Get().PlanWork(workId.Id)
 	if err != nil {
@@ -103,11 +111,6 @@ func (s *ServerImpl) PlanWork(ctx context.Context, workId *pb.WorkId) (*pb.Work,
 
 	return portWork(work), nil
 }
-
-// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-// Message Queue
-// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-// TODO
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Tools

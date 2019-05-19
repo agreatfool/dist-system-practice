@@ -1,25 +1,37 @@
 package kafka
 
-import "github.com/segmentio/kafka-go"
+import (
+	"dist-system-practice/lib/common"
+	"encoding/json"
+	"fmt"
+	"github.com/segmentio/kafka-go"
+	"time"
+)
 
 var reader *kafka.Reader
 var writer *kafka.Writer
+
+type Config struct {
+	// Servers is a list of address: "127.0.0.1:11211".
+	Servers []string `json:"servers" yaml:"servers"`
+}
 
 func GetReader() *kafka.Reader {
 	return reader
 }
 
-func NewReader(brokers []string, partition int) *kafka.Reader {
+func NewReader() *kafka.Reader {
 	if reader != nil {
 		return reader
 	}
 
 	reader = kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   brokers,
-		Topic:     "work-topic",
-		Partition: partition,
-		MinBytes:  0,
-		MaxBytes:  1024 * 1024, // 1M
+		Brokers:        getBrokers(),
+		GroupID:        "work-group",
+		Topic:          "work-topic",
+		MinBytes:       0,
+		MaxBytes:       1024 * 1024, // 1M
+		CommitInterval: time.Second, // flushes commits to Kafka every second
 	})
 
 	return reader
@@ -29,16 +41,34 @@ func GetWriter() *kafka.Writer {
 	return writer
 }
 
-func NewWriter(brokers []string) *kafka.Writer {
+func NewWriter() *kafka.Writer {
 	if writer != nil {
 		return writer
 	}
 
 	writer = kafka.NewWriter(kafka.WriterConfig{
-		Brokers:  brokers,
+		Brokers:  getBrokers(),
 		Topic:    "work-topic",
 		Balancer: &kafka.LeastBytes{},
 	})
 
 	return writer
+}
+
+func getBrokers() []string {
+	config := Config{}
+
+	// get config path string
+	conf := common.GetEnv("KAFKA_BROKERS", "")
+	if conf == "" {
+		panic("[Kafka] No conf provided: KAFKA_BROKERS")
+	}
+	conf = fmt.Sprintf("{servers:%s}", conf)
+
+	// parse config yaml
+	if err := json.Unmarshal([]byte(conf), &config); err != nil {
+		panic(fmt.Sprintf("[Kafka] Failed to parse json: %s", err.Error()))
+	}
+
+	return config.Servers
 }

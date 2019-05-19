@@ -5,6 +5,7 @@ import (
 	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/dao"
 	"dist-system-practice/lib/database"
+	lkafka "dist-system-practice/lib/kafka"
 	"dist-system-practice/lib/logger"
 	pb "dist-system-practice/message"
 	"dist-system-practice/service/rpc"
@@ -28,6 +29,7 @@ func main() {
 	cache.New()
 	database.New()
 	dao.New()
+	lkafka.NewWriter()
 
 	// service app
 	host := common.GetEnv("SERVICE_HOST", "0.0.0.0")

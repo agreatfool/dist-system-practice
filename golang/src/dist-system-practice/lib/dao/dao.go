@@ -141,12 +141,14 @@ func (d *Dao) UpdateViewed(id uint32) (uint32, error) {
 		return 0, ErrNoRecordUpdated
 	}
 
+	// invalidate cache
 	if err := d.cache.Delete(key); err != nil {
 		d.logger.Error("[Dao] UpdateViewed: Cache delete error.",
 			zap.String("api", "UpdateViewed"), zap.Uint32("workId", id), zap.Error(err))
 		return 0, err
 	}
 
+	// get updated work record
 	var getErr error
 	&work, getErr = d.GetWork(id)
 	if getErr != nil {
@@ -178,12 +180,14 @@ func (d *Dao) PlanWork(id uint32) (*model.Work, error) {
 		return &work, ErrNoRecordUpdated
 	}
 
+	// invalidate cache
 	if err := d.cache.Delete(key); err != nil {
 		d.logger.Error("[Dao] PlanWork: Cache delete error.",
 			zap.String("api", "PlanWork"), zap.Uint32("workId", id), zap.Error(err))
 		return &work, err
 	}
 
+	// get updated work record
 	var getErr error
 	&work, getErr = d.GetWork(id)
 	if getErr != nil {
@@ -191,6 +195,43 @@ func (d *Dao) PlanWork(id uint32) (*model.Work, error) {
 	}
 
 	return &work, nil
+}
+
+func (d *Dao) FinishPlannedWork(id uint32, achievement string) error {
+	var work model.Work
+
+	// build cache key
+	key := d.fmtWorkCacheKey(id)
+
+	// db update
+	dbRes := d.db.Model(&work).Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"achieved_count": gorm.Expr("achieved_count + 1"),
+			"achievement":    achievement,
+			"is_planned":     false,
+			"achieved_at":    time.Now(),
+		})
+	if dbRes.Error != nil {
+		// error in db
+		d.logger.Error("[Dao] FinishPlannedWork: Error in db.",
+			zap.String("api", "FinishPlannedWork"), zap.Uint32("workId", id), zap.Error(dbRes.Error))
+		return dbRes.Error
+	}
+	if dbRes.RowsAffected == 0 {
+		// no record updated, invalid
+		d.logger.Error("[Dao] FinishPlannedWork: No record updated.",
+			zap.String("api", "FinishPlannedWork"), zap.Uint32("workId", id), zap.Error(ErrNoRecordUpdated))
+		return ErrNoRecordUpdated
+	}
+
+	// invalidate cache
+	if err := d.cache.Delete(key); err != nil {
+		d.logger.Error("[Dao] FinishPlannedWork: Cache delete error.",
+			zap.String("api", "FinishPlannedWork"), zap.Uint32("workId", id), zap.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
