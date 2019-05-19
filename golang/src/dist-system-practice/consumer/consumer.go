@@ -7,7 +7,6 @@ import (
 	"dist-system-practice/lib/database"
 	lkafka "dist-system-practice/lib/kafka"
 	"dist-system-practice/lib/logger"
-	"encoding/json"
 	"fmt"
 	"github.com/satori/go.uuid"
 	"go.uber.org/zap"
@@ -62,12 +61,12 @@ func consume() {
 		logger.Get().Error("[Consumer] consume: Read message error.", zap.Error(rErr))
 		return
 	} else {
-		mBytes, err := json.Marshal(msg)
-		if err != nil {
-			logger.Get().Error("[Consumer] consume: json.Marshal(msg) error.", zap.Error(err))
-			return
-		}
-		logger.Get().Debug("[Consumer] consume: Got message.", zap.String("msg", string(mBytes)))
+		logger.Get().Info("[Consumer] consume: Got message.",
+			zap.String("topic", msg.Topic),
+			zap.Int("partition", msg.Partition),
+			zap.Int64("offset", msg.Offset),
+			zap.String("value", string(msg.Value)),
+			zap.Time("time", msg.Time))
 	}
 
 	// get workId from message
@@ -95,6 +94,7 @@ func consume() {
 			zap.String("topic", msg.Topic),
 			zap.Int("partition", msg.Partition),
 			zap.Int64("offset", msg.Offset),
-			zap.String("value", string(msg.Value)))
+			zap.String("value", string(msg.Value)),
+			zap.Time("time", msg.Time))
 	}
 }
