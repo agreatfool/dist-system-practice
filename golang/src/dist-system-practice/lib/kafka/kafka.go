@@ -63,7 +63,7 @@ func getBrokers() []string {
 	if conf == "" {
 		panic("[Kafka] No conf provided: KAFKA_BROKERS")
 	}
-	conf = fmt.Sprintf("{servers:%s}", conf)
+	conf = fmt.Sprintf("{\"servers\":%s}", conf)
 
 	// parse config yaml
 	if err := json.Unmarshal([]byte(conf), &config); err != nil {
