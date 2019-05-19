@@ -81,9 +81,6 @@ func (d *Dao) GetWork(id uint32) (*model.Work, error) {
 
 	if cacheErr == memcache.ErrCacheMiss {
 
-		d.logger.Debug("[Dao] GetWork: Cache not found.",
-			zap.String("api", "GetWork"), zap.Uint32("workId", id))
-
 		// no cached value found, query database
 		err := d.db.Where("id = ?", id).First(&work).Error
 
@@ -142,20 +139,19 @@ func (d *Dao) UpdateViewed(id uint32) (uint32, error) {
 	}
 
 	// invalidate cache
-	if err := d.cache.Delete(key); err != nil {
+	if err := d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
 		d.logger.Error("[Dao] UpdateViewed: Cache delete error.",
 			zap.String("api", "UpdateViewed"), zap.Uint32("workId", id), zap.Error(err))
 		return 0, err
 	}
 
 	// get updated work record
-	var getErr error
-	&work, getErr = d.GetWork(id)
+	read, getErr := d.GetWork(id)
 	if getErr != nil {
 		return 0, getErr
 	}
 
-	return work.Viewed, nil
+	return read.Viewed, nil
 }
 
 func (d *Dao) PlanWork(id uint32) (*model.Work, error) {
@@ -181,20 +177,19 @@ func (d *Dao) PlanWork(id uint32) (*model.Work, error) {
 	}
 
 	// invalidate cache
-	if err := d.cache.Delete(key); err != nil {
+	if err := d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
 		d.logger.Error("[Dao] PlanWork: Cache delete error.",
 			zap.String("api", "PlanWork"), zap.Uint32("workId", id), zap.Error(err))
 		return &work, err
 	}
 
 	// get updated work record
-	var getErr error
-	&work, getErr = d.GetWork(id)
+	read, getErr := d.GetWork(id)
 	if getErr != nil {
 		return &work, getErr
 	}
 
-	return &work, nil
+	return read, nil
 }
 
 func (d *Dao) FinishPlannedWork(id uint32, achievement string) error {
@@ -225,7 +220,7 @@ func (d *Dao) FinishPlannedWork(id uint32, achievement string) error {
 	}
 
 	// invalidate cache
-	if err := d.cache.Delete(key); err != nil {
+	if err := d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
 		d.logger.Error("[Dao] FinishPlannedWork: Cache delete error.",
 			zap.String("api", "FinishPlannedWork"), zap.Uint32("workId", id), zap.Error(err))
 		return err
