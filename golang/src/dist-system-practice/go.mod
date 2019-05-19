@@ -15,12 +15,13 @@ require (
 	github.com/gin-contrib/zap v0.0.0-20190405225521-7c4b822813e7
 	github.com/gin-gonic/gin v1.4.0
 	github.com/golang/mock v1.3.1 // indirect
+	github.com/golang/protobuf v1.3.1
 	github.com/google/btree v1.0.0 // indirect
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/google/pprof v0.0.0-20190515194954-54271f7e092f // indirect
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
-	github.com/hlts2/round-robin v0.0.0-20190314040659-eb24115f39ce // indirect
+	github.com/hlts2/round-robin v0.0.0-20190314040659-eb24115f39ce
 	github.com/jinzhu/gorm v1.9.8
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.1.1 // indirect
@@ -48,7 +49,7 @@ require (
 	golang.org/x/tools v0.0.0-20190517183331-d88f79806bbd // indirect
 	google.golang.org/appengine v1.6.0 // indirect
 	google.golang.org/genproto v0.0.0-20190515210553-995ef27e003f // indirect
-	google.golang.org/grpc v1.20.1 // indirect
+	google.golang.org/grpc v1.20.1
 	gopkg.in/ory-am/dockertest.v3 v3.3.4 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	gotest.tools v2.2.0+incompatible // indirect
