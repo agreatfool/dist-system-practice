@@ -7,6 +7,9 @@ dist-system-practice
 * CACHE_CONF_PATH：缓存配置文件位置
 * MYSQL_CONF_PATH：数据库配置文件位置
 
+### Web
+* APP_NAME：同上
+* LOGGER_CONF_PATH：同上
 * WEB_HOST：WEB应用的监听HOST
 * WEB_PORT：WEB应用的监听PORT
 * MAX_WORK_ID：最大可用WorkId，该数值是数据库中单表预建数据的数量值
@@ -16,12 +19,23 @@ dist-system-practice
 * API_PLAN_WORK_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * RPC_CONF_PATH：RPC配置文件位置
 
+### Service
+* APP_NAME：同上
+* LOGGER_CONF_PATH：同上
+* CACHE_CONF_PATH：同上
+* MYSQL_CONF_PATH：同上
 * SERVICE_HOST：Service应用的监听HOST
 * SERVICE_PORT：Service应用的监听PORT
 * KAFKA_BROKERS：Kafka服务的节点列表，json数组字符串，e.g ["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]
 
+### Consumer
+* APP_NAME：同上
+* LOGGER_CONF_PATH：同上
+* CACHE_CONF_PATH：同上
+* MYSQL_CONF_PATH：同上
 * CONSUMER_ROUTINES：在启动consumer app的时候，同时启动多少个routine并发处理message，默认为1；这个数值 = partition / consumer app count
 * CONSUMER_FACTOR：数字值，按设计consumer会计算一个值，该配置决定了运算的难度；ok: 37-39, edge: 40, default: 37
+* KAFKA_BROKERS：同上
 
 ## Versions
 ```bash
