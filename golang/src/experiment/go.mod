@@ -10,17 +10,18 @@ require (
 	github.com/google/pprof v0.0.0-20190404155422-f8f10df84213 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/processout/grpc-go-pool v1.2.1 // indirect
-	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734 // indirect
+	github.com/segmentio/kafka-go v0.2.4 // indirect
+	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f // indirect
 	golang.org/x/exp v0.0.0-20190429183610-475c5042d3f1 // indirect
 	golang.org/x/image v0.0.0-20190501045829-6d32002ffd75 // indirect
 	golang.org/x/lint v0.0.0-20190409202823-959b441ac422 // indirect
 	golang.org/x/mobile v0.0.0-20190415191353-3e0bab5405d6 // indirect
-	golang.org/x/net v0.0.0-20190501004415-9ce7a6920f09 // indirect
+	golang.org/x/net v0.0.0-20190514140710-3ec191127204 // indirect
 	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a // indirect
-	golang.org/x/sys v0.0.0-20190429190828-d89cdac9e872 // indirect
+	golang.org/x/sys v0.0.0-20190516110030-61b9204099cb // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
-	golang.org/x/tools v0.0.0-20190501045030-23463209683d // indirect
+	golang.org/x/tools v0.0.0-20190517183331-d88f79806bbd // indirect
 	google.golang.org/api v0.4.0 // indirect
 	google.golang.org/appengine v1.5.0 // indirect
 	google.golang.org/genproto v0.0.0-20190425155659-357c62f0e4bb // indirect
