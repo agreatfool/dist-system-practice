@@ -3,9 +3,9 @@
 FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 BASEPATH="${FULLPATH}/../.."
 
-export GOPATH=${BASEPATH/../..}
-export GOBIN=${GOPATH}/bin
-export GOROOT=/usr/local/Cellar/go/1.12/libexec # OSX brew
+export GOPATH="${BASEPATH}/../.."
+export GOBIN="${GOPATH}/bin"
+export GOROOT="/usr/local/Cellar/go/1.12/libexec" # OSX brew
 export GO111MODULE=on # see: https://github.com/golang/go/wiki/Modules#how-to-install-and-activate-module-support
 
 function web() {
@@ -36,14 +36,14 @@ function service() {
 function consumer() {
     cd ${BASEPATH}/consumer
 
-    APP_NAME="app.service" \
+    APP_NAME="app.consumer" \
     LOGGER_CONF_PATH="${BASEPATH}/conf/logger.yaml" \
     CACHE_CONF_PATH="${BASEPATH}/conf/cache.yaml" \
     MYSQL_CONF_PATH="${BASEPATH}/conf/mysql.yaml" \
     CONSUMER_ROUTINES="3" \
     CONSUMER_FACTOR="37" \
     KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]' \
-    go run service.go
+    go run consumer.go
 }
 
 function usage() {
