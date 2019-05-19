@@ -3,6 +3,11 @@
 FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 BASEPATH="${FULLPATH}/../.."
 
+export GOPATH=${BASEPATH/../..}
+export GOBIN=${GOPATH}/bin
+export GOROOT=/usr/local/Cellar/go/1.12/libexec # OSX brew
+export GO111MODULE=on # see: https://github.com/golang/go/wiki/Modules#how-to-install-and-activate-module-support
+
 function web() {
     cd ${BASEPATH}/web
 
