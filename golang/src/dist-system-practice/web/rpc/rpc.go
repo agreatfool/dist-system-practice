@@ -146,7 +146,7 @@ func New() *Client {
 	// build []*net.URL && initialize round robin
 	urls := make([]*url.URL, len(config.Servers))
 	for i, server := range config.Servers {
-		u, err := url.Parse(server)
+		u, err := url.Parse(fmt.Sprintf("//%s", server)) // see: https://github.com/golang/go/issues/19297
 		if err != nil {
 			panic(fmt.Sprintf("[RPC] Failed to parse url: %s", err.Error()))
 		}
