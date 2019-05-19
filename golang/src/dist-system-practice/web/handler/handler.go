@@ -284,9 +284,10 @@ func resetSelectorWithEnv() {
 }
 
 func randWorkId() uint32 {
-	maxWorkId, err := common.StrToInt(common.GetEnv("MAX_WORK_ID", "10000000"))
+	def := uint32(10000000)
+	maxWorkId, err := common.StrToInt(common.GetEnv("MAX_WORK_ID", fmt.Sprintf("%d", def)))
 	if err != nil {
-		return 10000000 // return default value when error encountered
+		return def // return default value when error encountered
 	}
 
 	return uint32(random.Int(1, maxWorkId))
