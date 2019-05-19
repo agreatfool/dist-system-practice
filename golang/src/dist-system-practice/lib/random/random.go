@@ -17,6 +17,11 @@ func Float(min float64, max float64) float64 {
 // Make random int between min & max
 func Int(min int, max int) int {
 	checkRandSeed()
+
+	if min == max {
+		return min
+	}
+
 	return min + rand.Intn(max-min)
 }
 
