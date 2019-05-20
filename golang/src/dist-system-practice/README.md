@@ -37,6 +37,18 @@ dist-system-practice
 * CONSUMER_FACTOR：数字值，按设计consumer会计算一个值，该配置决定了运算的难度；ok: 37-39, edge: 40, default: 37
 * KAFKA_BROKERS：同上
 
+## Dev Env
+* Memcached: 127.0.0.1:11211
+* Memcached Admin: 127.0.0.1:9083
+* MySQL: 127.0.0.1:3306
+* Web: 127.0.0.1:8000
+* Service: 127.0.0.1:16241
+* Zookeeper: 127.0.0.1:2181
+* Kafka:
+    * 127.0.0.1:19092
+    * 127.0.0.1:29092
+    * 127.0.0.1:39092
+
 ## Versions
 ```bash
 $ docker --version
