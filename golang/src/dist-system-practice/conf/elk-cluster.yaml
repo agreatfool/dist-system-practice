@@ -1,0 +1,218 @@
+version: '2'
+
+x-elk-environment-defaults: &ELK_ENV_DEFAULTS
+  - cluster.name=es_cluster
+  - network.host=0.0.0.0
+  - transport.tcp.port=9300
+  - discovery.seed_hosts=es_master_1:9300,es_master_2:9300,es_master_3:9300,es_data_1:9300,es_data_2:9300,es_data_3:9300
+  - cluster.initial_master_nodes=es_master_1:9300,es_master_2:9300,es_master_3:9300
+  - discovery.zen.minimum_master_nodes=2
+  - bootstrap.memory_lock=true
+  - path.data=/tmp/elk/es/data
+  - path.logs=/tmp/elk/es/logs
+  - "ES_JAVA_OPTS=\
+      -Xms512m \
+      -Xmx512m \
+      -XX:+UseConcMarkSweepGC \
+      -XX:CMSInitiatingOccupancyFraction=75 \
+      -XX:+UseCMSInitiatingOccupancyOnly \
+      -Des.networkaddress.cache.ttl=60 \
+      -Des.networkaddress.cache.negative.ttl=10 \
+      -XX:+AlwaysPreTouch \
+      -Xss1m \
+      -Djava.awt.headless=true \
+      -Dfile.encoding=UTF-8 \
+      -Djna.nosys=true \
+      -XX:-OmitStackTraceInFastThrow \
+      -Dio.netty.noUnsafe=true \
+      -Dio.netty.noKeySetOptimization=true \
+      -Dio.netty.recycler.maxCapacityPerThread=0 \
+      -Dlog4j.shutdownHookEnabled=false \
+      -Dlog4j2.disable.jmx=true \
+      -Djava.io.tmpdir=${ES_TMPDIR} \
+      -XX:+HeapDumpOnOutOfMemoryError \
+      -XX:HeapDumpPath=data \
+      -XX:ErrorFile=logs/hs_err_pid%p.log \
+      8:-XX:+PrintGCDetails \
+      8:-XX:+PrintGCDateStamps \
+      8:-XX:+PrintTenuringDistribution \
+      8:-XX:+PrintGCApplicationStoppedTime \
+      8:-Xloggc:logs/gc.log \
+      8:-XX:+UseGCLogFileRotation \
+      8:-XX:NumberOfGCLogFiles=32 \
+      8:-XX:GCLogFileSize=64m \
+      9-:-Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m \
+      9-:-Djava.locale.providers=COMPAT \
+    "
+
+networks:
+  elk-net:
+    driver: "bridge"
+
+volumes:
+  es_master_vol_logs_1:
+    driver: "local"
+  es_master_vol_data_1:
+    driver: "local"
+  es_master_vol_logs_2:
+    driver: "local"
+  es_master_vol_data_2:
+    driver: "local"
+  es_master_vol_logs_3:
+    driver: "local"
+  es_master_vol_data_3:
+    driver: "local"
+  es_data_vol_logs_1:
+    driver: "local"
+  es_data_vol_data_1:
+    driver: "local"
+  es_data_vol_logs_2:
+    driver: "local"
+  es_data_vol_data_2:
+    driver: "local"
+  es_data_vol_logs_3:
+    driver: "local"
+  es_data_vol_data_3:
+    driver: "local"
+
+services:
+  kibana:
+  filebeat:
+  es_master_1:
+    image: "elasticsearch:7.0.0"
+    container_name: "es_master_1"
+    hostname: "es_master_1"
+    volumes:
+      - es_master_vol_data_1:/tmp/elk/es/data
+      - es_master_vol_logs_1:/tmp/elk/es/logs
+    networks:
+      - "elk-net"
+    ports:
+      - "9201:9201"
+    expose:
+      - "9300"
+    environment:
+      - node.name=es_master_1
+      - http.port=9201
+      - node.master=true
+      - node.data=false
+      <<: *ELK_ENV_DEFAULTS
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  es_master_2:
+    image: "elasticsearch:7.0.0"
+    container_name: "es_master_2"
+    hostname: "es_master_2"
+    volumes:
+      - es_master_vol_data_2:/tmp/elk/es/data
+      - es_master_vol_logs_2:/tmp/elk/es/logs
+    networks:
+      - "elk-net"
+    ports:
+      - "9202:9202"
+    expose:
+      - "9300"
+    environment:
+      - node.name=es_master_2
+      - http.port=9202
+      - node.master=true
+      - node.data=false
+      <<: *ELK_ENV_DEFAULTS
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  es_master_3:
+    image: "elasticsearch:7.0.0"
+    container_name: "es_master_3"
+    hostname: "es_master_3"
+    volumes:
+      - es_master_vol_data_3:/tmp/elk/es/data
+      - es_master_vol_logs_3:/tmp/elk/es/logs
+    networks:
+      - "elk-net"
+    ports:
+      - "9203:9203"
+    expose:
+      - "9300"
+    environment:
+      - node.name=es_master_3
+      - http.port=9203
+      - node.master=true
+      - node.data=false
+      <<: *ELK_ENV_DEFAULTS
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  es_data_1:
+    image: "elasticsearch:7.0.0"
+    container_name: "es_data_1"
+    hostname: "es_data_1"
+    volumes:
+      - es_data_vol_data_1:/tmp/elk/es/data
+      - es_data_vol_logs_1:/tmp/elk/es/logs
+    networks:
+      - "elk-net"
+    ports:
+      - "9211:9211"
+    expose:
+      - "9300"
+    environment:
+      - node.name=es_data_1
+      - http.port=9211
+      - node.master=false
+      - node.data=true
+      <<: *ELK_ENV_DEFAULTS
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  es_data_2:
+    image: "elasticsearch:7.0.0"
+    container_name: "es_data_2"
+    hostname: "es_data_2"
+    volumes:
+      - es_data_vol_data_2:/tmp/elk/es/data
+      - es_data_vol_logs_2:/tmp/elk/es/logs
+    networks:
+      - "elk-net"
+    ports:
+      - "9212:9212"
+    expose:
+      - "9300"
+    environment:
+      - node.name=es_data_2
+      - http.port=9212
+      - node.master=false
+      - node.data=true
+      <<: *ELK_ENV_DEFAULTS
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  es_data_3:
+    image: "elasticsearch:7.0.0"
+    container_name: "es_data_3"
+    hostname: "es_data_3"
+    volumes:
+      - es_data_vol_data_3:/tmp/elk/es/data
+      - es_data_vol_logs_3:/tmp/elk/es/logs
+    networks:
+      - "elk-net"
+    ports:
+      - "9213:9213"
+    expose:
+      - "9300"
+    environment:
+      - node.name=es_data_3
+      - http.port=9213
+      - node.master=false
+      - node.data=true
+      <<: *ELK_ENV_DEFAULTS
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
