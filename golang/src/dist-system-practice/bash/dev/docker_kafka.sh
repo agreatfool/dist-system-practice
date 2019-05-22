@@ -10,11 +10,11 @@ BOOTSTRAP_SERVER="127.0.0.1:19092"
 BROKER_LIST="127.0.0.1:19092,127.0.0.1:29092,127.0.0.1:39092"
 
 function start() {
-    docker-compose -f ${BASEPATH}/conf/kafka.yaml up -d
+    docker-compose -f ${BASEPATH}/conf/kafka.yaml -p "kafka" up -d
 }
 
 function stop() {
-    docker-compose -f ${BASEPATH}/conf/kafka.yaml down -v # also remove containers
+    docker-compose -f ${BASEPATH}/conf/kafka.yaml -p "kafka" down -v # also remove containers & volumes
 }
 
 function logs() {

@@ -27,15 +27,15 @@ x-kafka-logging-defaults: &KAFKA_LOGGING_DEFAULTS
     max-size: "512m"
 
 networks:
-  kafka-net:
+  net:
     driver: "bridge"
 
 volumes:
-  kafka_vol_1:
+  vol_1:
     driver: "local"
-  kafka_vol_2:
+  vol_2:
     driver: "local"
-  kafka_vol_3:
+  vol_3:
     driver: "local"
 
 services:
@@ -44,7 +44,7 @@ services:
     hostname: "zookeeper"
     container_name: "zookeeper"
     networks:
-      - "kafka-net"
+      - "net"
     ports:
       - "2181:2181"
     restart: "always"
@@ -57,9 +57,9 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
-      - kafka_vol_1:/tmp/kafka/data
+      - vol_1:/tmp/kafka/data
     networks:
-      - "kafka-net"
+      - "net"
     ports:
       - "19092:19092"
     expose:
@@ -81,9 +81,9 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
-      - kafka_vol_2:/tmp/kafka/data
+      - vol_2:/tmp/kafka/data
     networks:
-      - "kafka-net"
+      - "net"
     ports:
       - "29092:29092"
     expose:
@@ -105,9 +105,9 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
-      - kafka_vol_3:/tmp/kafka/data
+      - vol_3:/tmp/kafka/data
     networks:
-      - "kafka-net"
+      - "net"
     ports:
       - "39092:39092"
     expose:
