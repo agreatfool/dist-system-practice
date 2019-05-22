@@ -9,12 +9,14 @@ import (
 	"dist-system-practice/lib/logger"
 	"fmt"
 	"github.com/satori/go.uuid"
+	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"os"
 )
 
 var factor = 37
+var readers []*kafka.Reader
 
 func main() {
 	// ensure env
@@ -43,20 +45,29 @@ func main() {
 	cache.New()
 	database.New()
 	dao.New()
-	lkafka.NewReader()
+
+	// create kafka reader connections
+	readers = make([]*kafka.Reader, routineCount)
+	for i := 0; i < routineCount; i++ {
+		readers[i] = lkafka.NewReader()
+	}
 
 	// consume messages
 	for i := 0; i < routineCount; i++ {
-		go consume()
+		go func(readerId int) {
+			for {
+				consume(readers[readerId])
+			}
+		}(i)
 	}
 
 	// wait
 	select {}
 }
 
-func consume() {
+func consume(reader *kafka.Reader) {
 	// fetch message
-	msg, rErr := lkafka.GetReader().FetchMessage(context.Background())
+	msg, rErr := reader.FetchMessage(context.Background())
 	if rErr != nil {
 		logger.Get().Error("[Consumer] consume: Read message error.", zap.Error(rErr))
 		return
@@ -87,7 +98,7 @@ func consume() {
 	}
 
 	// commit message
-	if err := lkafka.GetReader().CommitMessages(context.Background(), msg); err != nil {
+	if err := reader.CommitMessages(context.Background(), msg); err != nil {
 		logger.Get().Error("[Consumer] consume: Commit message error.", zap.Error(err))
 	} else {
 		logger.Get().Info("[Consumer] consume: Done.",

@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-var reader *kafka.Reader
 var writer *kafka.Writer
 
 type Config struct {
@@ -16,16 +15,8 @@ type Config struct {
 	Servers []string `json:"servers" yaml:"servers"`
 }
 
-func GetReader() *kafka.Reader {
-	return reader
-}
-
 func NewReader() *kafka.Reader {
-	if reader != nil {
-		return reader
-	}
-
-	reader = kafka.NewReader(kafka.ReaderConfig{
+	return kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        getBrokers(),
 		GroupID:        "work-group",
 		Topic:          "work-topic",
@@ -33,8 +24,6 @@ func NewReader() *kafka.Reader {
 		MaxBytes:       1024 * 1024, // 1M
 		CommitInterval: time.Second, // flushes commits to Kafka every second
 	})
-
-	return reader
 }
 
 func GetWriter() *kafka.Writer {
