@@ -14,7 +14,7 @@ function start() {
 }
 
 function stop() {
-    docker-compose -f ${BASEPATH}/conf/kafka.yaml down # also remove containers
+    docker-compose -f ${BASEPATH}/conf/kafka.yaml down -v # also remove containers
 }
 
 function logs() {
@@ -24,6 +24,10 @@ function logs() {
 #../../../experiment/bin/kafka/bin/kafka-topics.sh --describe --zookeeper 127.0.0.1:2181 --topic "work-topic"
 #../../../experiment/bin/kafka/bin/kafka-console-producer.sh --broker-list 127.0.0.1:19092 --topic "work-topic"
 #../../../experiment/bin/kafka/bin/kafka-console-consumer.sh --bootstrap-server 127.0.0.1:19092 --topic "work-topic" --from-beginning
+
+# the working directory in container is "/opt/kafka"
+# $ ls /opt/kafka
+# LICENSE    NOTICE     bin        config     libs       logs       site-docs
 
 function init() {
     ${KAFKA_LOCAL_BIN_PATH}/kafka-topics.sh \
