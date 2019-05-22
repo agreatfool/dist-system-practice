@@ -77,7 +77,17 @@ volumes:
 
 services:
   kibana:
+    image: "kibana:7.0.0"
+    container_name: "kibana"
+    hostname: "kibana"
+    networks:
+      - "elk-net"
   filebeat:
+    image: "elastic/filebeat:7.0.0"
+    container_name: "filebeat"
+    hostname: "filebeat"
+    networks:
+      - "elk-net"
   es_master_1:
     image: "elasticsearch:7.0.0"
     container_name: "es_master_1"
