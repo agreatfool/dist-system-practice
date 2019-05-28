@@ -52,7 +52,7 @@ services:
       - SERVER_PORT=5601
       - SERVER_HOST=0.0.0.0
       - SERVER_NAME=es_cluster
-      - ELASTICSEARCH_HOSTS=es_1:9201,es_2:9202,es_3:9203
+      - ELASTICSEARCH_HOSTS=["http://es_1:9201"]
       - KIBANA_INDEX=.kibana
       - DIBANA_DEFAULTAPPID=home
       - ELASTICSEARCH_PINGTIMEOUT=1500

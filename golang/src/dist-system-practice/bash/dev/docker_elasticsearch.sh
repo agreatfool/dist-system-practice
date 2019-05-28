@@ -9,6 +9,11 @@ BASEPATH="${FULLPATH}/../.."
 # data
 # logs/gc.log
 
+# Kibana:
+# /usr/share/kibana
+# LICENSE.txt  README.txt  built_assets  data  node_modules  package.json  src  webpackShims
+# NOTICE.txt   bin  config  node  optimize   plugins target
+
 # Filebeat:
 # LICENSE.txt  README.md fields.yml  filebeat.reference.yml  kibana  module
 # NOTICE.txt   data filebeat    filebeat.yml    logs    modules.d
