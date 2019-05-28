@@ -34,6 +34,11 @@ volumes:
   es_vol_3_data:
     driver: "local"
 
+x-es-logging-defaults: &ES_LOGGING_DEFAULTS
+  driver: "json-file"
+  options:
+    max-size: "512m"
+
 services:
   kibana:
     image: "kibana:7.0.0"
@@ -48,6 +53,8 @@ services:
     ports:
       - "5601:5601"
     restart: "always"
+    logging:
+      <<: *ES_LOGGING_DEFAULTS
     environment:
       - SERVER_PORT=5601
       - SERVER_HOST=0.0.0.0
@@ -72,6 +79,8 @@ services:
       - /private/tmp/filebeat.yaml:/usr/share/filebeat/filebeat.yml
       - /private/tmp/logs/app:/tmp/app/logs
     restart: "always"
+    logging:
+      <<: *ES_LOGGING_DEFAULTS
     environment:
       - ES_HOSTS=es_1:9201,es_2:9202,es_3:9203
       - LOGGING_LEVEL=debug
@@ -90,6 +99,8 @@ services:
     expose:
       - "9300"
     restart: "always"
+    logging:
+      <<: *ES_LOGGING_DEFAULTS
     environment:
       - node.name=es_1
       - http.port=9201
@@ -115,6 +126,8 @@ services:
     expose:
       - "9300"
     restart: "always"
+    logging:
+      <<: *ES_LOGGING_DEFAULTS
     environment:
       - node.name=es_2
       - http.port=9202
@@ -140,6 +153,8 @@ services:
     expose:
       - "9300"
     restart: "always"
+    logging:
+      <<: *ES_LOGGING_DEFAULTS
     environment:
       - node.name=es_3
       - http.port=9203
