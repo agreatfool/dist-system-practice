@@ -73,8 +73,8 @@ services:
       - /private/tmp/logs/app:/tmp/app/logs
     restart: "always"
     environment:
-      - output.elasticsearch.hosts=es_1:9201,es_2:9202,es_3:9203
-      - logging.level=debug
+      - ES_HOSTS=es_1:9201,es_2:9202,es_3:9203
+      - LOGGING_LEVEL=debug
   es_1:
     image: "elasticsearch:7.0.0"
     container_name: "es_1"

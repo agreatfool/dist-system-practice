@@ -3,10 +3,16 @@
 FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 BASEPATH="${FULLPATH}/../.."
 
+# Elasticsearch:
 # /usr/share/elasticsearch
 # LICENSE.txt  NOTICE.txt  README.textile  bin  config  data  jdk  lib  logs  modules  plugins
 # data
 # logs/gc.log
+
+# Filebeat:
+# LICENSE.txt  README.md fields.yml  filebeat.reference.yml  kibana  module
+# NOTICE.txt   data filebeat    filebeat.yml    logs    modules.d
+# Config path: [/usr/share/filebeat] Data path: [/usr/share/filebeat/data] Logs path: [/usr/share/filebeat/logs]
 
 function start() {
     cp ${BASEPATH}/conf/elasticsearch.yaml /private/tmp/elasticsearch.yaml

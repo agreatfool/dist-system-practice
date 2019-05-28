@@ -22,6 +22,7 @@ filebeat.inputs:
   enabled: true
   paths:
     - /tmp/app/logs/app.web.stdout.log
+  json.keys_under_root: true
   fields:
     app: web
 
@@ -29,6 +30,7 @@ filebeat.inputs:
   enabled: true
   paths:
     - /tmp/app/logs/app.service.stdout.log
+  json.keys_under_root: true
   fields:
     app: service
 
@@ -36,6 +38,7 @@ filebeat.inputs:
   enabled: true
   paths:
     - /tmp/app/logs/app.consumer.stdout.log
+  json.keys_under_root: true
   fields:
     app: consumer
 
@@ -170,16 +173,16 @@ setup.template.settings:
 
 #-------------------------- Elasticsearch output ------------------------------
 output.elasticsearch:
-  indices:
-    - index: "filebeat-%{[fields.app]}-%{[fields.module]}-%{[agent.version]}-%{+yyyy.MM.dd}"
-
   # Array of hosts to connect to.
-  #hosts: ["localhost:9200"]
+  hosts: '${ES_HOSTS}'
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"
   #password: "changeme"
+
+  indices:
+    - index: "filebeat-%{[fields.app]}-%{[fields.module]}-%{[agent.version]}-%{+yyyy.MM.dd}"
 
 #----------------------------- Logstash output --------------------------------
 #output.logstash:
@@ -216,7 +219,7 @@ processors:
   - add_fields:
       when:
         contains:
-          logger: "gorm"
+          message: "gorm"
       fields:
         module: "gorm"
   - add_fields:
@@ -240,12 +243,12 @@ processors:
 
 # Sets log level. The default log level is info.
 # Available log levels are: error, warning, info, debug
-#logging.level: debug
+logging.level: '${LOGGING_LEVEL}'
 
 # At debug level, you can selectively enable logging only for some components.
 # To enable all selectors use ["*"]. Examples of other selectors are "beat",
 # "publish", "service".
-#logging.selectors: ["*"]
+logging.selectors: ["*"]
 
 #============================== Xpack Monitoring ===============================
 # filebeat can export internal metrics to a central Elasticsearch monitoring
