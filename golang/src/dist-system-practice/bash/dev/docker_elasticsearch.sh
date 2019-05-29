@@ -3,6 +3,8 @@
 FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 BASEPATH="${FULLPATH}/../.."
 
+ES_1="http://127.0.0.1:9201"
+
 # Elasticsearch:
 # /usr/share/elasticsearch
 # LICENSE.txt  NOTICE.txt  README.textile  bin  config  data  jdk  lib  logs  modules  plugins
@@ -35,35 +37,38 @@ function logs() {
 }
 
 function init() {
-    curl -X GET ""
+    curl \
+        -H "Content-Type: application/json" \
+        -PUT "${ES_1}/_template/dist?pretty" \
+        -d @${BASEPATH}/conf/elk-index-template.json
 }
 
 function health() {
-    curl -X GET "http://127.0.0.1:9201/_cluster/health?pretty"
+    curl -X GET "${ES_1}/_cluster/health?pretty"
 }
 
 function cluster() {
-    curl -X GET "http://127.0.0.1:9201/_cluster/state?pretty"
+    curl -X GET "${ES_1}/_cluster/state?pretty"
 }
 
 function cluster_human() {
-    curl -X GET "http://127.0.0.1:9201/_cluster/stats?human&pretty"
+    curl -X GET "${ES_1}/_cluster/stats?human&pretty"
 }
 
 function shards() {
-    curl -X GET "http://127.0.0.1:9201/_cat/shards"
+    curl -X GET "${ES_1}/_cat/shards"
 }
 
 function node() {
-    curl -X GET "http://127.0.0.1:9201/_nodes/$1/stats?pretty"
+    curl -X GET "${ES_1}/_nodes/$1/stats?pretty"
 }
 
 function node_index() {
-    curl -X GET "http://127.0.0.1:9201/_nodes/stats/indices?pretty"
+    curl -X GET "${ES_1}/_nodes/stats/indices?pretty"
 }
 
 function templates() {
-    curl -X GET "http://127.0.0.1:9201/_template?pretty"
+    curl -X GET "${ES_1}/_template/$1?pretty"
 }
 
 function usage() {

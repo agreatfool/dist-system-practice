@@ -101,8 +101,8 @@ filebeat.inputs:
 
 #==================== Elasticsearch template setting ==========================
 
-setup.template.name: "filebeat-7.0.0"
-setup.template.pattern: "filebeat-7.0.0-*"
+setup.template.name: "dist"
+setup.template.pattern: "dist-*"
 setup.template.settings:
   index.number_of_shards: '${NUM_OF_SHARDS}'
   index.number_of_replicas: '${NUM_OF_REPLICAS}'
@@ -184,7 +184,7 @@ output.elasticsearch:
   worker: '${NUM_OF_OUTPUT_WORKERS}'
 
   indices:
-    - index: "filebeat-%{[agent.version]}-%{[fields.app]}-%{[fields.module]}-%{+yyyy.MM.dd}"
+    - index: "dist-%{[fields.app]}-%{[fields.module]}-%{[agent.version]}-%{+yyyy.MM.dd}"
 
 #----------------------------- Logstash output --------------------------------
 #output.logstash:
