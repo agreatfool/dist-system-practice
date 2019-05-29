@@ -83,7 +83,10 @@ services:
       <<: *ES_LOGGING_DEFAULTS
     environment:
       - ES_HOSTS=es_1:9201,es_2:9202,es_3:9203
-      - LOGGING_LEVEL=debug
+      - LOGGING_LEVEL=debug # error, warning, info, debug
+      - NUM_OF_OUTPUT_WORKERS=9 # node count * 3, 3 workers per node
+      - NUM_OF_SHARDS=3
+      - NUM_OF_REPLICAS=1 # replicas count per shard, total count is num_of_shards * (1 + num_of_replicas)
   es_1:
     image: "elasticsearch:7.0.0"
     container_name: "es_1"

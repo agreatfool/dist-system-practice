@@ -101,11 +101,11 @@ filebeat.inputs:
 
 #==================== Elasticsearch template setting ==========================
 
-setup.template.name: "filebeat"
-setup.template.pattern: "filebeat-*"
+setup.template.name: "filebeat-7.0.0"
+setup.template.pattern: "filebeat-7.0.0-*"
 setup.template.settings:
-  index.number_of_shards: 3
-  index.number_of_replicas: 1
+  index.number_of_shards: '${NUM_OF_SHARDS}'
+  index.number_of_replicas: '${NUM_OF_REPLICAS}'
   #index.codec: best_compression
   #_source.enabled: false
 
@@ -181,8 +181,10 @@ output.elasticsearch:
   #username: "elastic"
   #password: "changeme"
 
+  worker: '${NUM_OF_OUTPUT_WORKERS}'
+
   indices:
-    - index: "filebeat-%{[fields.app]}-%{[fields.module]}-%{[agent.version]}-%{+yyyy.MM.dd}"
+    - index: "filebeat-%{[agent.version]}-%{[fields.app]}-%{[fields.module]}-%{+yyyy.MM.dd}"
 
 #----------------------------- Logstash output --------------------------------
 #output.logstash:
@@ -235,7 +237,6 @@ processors:
       fields:
         module: "consumer"
 
-#processors:
   #- add_host_metadata: ~
   #- add_cloud_metadata: ~
 

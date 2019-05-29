@@ -34,6 +34,10 @@ function logs() {
     docker logs $1
 }
 
+function init() {
+    curl -X GET ""
+}
+
 function health() {
     curl -X GET "http://127.0.0.1:9201/_cluster/health?pretty"
 }
@@ -46,19 +50,27 @@ function cluster_human() {
     curl -X GET "http://127.0.0.1:9201/_cluster/stats?human&pretty"
 }
 
+function shards() {
+    curl -X GET "http://127.0.0.1:9201/_cat/shards"
+}
+
 function node() {
     curl -X GET "http://127.0.0.1:9201/_nodes/$1/stats?pretty"
 }
 
-function index() {
+function node_index() {
     curl -X GET "http://127.0.0.1:9201/_nodes/stats/indices?pretty"
 }
 
-function usage() {
-    echo "Usage: docker_elasticsearch.sh start|stop|logs|health|cluster|cluster_human|node|index"
+function templates() {
+    curl -X GET "http://127.0.0.1:9201/_template?pretty"
 }
 
-if [[ $1 != "start" ]] && [[ $1 != "stop" ]] && [[ $1 != "logs" ]] && [[ $1 != "health" ]] && [[ $1 != "cluster" ]] && [[ $1 != "cluster_human" ]] && [[ $1 != "node" ]] && [[ $1 != "index" ]]; then
+function usage() {
+    echo "Usage: docker_elasticsearch.sh start|stop|logs|init|health|cluster|cluster_human|shards|node|node_index|templates"
+}
+
+if [[ $1 != "start" ]] && [[ $1 != "stop" ]] && [[ $1 != "logs" ]] && [[ $1 != "init" ]] && [[ $1 != "health" ]] && [[ $1 != "cluster" ]] && [[ $1 != "cluster_human" ]] && [[ $1 != "shards" ]] && [[ $1 != "node" ]] && [[ $1 != "node_index" ]] && [[ $1 != "templates" ]]; then
     usage
     exit 0
 fi
