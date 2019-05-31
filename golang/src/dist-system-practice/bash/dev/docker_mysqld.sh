@@ -19,11 +19,11 @@ function start() {
     rm -rf ${BASEPATH}/mysql/data/*
     rm -rf ${BASEPATH}/mysql/log/*
 
-    docker network create mysqld-net
+    docker network create dist_net
 
     docker run --rm -d \
         --name mysqld \
-        --network=mysqld-net \
+        --network=dist_net \
         -e MYSQL_DATABASE=${DBNAME} \
         -e MYSQL_ROOT_PASSWORD=${PASSWORD} \
         -p 3306:3306 \
@@ -36,7 +36,7 @@ function start() {
 
 function connect() {
     docker run --rm -it \
-        --network mysqld-net \
+        --network dist_net \
         mysql:5.7.26 \
         mysql -hmysqld -u${USER} -p${PASSWORD}
 }
@@ -46,8 +46,6 @@ function stop() {
 }
 
 function clear() {
-    docker network rm mysqld-net
-
     # rm -rf ${BASEPATH}/mysql/conf/* # this is optional
     rm -rf ${BASEPATH}/mysql/data/*
     rm -rf ${BASEPATH}/mysql/log/*

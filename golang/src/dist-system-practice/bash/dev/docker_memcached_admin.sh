@@ -3,7 +3,7 @@
 function start() {
     docker run --rm -d \
         --name memcached-admin \
-        --network=memcached-net \
+        --network=dist_net \
         -e MEMCACHE_HOST=memcached \
         -e MEMCACHE_PORT=11211 \
         -p 9083:9083 \

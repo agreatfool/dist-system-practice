@@ -25,11 +25,11 @@ function start() {
     cp ${BASEPATH}/conf/elasticsearch.yaml /private/tmp/elasticsearch.yaml
     cp ${BASEPATH}/conf/filebeat.yaml /private/tmp/filebeat.yaml
 
-    docker-compose -f ${BASEPATH}/conf/elk-cluster.yaml -p "elk" up -d
+    docker-compose -f ${BASEPATH}/conf/elk-cluster.yaml -p "dist" up -d
 }
 
 function stop() {
-    docker-compose -f ${BASEPATH}/conf/elk-cluster.yaml -p "elk" down -v # also remove containers & volumes
+    docker-compose -f ${BASEPATH}/conf/elk-cluster.yaml -p "dist" down -v # also remove containers & volumes
 }
 
 function logs() {
