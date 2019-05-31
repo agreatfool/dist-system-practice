@@ -3,11 +3,19 @@
 FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 BASEPATH="${FULLPATH}/../.."
 
-# Elasticsearch:
-# /usr/share/elasticsearch
-# LICENSE.txt  NOTICE.txt  README.textile  bin  config  data  jdk  lib  logs  modules  plugins
-# data
-# logs/gc.log
+# Cassandra:
+# /etc/cassandra
+# cassandra-env.sh  cassandra-topology.properties  commitlog_archiving.properties  jvm.options  logback.xml
+# cassandra-rackdc.properties  cassandra.yaml  hotspot_compiler  logback-tools.xml triggers
+
+# /var/lib/cassandra
+# commitlog  data  hints  saved_caches
+
+# /var/log/cassandra
+# debug.log  gc.log.0.current  system.log
+
+# /usr/share/cassandra
+# apache-cassandra-3.11.4.jar  apache-cassandra-thrift-3.11.4.jar  apache-cassandra.jar  cassandra.in.sh  lib  stress.jar
 
 function start() {
     docker-compose -f ${BASEPATH}/conf/cassandra-cluster.yaml -p "dist" up -d

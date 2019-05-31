@@ -3,16 +3,7 @@
 FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 BASEPATH="${FULLPATH}/../.."
 
-# jaeger-agent:
-
-# jaeger-collector:
-
-# jaeger-query:
-
 function start() {
-    # Use the same project name "elk" as elasticsearch cluster,
-    # since jaeger using es as the data store.
-    # They need to be put in the same network.
     docker-compose -f ${BASEPATH}/conf/jaeger-cluster.yaml -p "dist" up -d
 }
 
