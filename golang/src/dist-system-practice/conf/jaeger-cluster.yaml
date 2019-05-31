@@ -1,0 +1,184 @@
+version: '2'
+
+x-jaeger-defaults:
+  C01: &ES_SERVER_URLS "--es.server-urls=http://es_1:9201,http://es_2:9202,http://es_3:9203"
+  C02: &ES_NUM_SHARDS "--es.num-shards=3"
+  C03: &ES_NUM_REPLICAS "--es.num-replicas=1"
+  C04: &LOG_LEVEL_DEBUG "--log-level=debug"
+  C05: &METRICS_BACKEND "--metrics-backend=prometheus"
+  C06: &METRICS_HTTP_ROUTE "--metrics-http-route=/metrics"
+  C07: &COLLECTOR_GRPC_PORT "--collector.grpc-port=14250"
+  C08: &COLLECTOR_HTTP_PORT "--collector.http-port=14268"
+  C09: &AGENT_BINARY_PORT "--processor.jaeger-binary.server-host-port=6832"
+  C10: &AGENT_COMPACT_PORT "--processor.jaeger-compact.server-host-port=6831"
+  C11: &AGENT_HTTP_PORT "--http-server.host-port=5778"
+  C12: &AGENT_REPORTER_TYPE "--reporter.type=grpc"
+  C13: &AGENT_REPORTER_ADDS "--reporter.grpc.host-port=jcollector_1:14250,jcollector_2:14250"
+
+networks:
+  net:
+    driver: "bridge"
+
+#volumes:
+#  es_vol_1_logs:
+#    driver: "local"
+#  es_vol_1_data:
+#    driver: "local"
+
+x-jaeger-logging-defaults: &JAEGER_LOGGING_DEFAULTS
+  driver: "json-file"
+  options:
+    max-size: "512m"
+
+services:
+  jaeger-query:
+    image: "jaegertracing/jaeger-query:1.11.0"
+    container_name: "jquery"
+    hostname: "jquery"
+    depends_on:
+      - "jaeger-collector-1"
+      - "jaeger-collector-2"
+    networks:
+      - "net"
+    ports:
+      - "16686:16686"
+    restart: "always"
+    logging:
+      <<: *JAEGER_LOGGING_DEFAULTS
+    command: [
+      "--query.port=16686",
+      *ES_SERVER_URLS,
+      *ES_NUM_SHARDS,
+      *ES_NUM_REPLICAS,
+      *METRICS_BACKEND,
+      *METRICS_HTTP_ROUTE,
+      *LOG_LEVEL_DEBUG
+    ]
+    environment:
+      - SPAN_STORAGE_TYPE=elasticsearch
+  jaeger-agent-web:
+    image: "jaegertracing/jaeger-agent:1.11.0"
+    container_name: "jagent_web"
+    hostname: "jagent_web"
+    depends_on:
+      - "jaeger-collector-1"
+      - "jaeger-collector-2"
+    networks:
+      - "net"
+    ports:
+      - "6832:6832/udp"
+      - "6831:6831/udp"
+      - "5778:5778"
+    restart: "always"
+    logging:
+      <<: *JAEGER_LOGGING_DEFAULTS
+    command: [
+      *AGENT_REPORTER_ADDS,
+      *AGENT_REPORTER_TYPE,
+      "--processor.jaeger-binary.server-host-port=6832",
+      "--processor.jaeger-compact.server-host-port=6831",
+      "--http-server.host-port=5778",
+      *METRICS_BACKEND,
+      *METRICS_HTTP_ROUTE,
+      *LOG_LEVEL_DEBUG
+    ]
+  jaeger-agent-service:
+    image: "jaegertracing/jaeger-agent:1.11.0"
+    container_name: "jagent_service"
+    hostname: "jagent_service"
+    depends_on:
+      - "jaeger-collector-1"
+      - "jaeger-collector-2"
+    networks:
+      - "net"
+    ports:
+      - "6842:6842/udp"
+      - "6841:6841/udp"
+      - "5788:5788"
+    restart: "always"
+    logging:
+      <<: *JAEGER_LOGGING_DEFAULTS
+    command: [
+      *AGENT_REPORTER_ADDS,
+      *AGENT_REPORTER_TYPE,
+      "--processor.jaeger-binary.server-host-port=6842",
+      "--processor.jaeger-compact.server-host-port=6841",
+      "--http-server.host-port=5788",
+      *METRICS_BACKEND,
+      *METRICS_HTTP_ROUTE,
+      *LOG_LEVEL_DEBUG
+    ]
+  jaeger-agent-consumer:
+    image: "jaegertracing/jaeger-agent:1.11.0"
+    container_name: "jagent_consumer"
+    hostname: "jagent_consumer"
+    depends_on:
+      - "jaeger-collector-1"
+      - "jaeger-collector-2"
+    networks:
+      - "net"
+    ports:
+      - "6852:6852/udp"
+      - "6851:6851/udp"
+      - "5798:5798"
+    restart: "always"
+    logging:
+      <<: *JAEGER_LOGGING_DEFAULTS
+    command: [
+      *AGENT_REPORTER_ADDS,
+      *AGENT_REPORTER_TYPE,
+      "--processor.jaeger-binary.server-host-port=6852",
+      "--processor.jaeger-compact.server-host-port=6851",
+      "--http-server.host-port=5798",
+      *METRICS_BACKEND,
+      *METRICS_HTTP_ROUTE,
+      *LOG_LEVEL_DEBUG
+    ]
+  jaeger-collector-1:
+    image: "jaegertracing/jaeger-collector:1.11.0"
+    container_name: "jcollector_1"
+    hostname: "jcollector_1"
+    networks:
+      - "net"
+    expose:
+      - "14250" # grpc
+      - "14268" # http (prometheus)
+    restart: "always"
+    logging:
+      <<: *JAEGER_LOGGING_DEFAULTS
+    command: [
+      *COLLECTOR_GRPC_PORT,
+      *COLLECTOR_HTTP_PORT,
+      *ES_SERVER_URLS,
+      *ES_NUM_SHARDS,
+      *ES_NUM_REPLICAS,
+      *METRICS_BACKEND,
+      *METRICS_HTTP_ROUTE,
+      *LOG_LEVEL_DEBUG
+    ]
+    environment:
+      - SPAN_STORAGE_TYPE=elasticsearch
+  jaeger-collector-2:
+    image: "jaegertracing/jaeger-collector:1.11.0"
+    container_name: "jcollector_2"
+    hostname: "jcollector_2"
+    networks:
+      - "net"
+    expose:
+      - "14250" # grpc
+      - "14268" # http (prometheus)
+    restart: "always"
+    logging:
+      <<: *JAEGER_LOGGING_DEFAULTS
+    command: [
+      *COLLECTOR_GRPC_PORT,
+      *COLLECTOR_HTTP_PORT,
+      *ES_SERVER_URLS,
+      *ES_NUM_SHARDS,
+      *ES_NUM_REPLICAS,
+      *METRICS_BACKEND,
+      *METRICS_HTTP_ROUTE,
+      *LOG_LEVEL_DEBUG
+    ]
+    environment:
+      - SPAN_STORAGE_TYPE=elasticsearch
