@@ -6,6 +6,13 @@ dist-system-practice
 * LOGGER_CONF_PATH：日志配置文件位置
 * CACHE_CONF_PATH：缓存配置文件位置
 * MYSQL_CONF_PATH：数据库配置文件位置
+* JAEGER_SERVICE_NAME：值应该同APP_NAME
+* JAEGER_AGENT_HOST：agent的host
+* JAEGER_AGENT_PORT：agent的port
+* JAEGER_REPORTER_LOG_SPANS：是否附加span，true
+* JAEGER_REPORTER_FLUSH_INTERVAL：输出间隔，1s
+* JAEGER_SAMPLER_TYPE：采样类型，probabilistic
+* JAEGER_SAMPLER_PARAM：采样变量，采样率，debug：1，production：0.01
 
 ### Web
 * APP_NAME：同上
@@ -18,6 +25,13 @@ dist-system-practice
 * API_GET_ACHIEVEMENT_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * API_PLAN_WORK_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * RPC_CONF_PATH：RPC配置文件位置
+* JAEGER_SERVICE_NAME：同上
+* JAEGER_AGENT_HOST：同上
+* JAEGER_AGENT_PORT：同上
+* JAEGER_REPORTER_LOG_SPANS：同上
+* JAEGER_REPORTER_FLUSH_INTERVAL：同上
+* JAEGER_SAMPLER_TYPE：同上
+* JAEGER_SAMPLER_PARAM：同上
 
 ### Service
 * APP_NAME：同上
@@ -27,6 +41,13 @@ dist-system-practice
 * SERVICE_HOST：Service应用的监听HOST
 * SERVICE_PORT：Service应用的监听PORT
 * KAFKA_BROKERS：Kafka服务的节点列表，json数组字符串，e.g ["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]
+* JAEGER_SERVICE_NAME：同上
+* JAEGER_AGENT_HOST：同上
+* JAEGER_AGENT_PORT：同上
+* JAEGER_REPORTER_LOG_SPANS：同上
+* JAEGER_REPORTER_FLUSH_INTERVAL：同上
+* JAEGER_SAMPLER_TYPE：同上
+* JAEGER_SAMPLER_PARAM：同上
 
 ### Consumer
 * APP_NAME：同上
@@ -36,6 +57,13 @@ dist-system-practice
 * CONSUMER_ROUTINES：在启动consumer app的时候，同时启动多少个routine并发处理message，默认为1；这个数值 = partition / consumer app count
 * CONSUMER_FACTOR：数字值，按设计consumer会计算一个值，该配置决定了运算的难度；ok: 37-39, edge: 40, default: 37
 * KAFKA_BROKERS：同上
+* JAEGER_SERVICE_NAME：同上
+* JAEGER_AGENT_HOST：同上
+* JAEGER_AGENT_PORT：同上
+* JAEGER_REPORTER_LOG_SPANS：同上
+* JAEGER_REPORTER_FLUSH_INTERVAL：同上
+* JAEGER_SAMPLER_TYPE：同上
+* JAEGER_SAMPLER_PARAM：同上
 
 ## Dev Env
 * Memcached: 127.0.0.1:11211

@@ -17,6 +17,13 @@ function web() {
     WEB_PORT="8000" \
     MAX_WORK_ID="1" \
     RPC_CONF_PATH="${BASEPATH}/conf/dev/rpc.yaml" \
+    JAEGER_SERVICE_NAME="app.web" \
+    JAEGER_AGENT_HOST="127.0.0.1" \
+    JAEGER_AGENT_PORT="6831" \
+    JAEGER_REPORTER_LOG_SPANS="true" \
+    JAEGER_REPORTER_FLUSH_INTERVAL="1s" \
+    JAEGER_SAMPLER_TYPE="probabilistic" \
+    JAEGER_SAMPLER_PARAM="1" \
     go run web.go
 }
 
@@ -30,6 +37,13 @@ function service() {
     SERVICE_HOST="127.0.0.1" \
     SERVICE_PORT="16241" \
     KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]' \
+    JAEGER_SERVICE_NAME="app.service" \
+    JAEGER_AGENT_HOST="127.0.0.1" \
+    JAEGER_AGENT_PORT="6841" \
+    JAEGER_REPORTER_LOG_SPANS="true" \
+    JAEGER_REPORTER_FLUSH_INTERVAL="1s" \
+    JAEGER_SAMPLER_TYPE="probabilistic" \
+    JAEGER_SAMPLER_PARAM="1" \
     go run service.go
 }
 
@@ -43,6 +57,13 @@ function consumer() {
     CONSUMER_ROUTINES="3" \
     CONSUMER_FACTOR="37" \
     KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]' \
+    JAEGER_SERVICE_NAME="app.consumer" \
+    JAEGER_AGENT_HOST="127.0.0.1" \
+    JAEGER_AGENT_PORT="6851" \
+    JAEGER_REPORTER_LOG_SPANS="true" \
+    JAEGER_REPORTER_FLUSH_INTERVAL="1s" \
+    JAEGER_SAMPLER_TYPE="probabilistic" \
+    JAEGER_SAMPLER_PARAM="1" \
     go run consumer.go
 }
 
