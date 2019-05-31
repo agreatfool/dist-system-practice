@@ -21,11 +21,22 @@ function logs() {
     docker logs $1
 }
 
-function usage() {
-    echo "Usage: docker_cassandra.sh start|stop|logs"
+function init() {
+    docker run --rm \
+        --name jaeger-cassandra-schema \
+        --network dist_net \
+        -e MODE=test \
+        -e CQLSH_HOST=cas_1 \
+        -e DATACENTER=jaeger_dc \
+        -e KEYSPACE=jaeger_keyspace \
+        jaegertracing/jaeger-cassandra-schema:1.11.0
 }
 
-if [[ $1 != "start" ]] && [[ $1 != "stop" ]] && [[ $1 != "logs" ]]; then
+function usage() {
+    echo "Usage: docker_cassandra.sh start|stop|logs|init"
+}
+
+if [[ $1 != "start" ]] && [[ $1 != "stop" ]] && [[ $1 != "logs" ]] && [[ $1 != "init" ]]; then
     usage
     exit 0
 fi

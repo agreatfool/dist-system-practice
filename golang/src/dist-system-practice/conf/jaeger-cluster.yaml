@@ -9,11 +9,13 @@ x-jaeger-defaults:
   C06: &METRICS_HTTP_ROUTE "--metrics-http-route=/metrics"
   C07: &COLLECTOR_GRPC_PORT "--collector.grpc-port=14250"
   C08: &COLLECTOR_HTTP_PORT "--collector.http-port=14268"
-  C09: &AGENT_BINARY_PORT "--processor.jaeger-binary.server-host-port=6832"
-  C10: &AGENT_COMPACT_PORT "--processor.jaeger-compact.server-host-port=6831"
-  C11: &AGENT_HTTP_PORT "--http-server.host-port=5778"
+  C09: &AGENT_BINARY_PORT "--processor.jaeger-binary.server-host-port=0.0.0.0:6832"
+  C10: &AGENT_COMPACT_PORT "--processor.jaeger-compact.server-host-port=0.0.0.0:6831"
+  C11: &AGENT_HTTP_PORT "--http-server.host-port=0.0.0.0:5778"
   C12: &AGENT_REPORTER_TYPE "--reporter.type=grpc"
   C13: &AGENT_REPORTER_ADDS "--reporter.grpc.host-port=jcollector_1:14250,jcollector_2:14250"
+  C14: &CASSANDRA_SERVERS "--cassandra.servers=cas_1"
+  C15: &CASSANDRA_KEYSPACE "--cassandra.keyspace=jaeger_keyspace"
 
 networks:
   net:
@@ -47,15 +49,14 @@ services:
       <<: *JAEGER_LOGGING_DEFAULTS
     command: [
       "--query.port=16686",
-      *ES_SERVER_URLS,
-      *ES_NUM_SHARDS,
-      *ES_NUM_REPLICAS,
+      *CASSANDRA_SERVERS,
+      *CASSANDRA_KEYSPACE,
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG
     ]
     environment:
-      - SPAN_STORAGE_TYPE=elasticsearch
+      - SPAN_STORAGE_TYPE=cassandra
   jaeger-agent-web:
     image: "jaegertracing/jaeger-agent:1.11.0"
     container_name: "jagent_web"
@@ -75,9 +76,9 @@ services:
     command: [
       *AGENT_REPORTER_ADDS,
       *AGENT_REPORTER_TYPE,
-      "--processor.jaeger-binary.server-host-port=6832",
-      "--processor.jaeger-compact.server-host-port=6831",
-      "--http-server.host-port=5778",
+      "--processor.jaeger-binary.server-host-port=0.0.0.0:6832",
+      "--processor.jaeger-compact.server-host-port=0.0.0.0:6831",
+      "--http-server.host-port=0.0.0.0:5778",
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG
@@ -101,9 +102,9 @@ services:
     command: [
       *AGENT_REPORTER_ADDS,
       *AGENT_REPORTER_TYPE,
-      "--processor.jaeger-binary.server-host-port=6842",
-      "--processor.jaeger-compact.server-host-port=6841",
-      "--http-server.host-port=5788",
+      "--processor.jaeger-binary.server-host-port=0.0.0.0:6842",
+      "--processor.jaeger-compact.server-host-port=0.0.0.0:6841",
+      "--http-server.host-port=0.0.0.0:5788",
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG
@@ -127,9 +128,9 @@ services:
     command: [
       *AGENT_REPORTER_ADDS,
       *AGENT_REPORTER_TYPE,
-      "--processor.jaeger-binary.server-host-port=6852",
-      "--processor.jaeger-compact.server-host-port=6851",
-      "--http-server.host-port=5798",
+      "--processor.jaeger-binary.server-host-port=0.0.0.0:6852",
+      "--processor.jaeger-compact.server-host-port=0.0.0.0:6851",
+      "--http-server.host-port=0.0.0.0:5798",
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG
@@ -149,15 +150,14 @@ services:
     command: [
       *COLLECTOR_GRPC_PORT,
       *COLLECTOR_HTTP_PORT,
-      *ES_SERVER_URLS,
-      *ES_NUM_SHARDS,
-      *ES_NUM_REPLICAS,
+      *CASSANDRA_SERVERS,
+      *CASSANDRA_KEYSPACE,
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG
     ]
     environment:
-      - SPAN_STORAGE_TYPE=elasticsearch
+      - SPAN_STORAGE_TYPE=cassandra
   jaeger-collector-2:
     image: "jaegertracing/jaeger-collector:1.11.0"
     container_name: "jcollector_2"
@@ -173,12 +173,11 @@ services:
     command: [
       *COLLECTOR_GRPC_PORT,
       *COLLECTOR_HTTP_PORT,
-      *ES_SERVER_URLS,
-      *ES_NUM_SHARDS,
-      *ES_NUM_REPLICAS,
+      *CASSANDRA_SERVERS,
+      *CASSANDRA_KEYSPACE,
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG
     ]
     environment:
-      - SPAN_STORAGE_TYPE=elasticsearch
+      - SPAN_STORAGE_TYPE=cassandra
