@@ -4,11 +4,11 @@ FULLPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 BASEPATH="${FULLPATH}/../.."
 
 function start() {
-    docker-compose -f ${BASEPATH}/conf/jaeger-cluster.yaml -p "dist" up -d
+    docker-compose -f ${BASEPATH}/conf/dev/jaeger-cluster.yaml -p "dist" up -d
 }
 
 function stop() {
-    docker-compose -f ${BASEPATH}/conf/jaeger-cluster.yaml -p "dist" down -v # also remove containers & volumes
+    docker-compose -f ${BASEPATH}/conf/dev/jaeger-cluster.yaml -p "dist" down -v # also remove containers & volumes
 }
 
 function logs() {

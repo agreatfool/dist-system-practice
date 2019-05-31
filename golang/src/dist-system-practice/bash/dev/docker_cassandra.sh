@@ -18,11 +18,11 @@ BASEPATH="${FULLPATH}/../.."
 # apache-cassandra-3.11.4.jar  apache-cassandra-thrift-3.11.4.jar  apache-cassandra.jar  cassandra.in.sh  lib  stress.jar
 
 function start() {
-    docker-compose -f ${BASEPATH}/conf/cassandra-cluster.yaml -p "dist" up -d
+    docker-compose -f ${BASEPATH}/conf/dev/cassandra-cluster.yaml -p "dist" up -d
 }
 
 function stop() {
-    docker-compose -f ${BASEPATH}/conf/cassandra-cluster.yaml -p "dist" down -v # also remove containers & volumes
+    docker-compose -f ${BASEPATH}/conf/dev/cassandra-cluster.yaml -p "dist" down -v # also remove containers & volumes
 }
 
 function logs() {

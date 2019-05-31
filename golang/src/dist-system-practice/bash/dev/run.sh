@@ -12,11 +12,11 @@ function web() {
     cd ${BASEPATH}/web
 
     APP_NAME="app.web" \
-    LOGGER_CONF_PATH="${BASEPATH}/conf/logger.yaml" \
+    LOGGER_CONF_PATH="${BASEPATH}/conf/dev/logger.yaml" \
     WEB_HOST="127.0.0.1" \
     WEB_PORT="8000" \
     MAX_WORK_ID="1" \
-    RPC_CONF_PATH="${BASEPATH}/conf/rpc.yaml" \
+    RPC_CONF_PATH="${BASEPATH}/conf/dev/rpc.yaml" \
     go run web.go
 }
 
@@ -24,9 +24,9 @@ function service() {
     cd ${BASEPATH}/service
 
     APP_NAME="app.service" \
-    LOGGER_CONF_PATH="${BASEPATH}/conf/logger.yaml" \
-    CACHE_CONF_PATH="${BASEPATH}/conf/cache.yaml" \
-    MYSQL_CONF_PATH="${BASEPATH}/conf/mysql.yaml" \
+    LOGGER_CONF_PATH="${BASEPATH}/conf/dev/logger.yaml" \
+    CACHE_CONF_PATH="${BASEPATH}/conf/dev/cache.yaml" \
+    MYSQL_CONF_PATH="${BASEPATH}/conf/dev/mysql.yaml" \
     SERVICE_HOST="127.0.0.1" \
     SERVICE_PORT="16241" \
     KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]' \
@@ -37,9 +37,9 @@ function consumer() {
     cd ${BASEPATH}/consumer
 
     APP_NAME="app.consumer" \
-    LOGGER_CONF_PATH="${BASEPATH}/conf/logger.yaml" \
-    CACHE_CONF_PATH="${BASEPATH}/conf/cache.yaml" \
-    MYSQL_CONF_PATH="${BASEPATH}/conf/mysql.yaml" \
+    LOGGER_CONF_PATH="${BASEPATH}/conf/dev/logger.yaml" \
+    CACHE_CONF_PATH="${BASEPATH}/conf/dev/cache.yaml" \
+    MYSQL_CONF_PATH="${BASEPATH}/conf/dev/mysql.yaml" \
     CONSUMER_ROUTINES="3" \
     CONSUMER_FACTOR="37" \
     KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]' \

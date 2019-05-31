@@ -22,14 +22,14 @@ ES_1="http://127.0.0.1:9201"
 # Config path: [/usr/share/filebeat] Data path: [/usr/share/filebeat/data] Logs path: [/usr/share/filebeat/logs]
 
 function start() {
-    cp ${BASEPATH}/conf/elasticsearch.yaml /private/tmp/
-    cp ${BASEPATH}/conf/filebeat.yaml /private/tmp/
+    cp ${BASEPATH}/conf/dev/elasticsearch.yaml /private/tmp/
+    cp ${BASEPATH}/conf/dev/filebeat.yaml /private/tmp/
 
-    docker-compose -f ${BASEPATH}/conf/elk-cluster.yaml -p "dist" up -d
+    docker-compose -f ${BASEPATH}/conf/dev/elk-cluster.yaml -p "dist" up -d
 }
 
 function stop() {
-    docker-compose -f ${BASEPATH}/conf/elk-cluster.yaml -p "dist" down -v # also remove containers & volumes
+    docker-compose -f ${BASEPATH}/conf/dev/elk-cluster.yaml -p "dist" down -v # also remove containers & volumes
 }
 
 function logs() {
@@ -40,7 +40,7 @@ function init() {
     curl \
         -H "Content-Type: application/json" \
         -PUT "${ES_1}/_template/dist?pretty" \
-        -d @${BASEPATH}/conf/elk-index-template.json
+        -d @${BASEPATH}/conf/dev/elk-index-template.json
 }
 
 function health() {
