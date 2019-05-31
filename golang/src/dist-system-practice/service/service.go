@@ -5,6 +5,7 @@ import (
 	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/dao"
 	"dist-system-practice/lib/database"
+	"dist-system-practice/lib/jaeger"
 	lkafka "dist-system-practice/lib/kafka"
 	"dist-system-practice/lib/logger"
 	pb "dist-system-practice/message"
@@ -30,6 +31,7 @@ func main() {
 	database.New()
 	dao.New()
 	lkafka.NewWriter()
+	jaeger.New()
 
 	// service app
 	host := common.GetEnv("SERVICE_HOST", "0.0.0.0")

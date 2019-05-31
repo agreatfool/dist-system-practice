@@ -5,6 +5,7 @@ import (
 	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/dao"
 	"dist-system-practice/lib/database"
+	"dist-system-practice/lib/jaeger"
 	lkafka "dist-system-practice/lib/kafka"
 	"dist-system-practice/lib/logger"
 	"fmt"
@@ -45,6 +46,7 @@ func main() {
 	cache.New()
 	database.New()
 	dao.New()
+	jaeger.New()
 
 	// create kafka reader connections
 	readers = make([]*kafka.Reader, routineCount)

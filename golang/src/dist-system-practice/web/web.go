@@ -2,6 +2,7 @@ package main
 
 import (
 	"dist-system-practice/lib/common"
+	"dist-system-practice/lib/jaeger"
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/web/handler"
 	"dist-system-practice/web/rpc"
@@ -25,6 +26,7 @@ func main() {
 	// initialize utilities
 	logger.New()
 	rpc.New()
+	jaeger.New()
 
 	// web app
 	router := gin.Default()
