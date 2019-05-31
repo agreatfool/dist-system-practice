@@ -1,0 +1,48 @@
+version: '2'
+x-cas-environment-defaults:
+  C1: &MAX_HEAP_SIZE "MAX_HEAP_SIZE=200M"
+  C2: &HEAP_NEWSIZE "HEAP_NEWSIZE=100M"
+  C3: &CASSANDRA_RPC_ADDRESS "CASSANDRA_RPC_ADDRESS=0.0.0.0"
+  C4: &CASSANDRA_START_RPC "CASSANDRA_START_RPC=true"
+  C5: &CASSANDRA_CLUSTER_NAME "CASSANDRA_CLUSTER_NAME=cassandra_cluster"
+  C6: &CASSANDRA_SEEDS "CASSANDRA_SEEDS=cas_1"
+
+networks:
+  net:
+    driver: "bridge"
+
+volumes:
+  cas_vol_1:
+    driver: "local"
+
+x-cas-logging-defaults: &CAS_LOGGING_DEFAULTS
+  driver: "json-file"
+  options:
+    max-size: "512m"
+
+services:
+  cas_1:
+    image: "cassandra:3.11.4"
+    container_name: "cas_1"
+    hostname: "cas_1"
+    volumes:
+      - cas_vol_1:/var/lib/cassandra
+    networks:
+      - "net"
+    ports:
+      - "7199:7199" # JMX
+      - "9042:9042" # Cassandra client port.
+      - "9160:9160" # Cassandra client port (Thrift).
+      - "7000:7000" # Cassandra inter-node cluster communication.
+    restart: "always"
+    logging:
+      <<: *CAS_LOGGING_DEFAULTS
+    environment:
+      - CASSANDRA_BROADCAST_ADDRESS=cas_1
+      - CASSANDRA_LISTEN_ADDRESS=cas_1
+      - *MAX_HEAP_SIZE
+      - *HEAP_NEWSIZE
+      - *CASSANDRA_RPC_ADDRESS
+      - *CASSANDRA_START_RPC
+      - *CASSANDRA_CLUSTER_NAME
+      - *CASSANDRA_SEEDS
