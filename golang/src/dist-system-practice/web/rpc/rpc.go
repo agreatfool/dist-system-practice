@@ -5,6 +5,7 @@ import (
 	"dist-system-practice/lib/common"
 	pb "dist-system-practice/message"
 	"fmt"
+	"github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/hlts2/round-robin"
 	"google.golang.org/grpc"
 	"gopkg.in/yaml.v2"
@@ -43,8 +44,8 @@ func (c *Client) getClient() pb.WorkServiceClient {
 	return c.pool[c.rr.Next().Host]
 }
 
-func (c *Client) GetWork(id uint32) (*pb.Work, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+func (c *Client) GetWork(ctx context.Context, id uint32) (*pb.Work, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 	defer cancel()
 
 	response, err := c.getClient().GetWork(ctx, &pb.WorkId{Id: id})
@@ -134,7 +135,11 @@ func New() *Client {
 
 	// loop & init servers
 	for _, server := range config.Servers {
-		conn, dialErr := grpc.Dial(server, grpc.WithInsecure())
+		conn, dialErr := grpc.Dial(
+			server,
+			grpc.WithInsecure(),
+			grpc.WithUnaryInterceptor(grpc_opentracing.UnaryClientInterceptor()),
+		)
 
 		if dialErr != nil {
 			panic(fmt.Sprintf("[RPC] grpc.Dial err: %s", dialErr.Error()))

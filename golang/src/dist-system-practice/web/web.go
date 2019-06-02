@@ -7,6 +7,7 @@ import (
 	"dist-system-practice/web/handler"
 	"dist-system-practice/web/rpc"
 	"fmt"
+	"github.com/gin-contrib/location"
 	"github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -30,6 +31,11 @@ func main() {
 
 	// web app
 	router := gin.Default()
+
+	// configure to automatically detect scheme and host
+	// - use http when default scheme cannot be determined
+	// - use localhost:8080 when default host cannot be determined
+	router.Use(location.Default())
 
 	// Add a ginzap middleware, which:
 	//   - Logs all requests, like a combined access and error log.

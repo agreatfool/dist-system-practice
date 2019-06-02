@@ -1,14 +1,20 @@
 package handler
 
 import (
+	"context"
 	"dist-system-practice/lib/common"
+	"dist-system-practice/lib/jaeger"
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/lib/random"
 	"dist-system-practice/lib/timerecorder"
 	"dist-system-practice/web/rpc"
 	"errors"
 	"fmt"
+	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
+	"github.com/opentracing/opentracing-go/log"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -54,7 +60,7 @@ func HandleApi(c *gin.Context) {
 
 	switch randApi {
 	case "apiGetWork":
-		res, err = apiGetWork(workId)
+		res, err = apiGetWork(nil, workId) // FIXME
 	case "apiUpdateViewed":
 		res, err = apiUpdateViewed(workId)
 	case "apiGetAchievement":
@@ -81,15 +87,19 @@ func HandleApi(c *gin.Context) {
 }
 
 func HandleGetWork(c *gin.Context) {
-	res, err := apiGetWork(randWorkId())
-	if err != nil {
-		logger.Get().Error("[WEB.Handler] HandleGetWork: Error.", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-	} else {
-		c.JSON(res.Code, res.Data)
-	}
+	var res result
+	var err error
+
+	recorder := timerecorder.New()
+	workId := randWorkId()
+	ctx, span := newSpan(c, "WEB.HandleGetWork")
+	defer func() {
+		logApi("apiGetWork", workId, recorder, err)
+		respond(c, res, err)
+		finishSpan(span, res, err)
+	}()
+
+	res, err = apiGetWork(ctx, workId)
 }
 
 func HandleUpdateViewed(c *gin.Context) {
@@ -132,19 +142,10 @@ func HandlePlanWork(c *gin.Context) {
 // Apis
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-func apiGetWork(id uint32) (result, error) {
+func apiGetWork(ctx context.Context, id uint32) (result, error) {
 	var res result
 
-	recorder := timerecorder.New()
-	defer func() {
-		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiGetWork.",
-			zap.String("api", "apiGetWork"),
-			zap.Uint32("workId", id),
-			zap.Float64("consumed", recorder.Elapsed()))
-	}()
-
-	work, err := rpc.Get().GetWork(id)
+	work, err := rpc.Get().GetWork(ctx, id)
 	if err != nil {
 		return res, err
 	}
@@ -291,4 +292,55 @@ func randWorkId() uint32 {
 	}
 
 	return uint32(random.Int(1, maxWorkId))
+}
+
+func respond(c *gin.Context, res result, err error) {
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(res.Code, res.Data)
+	}
+}
+
+func logApi(api string, workId uint32, recorder *timerecorder.TimeRecorder, err error) {
+	recorder.End()
+
+	if err != nil {
+		logger.Get().Error(fmt.Sprintf("[WEB.Handler] Api: %s: Error.", api), zap.Error(err))
+	} else {
+		logger.Get().Info(fmt.Sprintf("[WEB.Handler] Api: %s.", api),
+			zap.String("api", api),
+			zap.Uint32("workId", workId),
+			zap.Float64("consumed", recorder.Elapsed()))
+	}
+}
+
+func newSpan(c *gin.Context, optName string) (context.Context, opentracing.Span) {
+	span := jaeger.Get().StartSpan(optName)
+
+	ext.Component.Set(span, "gin")
+	ext.SpanKindRPCClient.Set(span)
+	ext.HTTPUrl.Set(span, location.Get(c).String())
+	ext.HTTPMethod.Set(span, "GET")
+
+	ctx := opentracing.ContextWithSpan(context.Background(), span)
+
+	return ctx, span
+}
+
+func finishSpan(span opentracing.Span, res result, err error) {
+	if err != nil {
+		ext.Error.Set(span, true)
+		ext.HTTPStatusCode.Set(span, http.StatusInternalServerError)
+		span.LogFields(
+			log.String("event", "error"),
+			log.String("message", err.Error()),
+		)
+	} else {
+		ext.HTTPStatusCode.Set(span, uint16(res.Code))
+	}
+
+	span.Finish()
 }
