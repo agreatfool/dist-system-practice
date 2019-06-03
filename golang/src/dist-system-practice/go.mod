@@ -13,7 +13,7 @@ require (
 	github.com/containerd/continuity v0.0.0-20190426062206-aaeac12a7ffc // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/gin-contrib/location v0.0.0-20190528141421-4d994432eb13 // indirect
+	github.com/gin-contrib/location v0.0.0-20190528141421-4d994432eb13
 	github.com/gin-contrib/zap v0.0.0-20190405225521-7c4b822813e7
 	github.com/gin-gonic/gin v1.4.0
 	github.com/golang/mock v1.3.1 // indirect
@@ -22,7 +22,7 @@ require (
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/google/pprof v0.0.0-20190515194954-54271f7e092f // indirect
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/hlts2/round-robin v0.0.0-20190314040659-eb24115f39ce
 	github.com/jinzhu/gorm v1.9.8
@@ -32,15 +32,15 @@ require (
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v0.1.1 // indirect
-	github.com/opentracing/opentracing-go v1.1.0 // indirect
+	github.com/opentracing/opentracing-go v1.1.0
 	github.com/ory/dockertest v3.3.4+incompatible // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/segmentio/kafka-go v0.2.4
 	github.com/sirupsen/logrus v1.4.1 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
-	github.com/uber/jaeger-client-go v2.16.0+incompatible // indirect
-	github.com/uber/jaeger-lib v2.0.0+incompatible // indirect
+	github.com/uber/jaeger-client-go v2.16.0+incompatible
+	github.com/uber/jaeger-lib v2.0.0+incompatible
 	github.com/wantedly/gorm-zap v0.0.0-20171015071652-372d3517a876
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/zap v1.10.0
