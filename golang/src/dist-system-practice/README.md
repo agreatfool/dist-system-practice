@@ -77,6 +77,37 @@ dist-system-practice
     * 127.0.0.1:29092
     * 127.0.0.1:39092
 
+## Deployment
+### Dev
+#### Deploy
+* bash/dev/docker_memcached.sh start
+* bash/dev/docker_mysqld.sh start
+* bash/dev/docker_mysqld.sh connect | use dist; | insert into work values (); | select * from work \G
+* bash/dev/docker_kafka.sh start
+* bash/dev/docker_kafka.sh init
+* bash/dev/docker_cassandra.sh start
+* bash/dev/docker_cassandra.sh init
+* bash/dev/docker_jaeger.sh start
+* bash/dev/docker_elasticsearch.sh start
+* bash/dev/docker_elasticsearch.sh init
+
+#### Log
+* bash/dev/logs.sh reset
+* bash/dev/logs.sh web
+* bash/dev/logs.sh service
+* bash/dev/logs.sh consumer
+
+#### App
+* bash/dev/run.sh consumer
+* bash/dev/run.sh service
+* bash/dev/run.sh web
+
+#### Test
+* bash/dev/query.sh work
+* bash/dev/query.sh viewed
+* bash/dev/query.sh achievement
+* bash/dev/query.sh plan
+
 ## Versions
 ```bash
 $ docker --version
