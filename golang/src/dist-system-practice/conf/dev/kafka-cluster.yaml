@@ -31,11 +31,11 @@ networks:
     driver: "bridge"
 
 volumes:
-  vol_1:
+  kafka_vol_1:
     driver: "local"
-  vol_2:
+  kafka_vol_2:
     driver: "local"
-  vol_3:
+  kafka_vol_3:
     driver: "local"
 
 services:
@@ -57,7 +57,7 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
-      - vol_1:/tmp/kafka/data
+      - kafka_vol_1:/tmp/kafka/data
     networks:
       - "net"
     ports:
@@ -81,7 +81,7 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
-      - vol_2:/tmp/kafka/data
+      - kafka_vol_2:/tmp/kafka/data
     networks:
       - "net"
     ports:
@@ -105,7 +105,7 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
-      - vol_3:/tmp/kafka/data
+      - kafka_vol_3:/tmp/kafka/data
     networks:
       - "net"
     ports:
