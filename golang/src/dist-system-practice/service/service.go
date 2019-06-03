@@ -11,6 +11,7 @@ import (
 	pb "dist-system-practice/message"
 	"dist-system-practice/service/rpc"
 	"fmt"
+	"github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -41,7 +42,7 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("[Service] Failed to listen: %s", err.Error()))
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(grpc_opentracing.UnaryServerInterceptor()))
 	pb.RegisterWorkServiceServer(s, rpc.New())
 	if err := s.Serve(lis); err != nil {
 		panic(fmt.Sprintf("[Service] Failed to serve: %s", err.Error()))
