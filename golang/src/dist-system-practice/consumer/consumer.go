@@ -109,7 +109,7 @@ func consume(reader *kafka.Reader) {
 	workId := uint32(mvInt)
 
 	// calc achievement
-	achievement := fmt.Sprintf("work.%d.%d;%s", workId, common.Consume(factor), uuid.NewV4())
+	achievement := calc(ctx, workId)
 
 	// update db
 	if err = dao.Get().FinishPlannedWork(ctx, workId, achievement); err != nil {
@@ -120,6 +120,15 @@ func consume(reader *kafka.Reader) {
 	if err = reader.CommitMessages(ctx, msg); err != nil {
 		return
 	}
+}
+
+func calc(ctx context.Context, workId uint32) string {
+	var span opentracing.Span
+	ctx, span = jaeger.NewCalcSpan(ctx, "Kafka.Consumer.Calc")
+	span.SetBaggageItem("factor", common.IntToStr(factor))
+	defer jaeger.FinishCalcSpan(span)
+
+	return fmt.Sprintf("work.%d.%d;%s", workId, common.Consume(factor), uuid.NewV4())
 }
 
 func log(info string, msg kafka.Message, recorder *timerecorder.TimeRecorder, err error) {

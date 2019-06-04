@@ -168,6 +168,24 @@ func FinishKafkaSpan(span opentracing.Span, err error) {
 	span.Finish()
 }
 
+func NewCalcSpan(ctx context.Context, optName string) (context.Context, opentracing.Span) {
+	var parentSpanCtx opentracing.SpanContext
+	if parent := opentracing.SpanFromContext(ctx); parent != nil {
+		parentSpanCtx = parent.Context()
+	}
+	opts := []opentracing.StartSpanOption{
+		opentracing.ChildOf(parentSpanCtx),
+		opentracing.Tag{Key: string(ext.Component), Value: "Fibonacci"},
+	}
+	span := Get().StartSpan(optName, opts...)
+
+	return opentracing.ContextWithSpan(ctx, span), span
+}
+
+func FinishCalcSpan(span opentracing.Span) {
+	span.Finish()
+}
+
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Tools
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
