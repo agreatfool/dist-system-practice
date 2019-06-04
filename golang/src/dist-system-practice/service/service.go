@@ -44,6 +44,7 @@ func main() {
 	}
 	s := grpc.NewServer(grpc.UnaryInterceptor(grpc_opentracing.UnaryServerInterceptor()))
 	pb.RegisterWorkServiceServer(s, rpc.New())
+
 	if err := s.Serve(lis); err != nil {
 		panic(fmt.Sprintf("[Service] Failed to serve: %s", err.Error()))
 	}

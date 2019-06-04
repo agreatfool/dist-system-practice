@@ -23,6 +23,7 @@ require (
 	github.com/google/pprof v0.0.0-20190515194954-54271f7e092f // indirect
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
+	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/hlts2/round-robin v0.0.0-20190314040659-eb24115f39ce
 	github.com/jinzhu/gorm v1.9.8

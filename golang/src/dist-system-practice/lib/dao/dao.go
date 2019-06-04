@@ -1,8 +1,10 @@
 package dao
 
 import (
+	"context"
 	"dist-system-practice/lib/cache"
 	"dist-system-practice/lib/database"
+	"dist-system-practice/lib/jaeger"
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/lib/model"
 	"dist-system-practice/lib/random"
@@ -11,6 +13,7 @@ import (
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/jinzhu/gorm"
+	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 	"time"
 )
@@ -21,6 +24,7 @@ import (
 
 var instance *Dao
 
+const timeout = 10
 const defaultWorkExpiration = 7 * 24 * 60 * 60 // 7 days
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -65,41 +69,43 @@ var ErrNoRecordUpdated = errors.New("no record updated")
 // Apis
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-func (d *Dao) GetWork(id uint32) (*model.Work, error) {
+func (d *Dao) GetWork(ctx context.Context, id uint32) (*model.Work, error) {
 	var work model.Work
+	var span opentracing.Span
+	var err error
+
+	ctx, span = jaeger.NewDbSpanFromContext(ctx, "Dao.GetWork")
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer func() {
+		cancel()
+		d.logError("GetWork", id, err)
+		jaeger.FinishDbSpan(span, err)
+	}()
 
 	// build cache key
 	key := d.fmtWorkCacheKey(id)
 
 	// search cache
-	cached, cacheErr := d.cache.Get(key)
-	if cacheErr != nil && cacheErr != memcache.ErrCacheMiss {
-		d.logger.Error("[Dao] GetWork: Cache get error.",
-			zap.String("api", "GetWork"), zap.Uint32("workId", id), zap.Error(cacheErr))
-		return &work, cacheErr
+	var cached *memcache.Item
+	cached, err = d.cache.Get(key)
+	if err != nil && err != memcache.ErrCacheMiss {
+		return &work, err
 	}
 
-	if cacheErr == memcache.ErrCacheMiss {
+	if err == memcache.ErrCacheMiss {
+
+		// reset err
+		err = nil
 
 		// no cached value found, query database
-		err := d.db.Where("id = ?", id).First(&work).Error
+		err = d.db.Where("id = ?", id).First(&work).Error
 
 		if err != nil { // maybe gorm.ErrRecordNotFound
-			if err == gorm.ErrRecordNotFound {
-				d.logger.Warn("[Dao] GetWork: Work not found in db.",
-					zap.String("api", "GetWork"), zap.Uint32("workId", id))
-			} else {
-				d.logger.Error("[Dao] GetWork: Error in db.",
-					zap.String("api", "GetWork"), zap.Uint32("workId", id), zap.Error(err))
-			}
-
 			return &work, err
 		} else {
 			// found in database, set cache
-			err := d.cacheWork(work)
+			err = d.cacheWork(work)
 			if err != nil {
-				d.logger.Error("[Dao] GetWork: Cache set error.",
-					zap.String("api", "GetWork"), zap.Uint32("workId", id), zap.Error(err))
 				return &work, err
 			}
 			return &work, nil
@@ -108,9 +114,7 @@ func (d *Dao) GetWork(id uint32) (*model.Work, error) {
 	} else {
 
 		// decode from cached value
-		if err := d.decodeWork(cached.Value, &work); err != nil {
-			d.logger.Error("[Dao] GetWork: Work decode error.",
-				zap.String("api", "GetWork"), zap.Uint32("workId", id), zap.Error(err))
+		if err = d.decodeWork(cached.Value, &work); err != nil {
 			return &work, err
 		}
 		return &work, nil
@@ -118,44 +122,59 @@ func (d *Dao) GetWork(id uint32) (*model.Work, error) {
 	}
 }
 
-func (d *Dao) UpdateViewed(id uint32) (uint32, error) {
+func (d *Dao) UpdateViewed(ctx context.Context, id uint32) (uint32, error) {
 	var work model.Work
+	var span opentracing.Span
+	var err error
+
+	ctx, span = jaeger.NewDbSpanFromContext(ctx, "Dao.UpdateViewed")
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer func() {
+		cancel()
+		d.logError("UpdateViewed", id, err)
+		jaeger.FinishDbSpan(span, err)
+	}()
 
 	// build cache key
 	key := d.fmtWorkCacheKey(id)
 
 	dbRes := d.db.Model(&work).Where("id = ?", id).UpdateColumn("viewed", gorm.Expr("viewed + 1"))
-	if dbRes.Error != nil {
-		// error in db
-		d.logger.Error("[Dao] UpdateViewed: Error in db.",
-			zap.String("api", "UpdateViewed"), zap.Uint32("workId", id), zap.Error(dbRes.Error))
-		return 0, dbRes.Error
+	if dbRes.Error != nil { // error in db
+		err = dbRes.Error
+		return 0, err
 	}
-	if dbRes.RowsAffected == 0 {
-		// no record updated, invalid
-		d.logger.Error("[Dao] UpdateViewed: No record updated.",
-			zap.String("api", "UpdateViewed"), zap.Uint32("workId", id), zap.Error(ErrNoRecordUpdated))
-		return 0, ErrNoRecordUpdated
+	if dbRes.RowsAffected == 0 { // no record updated, invalid
+		err = ErrNoRecordUpdated
+		return 0, err
 	}
 
 	// invalidate cache
-	if err := d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
-		d.logger.Error("[Dao] UpdateViewed: Cache delete error.",
-			zap.String("api", "UpdateViewed"), zap.Uint32("workId", id), zap.Error(err))
+	if err = d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
 		return 0, err
 	}
 
 	// get updated work record
-	read, getErr := d.GetWork(id)
-	if getErr != nil {
-		return 0, getErr
+	var got *model.Work
+	got, err = d.GetWork(ctx, id)
+	if err != nil {
+		return 0, err
 	}
 
-	return read.Viewed, nil
+	return got.Viewed, nil
 }
 
-func (d *Dao) PlanWork(id uint32) (*model.Work, error) {
+func (d *Dao) PlanWork(ctx context.Context, id uint32) (*model.Work, error) {
 	var work model.Work
+	var span opentracing.Span
+	var err error
+
+	ctx, span = jaeger.NewDbSpanFromContext(ctx, "Dao.PlanWork")
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer func() {
+		cancel()
+		d.logError("PlanWork", id, err)
+		jaeger.FinishDbSpan(span, err)
+	}()
 
 	// build cache key
 	key := d.fmtWorkCacheKey(id)
@@ -163,37 +182,42 @@ func (d *Dao) PlanWork(id uint32) (*model.Work, error) {
 	// isPlanned plannedAt
 	dbRes := d.db.Model(&work).Where("id = ?", id).
 		UpdateColumns(model.Work{IsPlanned: true, PlannedAt: time.Now()})
-	if dbRes.Error != nil {
-		// error in db
-		d.logger.Error("[Dao] PlanWork: Error in db.",
-			zap.String("api", "PlanWork"), zap.Uint32("workId", id), zap.Error(dbRes.Error))
-		return &work, dbRes.Error
+	if dbRes.Error != nil { // error in db
+		err = dbRes.Error
+		return &work, err
 	}
-	if dbRes.RowsAffected == 0 {
-		// no record updated, invalid
-		d.logger.Error("[Dao] PlanWork: No record updated.",
-			zap.String("api", "PlanWork"), zap.Uint32("workId", id), zap.Error(ErrNoRecordUpdated))
-		return &work, ErrNoRecordUpdated
+	if dbRes.RowsAffected == 0 { // no record updated, invalid
+		err = ErrNoRecordUpdated
+		return &work, err
 	}
 
 	// invalidate cache
-	if err := d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
-		d.logger.Error("[Dao] PlanWork: Cache delete error.",
-			zap.String("api", "PlanWork"), zap.Uint32("workId", id), zap.Error(err))
+	if err = d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
 		return &work, err
 	}
 
 	// get updated work record
-	read, getErr := d.GetWork(id)
-	if getErr != nil {
-		return &work, getErr
+	var got *model.Work
+	got, err = d.GetWork(ctx, id)
+	if err != nil {
+		return &work, err
 	}
 
-	return read, nil
+	return got, nil
 }
 
-func (d *Dao) FinishPlannedWork(id uint32, achievement string) error {
+func (d *Dao) FinishPlannedWork(ctx context.Context, id uint32, achievement string) error {
 	var work model.Work
+	var span opentracing.Span
+	var err error
+
+	ctx, span = jaeger.NewDbSpanFromContext(ctx, "Dao.FinishPlannedWork")
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer func() {
+		cancel()
+		d.logError("FinishPlannedWork", id, err)
+		jaeger.FinishDbSpan(span, err)
+	}()
 
 	// build cache key
 	key := d.fmtWorkCacheKey(id)
@@ -206,23 +230,17 @@ func (d *Dao) FinishPlannedWork(id uint32, achievement string) error {
 			"is_planned":     false,
 			"achieved_at":    time.Now(),
 		})
-	if dbRes.Error != nil {
-		// error in db
-		d.logger.Error("[Dao] FinishPlannedWork: Error in db.",
-			zap.String("api", "FinishPlannedWork"), zap.Uint32("workId", id), zap.Error(dbRes.Error))
-		return dbRes.Error
+	if dbRes.Error != nil { // error in db
+		err = dbRes.Error
+		return err
 	}
-	if dbRes.RowsAffected == 0 {
-		// no record updated, invalid
-		d.logger.Error("[Dao] FinishPlannedWork: No record updated.",
-			zap.String("api", "FinishPlannedWork"), zap.Uint32("workId", id), zap.Error(ErrNoRecordUpdated))
-		return ErrNoRecordUpdated
+	if dbRes.RowsAffected == 0 { // no record updated, invalid
+		err = ErrNoRecordUpdated
+		return err
 	}
 
 	// invalidate cache
-	if err := d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
-		d.logger.Error("[Dao] FinishPlannedWork: Cache delete error.",
-			zap.String("api", "FinishPlannedWork"), zap.Uint32("workId", id), zap.Error(err))
+	if err = d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
 		return err
 	}
 
@@ -289,4 +307,12 @@ func (d *Dao) buildWorkExpireTime() int32 {
 	alter := int32(defaultWorkExpiration * (1 + random.Float(0.0, 0.1)))
 
 	return int32(time.Now().Local().Add(time.Second * time.Duration(alter)).Unix())
+}
+
+func (d *Dao) logError(api string, workId uint32, err error) {
+	if err == nil {
+		return
+	}
+	d.logger.Error(fmt.Sprintf("[Dao] %s: Error.", api),
+		zap.String("api", api), zap.Uint32("workId", workId), zap.Error(err))
 }

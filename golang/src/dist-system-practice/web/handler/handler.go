@@ -10,11 +10,8 @@ import (
 	"dist-system-practice/web/rpc"
 	"errors"
 	"fmt"
-	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
-	"github.com/opentracing/opentracing-go/log"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -55,34 +52,35 @@ func HandleApi(c *gin.Context) {
 	var res result
 	var err error
 
+	var span opentracing.Span
+	var ctx = context.Background()
+
+	recorder := timerecorder.New()
 	randApi := randApi()
 	workId := randWorkId()
 
+	defer func() {
+		logApi(randApi, workId, recorder, err)
+		respond(c, res, err)
+		jaeger.FinishWebSpan(span, res.Code, err)
+	}()
+
 	switch randApi {
 	case "apiGetWork":
-		res, err = apiGetWork(nil, workId) // FIXME
+		ctx, span = jaeger.NewWebSpan(ctx, c, fmt.Sprintf("Web.HandleApi.%s", randApi))
+		res, err = apiGetWork(ctx, workId)
 	case "apiUpdateViewed":
-		res, err = apiUpdateViewed(workId)
+		ctx, span = jaeger.NewWebSpan(ctx, c, fmt.Sprintf("Web.HandleApi.%s", randApi))
+		res, err = apiUpdateViewed(ctx, workId)
 	case "apiGetAchievement":
-		res, err = apiGetAchievement(workId)
+		ctx, span = jaeger.NewWebSpan(ctx, c, fmt.Sprintf("Web.HandleApi.%s", randApi))
+		res, err = apiGetAchievement(ctx, workId)
 	case "apiPlanWork":
-		res, err = apiPlanWork(workId)
+		ctx, span = jaeger.NewWebSpan(ctx, c, fmt.Sprintf("Web.HandleApi.%s", randApi))
+		res, err = apiPlanWork(ctx, workId)
 	default:
-		err := errors.New(fmt.Sprintf("invalid api generated: %s", randApi))
-		logger.Get().Error("[WEB.Handler] HandleApi: Invalid api generated.", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		err = errors.New(fmt.Sprintf("invalid api generated: %s", randApi))
 		return
-	}
-
-	if err != nil {
-		logger.Get().Error("[WEB.Handler] HandleApi: Error.", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-	} else {
-		c.JSON(res.Code, res.Data)
 	}
 }
 
@@ -92,50 +90,62 @@ func HandleGetWork(c *gin.Context) {
 
 	recorder := timerecorder.New()
 	workId := randWorkId()
-	ctx, span := newSpan(c, "WEB.HandleGetWork")
+	ctx, span := jaeger.NewWebSpan(context.Background(), c, "Web.HandleGetWork")
 	defer func() {
 		logApi("apiGetWork", workId, recorder, err)
 		respond(c, res, err)
-		finishSpan(span, res, err)
+		jaeger.FinishWebSpan(span, res.Code, err)
 	}()
 
 	res, err = apiGetWork(ctx, workId)
 }
 
 func HandleUpdateViewed(c *gin.Context) {
-	res, err := apiUpdateViewed(randWorkId())
-	if err != nil {
-		logger.Get().Error("[WEB.Handler] HandleUpdateViewed: Error.", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-	} else {
-		c.JSON(res.Code, res.Data)
-	}
+	var res result
+	var err error
+
+	recorder := timerecorder.New()
+	workId := randWorkId()
+	ctx, span := jaeger.NewWebSpan(context.Background(), c, "Web.HandleUpdateViewed")
+	defer func() {
+		logApi("apiUpdateViewed", workId, recorder, err)
+		respond(c, res, err)
+		jaeger.FinishWebSpan(span, res.Code, err)
+	}()
+
+	res, err = apiUpdateViewed(ctx, randWorkId())
 }
 
 func HandleGetAchievement(c *gin.Context) {
-	res, err := apiGetAchievement(randWorkId())
-	if err != nil {
-		logger.Get().Error("[WEB.Handler] HandleGetAchievement: Error.", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-	} else {
-		c.JSON(res.Code, res.Data)
-	}
+	var res result
+	var err error
+
+	recorder := timerecorder.New()
+	workId := randWorkId()
+	ctx, span := jaeger.NewWebSpan(context.Background(), c, "Web.HandleGetAchievement")
+	defer func() {
+		logApi("apiGetAchievement", workId, recorder, err)
+		respond(c, res, err)
+		jaeger.FinishWebSpan(span, res.Code, err)
+	}()
+
+	res, err = apiGetAchievement(ctx, randWorkId())
 }
 
 func HandlePlanWork(c *gin.Context) {
-	res, err := apiPlanWork(randWorkId())
-	if err != nil {
-		logger.Get().Error("[WEB.Handler] HandlePlanWork: Error.", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-	} else {
-		c.JSON(res.Code, res.Data)
-	}
+	var res result
+	var err error
+
+	recorder := timerecorder.New()
+	workId := randWorkId()
+	ctx, span := jaeger.NewWebSpan(context.Background(), c, "Web.HandlePlanWork")
+	defer func() {
+		logApi("apiPlanWork", workId, recorder, err)
+		respond(c, res, err)
+		jaeger.FinishWebSpan(span, res.Code, err)
+	}()
+
+	res, err = apiPlanWork(ctx, randWorkId())
 }
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -156,19 +166,10 @@ func apiGetWork(ctx context.Context, id uint32) (result, error) {
 	return res, nil
 }
 
-func apiUpdateViewed(id uint32) (result, error) {
+func apiUpdateViewed(ctx context.Context, id uint32) (result, error) {
 	var res result
 
-	recorder := timerecorder.New()
-	defer func() {
-		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiUpdateViewed.",
-			zap.String("api", "apiUpdateViewed"),
-			zap.Uint32("workId", id),
-			zap.Float64("consumed", recorder.Elapsed()))
-	}()
-
-	viewed, err := rpc.Get().UpdateViewed(id)
+	viewed, err := rpc.Get().UpdateViewed(ctx, id)
 	if err != nil {
 		return res, err
 	}
@@ -179,19 +180,10 @@ func apiUpdateViewed(id uint32) (result, error) {
 	return res, nil
 }
 
-func apiGetAchievement(id uint32) (result, error) {
+func apiGetAchievement(ctx context.Context, id uint32) (result, error) {
 	var res result
 
-	recorder := timerecorder.New()
-	defer func() {
-		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiGetAchievement.",
-			zap.String("api", "apiGetAchievement"),
-			zap.Uint32("workId", id),
-			zap.Float64("consumed", recorder.Elapsed()))
-	}()
-
-	achievement, err := rpc.Get().GetAchievement(id)
+	achievement, err := rpc.Get().GetAchievement(ctx, id)
 	if err != nil {
 		return res, err
 	}
@@ -202,19 +194,10 @@ func apiGetAchievement(id uint32) (result, error) {
 	return res, nil
 }
 
-func apiPlanWork(id uint32) (result, error) {
+func apiPlanWork(ctx context.Context, id uint32) (result, error) {
 	var res result
 
-	recorder := timerecorder.New()
-	defer func() {
-		recorder.End()
-		logger.Get().Info("[WEB.Handler] Api: apiPlanWork.",
-			zap.String("api", "apiPlanWork"),
-			zap.Uint32("workId", id),
-			zap.Float64("consumed", recorder.Elapsed()))
-	}()
-
-	work, err := rpc.Get().PlanWork(id)
+	work, err := rpc.Get().PlanWork(ctx, id)
 	if err != nil {
 		return res, err
 	}
@@ -308,39 +291,11 @@ func logApi(api string, workId uint32, recorder *timerecorder.TimeRecorder, err 
 	recorder.End()
 
 	if err != nil {
-		logger.Get().Error(fmt.Sprintf("[WEB.Handler] Api: %s: Error.", api), zap.Error(err))
+		logger.Get().Error(fmt.Sprintf("[Web.Handler] Api: %s: Error.", api), zap.Error(err))
 	} else {
-		logger.Get().Info(fmt.Sprintf("[WEB.Handler] Api: %s.", api),
+		logger.Get().Info(fmt.Sprintf("[Web.Handler] Api: %s.", api),
 			zap.String("api", api),
 			zap.Uint32("workId", workId),
 			zap.Float64("consumed", recorder.Elapsed()))
 	}
-}
-
-func newSpan(c *gin.Context, optName string) (context.Context, opentracing.Span) {
-	span := jaeger.Get().StartSpan(optName)
-
-	ext.Component.Set(span, "gin")
-	ext.SpanKindRPCClient.Set(span)
-	ext.HTTPUrl.Set(span, location.Get(c).String())
-	ext.HTTPMethod.Set(span, "GET")
-
-	ctx := opentracing.ContextWithSpan(context.Background(), span)
-
-	return ctx, span
-}
-
-func finishSpan(span opentracing.Span, res result, err error) {
-	if err != nil {
-		ext.Error.Set(span, true)
-		ext.HTTPStatusCode.Set(span, http.StatusInternalServerError)
-		span.LogFields(
-			log.String("event", "error"),
-			log.String("message", err.Error()),
-		)
-	} else {
-		ext.HTTPStatusCode.Set(span, uint16(res.Code))
-	}
-
-	span.Finish()
 }

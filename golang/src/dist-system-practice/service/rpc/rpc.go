@@ -9,9 +9,13 @@ import (
 	"dist-system-practice/lib/model"
 	"dist-system-practice/lib/timerecorder"
 	pb "dist-system-practice/message"
+	"fmt"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
+	"time"
 )
+
+const timeout = 15
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Structure
@@ -34,16 +38,17 @@ func New() *ServerImpl {
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 func (s *ServerImpl) GetWork(ctx context.Context, workId *pb.WorkId) (*pb.Work, error) {
+	var work *model.Work
+	var err error
+
 	recorder := timerecorder.New()
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 	defer func() {
-		recorder.End()
-		logger.Get().Info("[Service.Rpc] GetWork.",
-			zap.String("rpc", "GetWork"),
-			zap.Uint32("workId", workId.Id),
-			zap.Float64("consumed", recorder.Elapsed()))
+		cancel()
+		logApi("GetWork", workId.Id, recorder, err)
 	}()
 
-	work, err := dao.Get().GetWork(workId.Id)
+	work, err = dao.Get().GetWork(ctx, workId.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -52,16 +57,17 @@ func (s *ServerImpl) GetWork(ctx context.Context, workId *pb.WorkId) (*pb.Work, 
 }
 
 func (s *ServerImpl) UpdateViewed(ctx context.Context, workId *pb.WorkId) (*pb.WorkViewed, error) {
+	var viewed uint32
+	var err error
+
 	recorder := timerecorder.New()
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 	defer func() {
-		recorder.End()
-		logger.Get().Info("[Service.Rpc] UpdateViewed.",
-			zap.String("rpc", "UpdateViewed"),
-			zap.Uint32("workId", workId.Id),
-			zap.Float64("consumed", recorder.Elapsed()))
+		cancel()
+		logApi("UpdateViewed", workId.Id, recorder, err)
 	}()
 
-	viewed, err := dao.Get().UpdateViewed(workId.Id)
+	viewed, err = dao.Get().UpdateViewed(ctx, workId.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -70,16 +76,17 @@ func (s *ServerImpl) UpdateViewed(ctx context.Context, workId *pb.WorkId) (*pb.W
 }
 
 func (s *ServerImpl) GetAchievement(ctx context.Context, workId *pb.WorkId) (*pb.WorkAchievement, error) {
+	var work *model.Work
+	var err error
+
 	recorder := timerecorder.New()
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 	defer func() {
-		recorder.End()
-		logger.Get().Info("[Service.Rpc] GetAchievement.",
-			zap.String("rpc", "GetAchievement"),
-			zap.Uint32("workId", workId.Id),
-			zap.Float64("consumed", recorder.Elapsed()))
+		cancel()
+		logApi("GetAchievement", workId.Id, recorder, err)
 	}()
 
-	work, err := dao.Get().GetWork(workId.Id)
+	work, err = dao.Get().GetWork(ctx, workId.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -88,23 +95,24 @@ func (s *ServerImpl) GetAchievement(ctx context.Context, workId *pb.WorkId) (*pb
 }
 
 func (s *ServerImpl) PlanWork(ctx context.Context, workId *pb.WorkId) (*pb.Work, error) {
+	var work *model.Work
+	var err error
+
 	recorder := timerecorder.New()
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
 	defer func() {
-		recorder.End()
-		logger.Get().Info("[Service.Rpc] PlanWork.",
-			zap.String("rpc", "PlanWork"),
-			zap.Uint32("workId", workId.Id),
-			zap.Float64("consumed", recorder.Elapsed()))
+		cancel()
+		logApi("PlanWork", workId.Id, recorder, err)
 	}()
 
-	kerr := lkafka.GetWriter().WriteMessages(ctx, kafka.Message{
+	err = lkafka.GetWriter().WriteMessages(ctx, kafka.Message{
 		Value: []byte(common.IntToStr(int(workId.Id))),
 	})
-	if kerr != nil {
-		return nil, kerr
+	if err != nil {
+		return nil, err
 	}
 
-	work, err := dao.Get().PlanWork(workId.Id)
+	work, err = dao.Get().PlanWork(ctx, workId.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -127,5 +135,18 @@ func portWork(work *model.Work) *pb.Work {
 		AchievedAt:    int32(work.AchievedAt.Unix()),
 		Created:       int32(work.Created.Unix()),
 		Updated:       int32(work.Updated.Unix()),
+	}
+}
+
+func logApi(api string, workId uint32, recorder *timerecorder.TimeRecorder, err error) {
+	recorder.End()
+
+	if err != nil {
+		logger.Get().Error(fmt.Sprintf("[Service.Rpc] Api: %s: Error.", api), zap.Error(err))
+	} else {
+		logger.Get().Info(fmt.Sprintf("[Service.Rpc] Api: %s.", api),
+			zap.String("api", api),
+			zap.Uint32("workId", workId),
+			zap.Float64("consumed", recorder.Elapsed()))
 	}
 }

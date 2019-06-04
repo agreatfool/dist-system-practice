@@ -13,6 +13,7 @@ import (
 )
 
 var instance *gorm.DB
+var address string
 
 type Config struct {
 	Host            string `json:"host" yaml:"host"`
@@ -55,11 +56,12 @@ func New() *gorm.DB {
 		panic(fmt.Sprintf("[Database] Failed to parse yaml: %s", err.Error()))
 	}
 
+	address = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&collation=%s&parseTime=true&loc=Local",
+		config.User, config.Password, config.Host, config.Port, config.Database,
+		config.Charset, config.Collation)
+
 	// open database connection
-	db, dbErr := gorm.Open("mysql",
-		fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&collation=%s&&parseTime=true&loc=Local",
-			config.User, config.Password, config.Host, config.Port, config.Database,
-			config.Charset, config.Collation))
+	db, dbErr := gorm.Open("mysql", address)
 	if dbErr != nil {
 		panic(fmt.Sprintf("[Database] Failed to connect to mysql: %s", dbErr.Error()))
 	}
@@ -74,4 +76,8 @@ func New() *gorm.DB {
 	instance = db
 
 	return instance
+}
+
+func Address() string {
+	return address
 }

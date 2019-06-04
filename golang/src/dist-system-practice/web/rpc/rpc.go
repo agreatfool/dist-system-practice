@@ -3,10 +3,11 @@ package rpc
 import (
 	"context"
 	"dist-system-practice/lib/common"
+	"dist-system-practice/lib/jaeger"
 	pb "dist-system-practice/message"
 	"fmt"
-	"github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/hlts2/round-robin"
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -18,7 +19,7 @@ import (
 // Global
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-var timeout = 10
+const timeout = 15
 
 var instance *Client
 
@@ -45,10 +46,18 @@ func (c *Client) getClient() pb.WorkServiceClient {
 }
 
 func (c *Client) GetWork(ctx context.Context, id uint32) (*pb.Work, error) {
+	var response *pb.Work
+	var err error
+	var span opentracing.Span
+
+	ctx, span = jaeger.NewRpcClientSpanFromContext(ctx, "Web.Rpc.GetWork")
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
-	defer cancel()
+	defer func() {
+		cancel()
+		jaeger.FinishRpcClientSpan(span, err)
+	}()
 
-	response, err := c.getClient().GetWork(ctx, &pb.WorkId{Id: id})
+	response, err = c.getClient().GetWork(ctx, &pb.WorkId{Id: id})
 	if err != nil {
 		return nil, err
 	}
@@ -56,11 +65,19 @@ func (c *Client) GetWork(ctx context.Context, id uint32) (*pb.Work, error) {
 	return response, nil
 }
 
-func (c *Client) UpdateViewed(id uint32) (*pb.WorkViewed, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
-	defer cancel()
+func (c *Client) UpdateViewed(ctx context.Context, id uint32) (*pb.WorkViewed, error) {
+	var response *pb.WorkViewed
+	var err error
+	var span opentracing.Span
 
-	response, err := c.getClient().UpdateViewed(ctx, &pb.WorkId{Id: id})
+	ctx, span = jaeger.NewRpcClientSpanFromContext(ctx, "Web.Rpc.UpdateViewed")
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer func() {
+		cancel()
+		jaeger.FinishRpcClientSpan(span, err)
+	}()
+
+	response, err = c.getClient().UpdateViewed(ctx, &pb.WorkId{Id: id})
 	if err != nil {
 		return nil, err
 	}
@@ -68,11 +85,19 @@ func (c *Client) UpdateViewed(id uint32) (*pb.WorkViewed, error) {
 	return response, nil
 }
 
-func (c *Client) GetAchievement(id uint32) (*pb.WorkAchievement, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
-	defer cancel()
+func (c *Client) GetAchievement(ctx context.Context, id uint32) (*pb.WorkAchievement, error) {
+	var response *pb.WorkAchievement
+	var err error
+	var span opentracing.Span
 
-	response, err := c.getClient().GetAchievement(ctx, &pb.WorkId{Id: id})
+	ctx, span = jaeger.NewRpcClientSpanFromContext(ctx, "Web.Rpc.GetAchievement")
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer func() {
+		cancel()
+		jaeger.FinishRpcClientSpan(span, err)
+	}()
+
+	response, err = c.getClient().GetAchievement(ctx, &pb.WorkId{Id: id})
 	if err != nil {
 		return nil, err
 	}
@@ -80,11 +105,19 @@ func (c *Client) GetAchievement(id uint32) (*pb.WorkAchievement, error) {
 	return response, nil
 }
 
-func (c *Client) PlanWork(id uint32) (*pb.Work, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
-	defer cancel()
+func (c *Client) PlanWork(ctx context.Context, id uint32) (*pb.Work, error) {
+	var response *pb.Work
+	var err error
+	var span opentracing.Span
 
-	response, err := c.getClient().PlanWork(ctx, &pb.WorkId{Id: id})
+	ctx, span = jaeger.NewRpcClientSpanFromContext(ctx, "Web.Rpc.PlanWork")
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	defer func() {
+		cancel()
+		jaeger.FinishRpcClientSpan(span, err)
+	}()
+
+	response, err = c.getClient().PlanWork(ctx, &pb.WorkId{Id: id})
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +171,6 @@ func New() *Client {
 		conn, dialErr := grpc.Dial(
 			server,
 			grpc.WithInsecure(),
-			grpc.WithUnaryInterceptor(grpc_opentracing.UnaryClientInterceptor()),
 		)
 
 		if dialErr != nil {

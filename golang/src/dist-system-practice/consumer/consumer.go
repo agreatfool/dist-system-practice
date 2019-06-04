@@ -8,13 +8,18 @@ import (
 	"dist-system-practice/lib/jaeger"
 	lkafka "dist-system-practice/lib/kafka"
 	"dist-system-practice/lib/logger"
+	"dist-system-practice/lib/timerecorder"
 	"fmt"
+	"github.com/opentracing/opentracing-go"
 	"github.com/satori/go.uuid"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"os"
+	"time"
 )
+
+const timeout = 15
 
 var factor = 37
 var readers []*kafka.Reader
@@ -68,24 +73,34 @@ func main() {
 }
 
 func consume(reader *kafka.Reader) {
+	var msg kafka.Message
+	var err error
+	var span opentracing.Span
+	var ctx, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+
+	recorder := timerecorder.New()
+	ctx, span = jaeger.NewConsumerSpan(ctx, "Kafka.Consumer")
+	defer func() {
+		cancel()
+		log("Done", msg, recorder, err)
+		jaeger.FinishConsumerSpan(span, err)
+	}()
+
 	// fetch message
-	msg, rErr := reader.FetchMessage(context.Background())
-	if rErr != nil {
-		logger.Get().Error("[Consumer] consume: Read message error.", zap.Error(rErr))
+	msg, err = reader.FetchMessage(ctx)
+	if err != nil {
 		return
 	} else {
-		logger.Get().Info("[Consumer] consume: Got message.",
-			zap.String("topic", msg.Topic),
-			zap.Int("partition", msg.Partition),
-			zap.Int64("offset", msg.Offset),
-			zap.String("value", string(msg.Value)),
-			zap.Time("time", msg.Time))
+		log("Got message", msg, recorder, err)
 	}
+	span.SetBaggageItem("partition", string(msg.Partition))
+	span.SetBaggageItem("offset", string(msg.Offset))
+	span.SetBaggageItem("workId", string(msg.Value))
 
 	// get workId from message
-	mvInt, cErr := common.StrToInt(string(msg.Value))
-	if cErr != nil {
-		logger.Get().Error("[Consumer] consume: Convert message value error.", zap.Error(cErr))
+	var mvInt int
+	mvInt, err = common.StrToInt(string(msg.Value))
+	if err != nil {
 		return
 	}
 	workId := uint32(mvInt)
@@ -94,20 +109,34 @@ func consume(reader *kafka.Reader) {
 	achievement := fmt.Sprintf("work.%d.%d;%s", workId, common.Consume(factor), uuid.NewV4())
 
 	// update db
-	if err := dao.Get().FinishPlannedWork(workId, achievement); err != nil {
-		logger.Get().Error("[Consumer] consume: Convert message value error.", zap.Error(err))
+	if err = dao.Get().FinishPlannedWork(ctx, workId, achievement); err != nil {
 		return
 	}
 
 	// commit message
-	if err := reader.CommitMessages(context.Background(), msg); err != nil {
-		logger.Get().Error("[Consumer] consume: Commit message error.", zap.Error(err))
-	} else {
-		logger.Get().Info("[Consumer] consume: Done.",
-			zap.String("topic", msg.Topic),
-			zap.Int("partition", msg.Partition),
-			zap.Int64("offset", msg.Offset),
-			zap.String("value", string(msg.Value)),
-			zap.Time("time", msg.Time))
+	if err = reader.CommitMessages(ctx, msg); err != nil {
+		return
 	}
+}
+
+func log(info string, msg kafka.Message, recorder *timerecorder.TimeRecorder, err error) {
+	if err != nil {
+		logger.Get().Error("[Consumer] Error.", zap.Error(err))
+		return
+	}
+
+	fields := []zap.Field{
+		zap.String("topic", msg.Topic),
+		zap.Int("partition", msg.Partition),
+		zap.Int64("offset", msg.Offset),
+		zap.String("value", string(msg.Value)),
+		zap.Time("time", msg.Time),
+	}
+
+	if info == "Done" {
+		recorder.End()
+		fields = append(fields, zap.Float64("consumed", recorder.Elapsed()))
+	}
+
+	logger.Get().Info(fmt.Sprintf("[Consumer] %s.", info), fields...)
 }
