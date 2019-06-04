@@ -9,7 +9,6 @@ import (
 	"dist-system-practice/lib/model"
 	"dist-system-practice/lib/random"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/jinzhu/gorm"
@@ -58,12 +57,6 @@ func New() *Dao {
 
 	return instance
 }
-
-// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-// Errors
-// -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-
-var ErrNoRecordUpdated = errors.New("no record updated")
 
 // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 // Apis
@@ -143,10 +136,6 @@ func (d *Dao) UpdateViewed(ctx context.Context, id uint32) (uint32, error) {
 		err = dbRes.Error
 		return 0, err
 	}
-	if dbRes.RowsAffected == 0 { // no record updated, invalid
-		err = ErrNoRecordUpdated
-		return 0, err
-	}
 
 	// invalidate cache
 	if err = d.cache.Delete(key); err != nil && err != memcache.ErrCacheMiss {
@@ -184,10 +173,6 @@ func (d *Dao) PlanWork(ctx context.Context, id uint32) (*model.Work, error) {
 		UpdateColumns(model.Work{IsPlanned: true, PlannedAt: time.Now()})
 	if dbRes.Error != nil { // error in db
 		err = dbRes.Error
-		return &work, err
-	}
-	if dbRes.RowsAffected == 0 { // no record updated, invalid
-		err = ErrNoRecordUpdated
 		return &work, err
 	}
 
@@ -232,10 +217,6 @@ func (d *Dao) FinishPlannedWork(ctx context.Context, id uint32, achievement stri
 		})
 	if dbRes.Error != nil { // error in db
 		err = dbRes.Error
-		return err
-	}
-	if dbRes.RowsAffected == 0 { // no record updated, invalid
-		err = ErrNoRecordUpdated
 		return err
 	}
 
