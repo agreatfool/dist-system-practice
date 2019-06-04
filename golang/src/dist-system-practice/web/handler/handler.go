@@ -291,7 +291,7 @@ func logApi(api string, workId uint32, recorder *timerecorder.TimeRecorder, err 
 	recorder.End()
 
 	if err != nil {
-		logger.Get().Error(fmt.Sprintf("[Web.Handler] Api: %s: Error.", api), zap.Error(err))
+		logger.Get().Error(fmt.Sprintf("[Web.Handler] Api: %s: Error: %s", api, err.Error()), zap.Error(err))
 	} else {
 		logger.Get().Info(fmt.Sprintf("[Web.Handler] Api: %s.", api),
 			zap.String("api", api),

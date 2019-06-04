@@ -310,9 +310,9 @@ func (d *Dao) buildWorkExpireTime() int32 {
 }
 
 func (d *Dao) logError(api string, workId uint32, err error) {
-	if err == nil {
+	if err == nil || err == memcache.ErrCacheMiss {
 		return
 	}
-	d.logger.Error(fmt.Sprintf("[Dao] %s: Error.", api),
+	d.logger.Error(fmt.Sprintf("[Dao] %s: Error: %s", api, err.Error()),
 		zap.String("api", api), zap.Uint32("workId", workId), zap.Error(err))
 }

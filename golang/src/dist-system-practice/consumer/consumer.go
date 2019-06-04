@@ -10,13 +10,13 @@ import (
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/lib/timerecorder"
 	"fmt"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/opentracing/opentracing-go"
 	"github.com/satori/go.uuid"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"os"
-	"time"
 )
 
 const timeout = 15
@@ -76,12 +76,11 @@ func consume(reader *kafka.Reader) {
 	var msg kafka.Message
 	var err error
 	var span opentracing.Span
-	var ctx, cancel = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	var ctx = context.Background()
+	var recorder *timerecorder.TimeRecorder
 
-	recorder := timerecorder.New()
 	ctx, span = jaeger.NewConsumerSpan(ctx, "Kafka.Consumer")
 	defer func() {
-		cancel()
 		log("Done", msg, recorder, err)
 		jaeger.FinishConsumerSpan(span, err)
 	}()
@@ -93,8 +92,12 @@ func consume(reader *kafka.Reader) {
 	} else {
 		log("Got message", msg, recorder, err)
 	}
-	span.SetBaggageItem("partition", string(msg.Partition))
-	span.SetBaggageItem("offset", string(msg.Offset))
+	recorder = timerecorder.New()
+	// reset span, since "reader.FetchMessage(ctx)" blocks the routine,
+	// time consumption of previous span is invalid
+	ctx, span = jaeger.NewConsumerSpan(ctx, "Kafka.Consumer")
+	span.SetBaggageItem("partition", common.IntToStr(msg.Partition))
+	span.SetBaggageItem("offset", common.Int64ToStr(msg.Offset))
 	span.SetBaggageItem("workId", string(msg.Value))
 
 	// get workId from message
@@ -120,8 +123,8 @@ func consume(reader *kafka.Reader) {
 }
 
 func log(info string, msg kafka.Message, recorder *timerecorder.TimeRecorder, err error) {
-	if err != nil {
-		logger.Get().Error("[Consumer] Error.", zap.Error(err))
+	if err != nil && err != memcache.ErrCacheMiss {
+		logger.Get().Error(fmt.Sprintf("[Consumer] Error: %s", err.Error()), zap.Error(err))
 		return
 	}
 

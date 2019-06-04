@@ -4,6 +4,7 @@ import (
 	"context"
 	"dist-system-practice/lib/database"
 	"fmt"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 	"github.com/opentracing/opentracing-go"
@@ -110,7 +111,7 @@ func NewDbSpanFromContext(ctx context.Context, optName string) (context.Context,
 }
 
 func FinishDbSpan(span opentracing.Span, err error) {
-	if err != nil && err != io.EOF {
+	if err != nil && err != io.EOF && err != memcache.ErrCacheMiss {
 		ext.Error.Set(span, true)
 		span.LogFields(
 			log.String("event", "error"),
@@ -128,10 +129,35 @@ func NewConsumerSpan(ctx context.Context, optName string) (context.Context, open
 	span := Get().StartSpan(optName, opts...)
 
 	return opentracing.ContextWithSpan(ctx, span), span
-
 }
 
 func FinishConsumerSpan(span opentracing.Span, err error) {
+	if err != nil && err != memcache.ErrCacheMiss {
+		ext.Error.Set(span, true)
+		span.LogFields(
+			log.String("event", "error"),
+			log.String("message", err.Error()),
+		)
+	}
+	span.Finish()
+}
+
+func NewKafkaSpan(ctx context.Context, optName string) (context.Context, opentracing.Span) {
+	var parentSpanCtx opentracing.SpanContext
+	if parent := opentracing.SpanFromContext(ctx); parent != nil {
+		parentSpanCtx = parent.Context()
+	}
+	opts := []opentracing.StartSpanOption{
+		opentracing.ChildOf(parentSpanCtx),
+		ext.SpanKindProducer,
+		opentracing.Tag{Key: string(ext.Component), Value: "Kafka Producer"},
+	}
+	span := Get().StartSpan(optName, opts...)
+
+	return opentracing.ContextWithSpan(ctx, span), span
+}
+
+func FinishKafkaSpan(span opentracing.Span, err error) {
 	if err != nil {
 		ext.Error.Set(span, true)
 		span.LogFields(

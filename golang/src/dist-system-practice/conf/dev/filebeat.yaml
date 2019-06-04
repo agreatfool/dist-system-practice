@@ -209,7 +209,7 @@ processors:
   - add_fields:
       when:
         contains:
-          message: "WEB.Handler"
+          message: "Web.Handler"
       fields:
         module: "web"
   - add_fields:
@@ -236,6 +236,12 @@ processors:
           message: "Consumer"
       fields:
         module: "consumer"
+  - add_fields:
+      when:
+        contains:
+          message: "Dao"
+      fields:
+        module: "dao"
 
   #- add_host_metadata: ~
   #- add_cloud_metadata: ~

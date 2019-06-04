@@ -4,12 +4,15 @@ import (
 	"context"
 	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/dao"
+	"dist-system-practice/lib/jaeger"
 	lkafka "dist-system-practice/lib/kafka"
 	"dist-system-practice/lib/logger"
 	"dist-system-practice/lib/model"
 	"dist-system-practice/lib/timerecorder"
 	pb "dist-system-practice/message"
 	"fmt"
+	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/opentracing/opentracing-go"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 	"time"
@@ -105,9 +108,7 @@ func (s *ServerImpl) PlanWork(ctx context.Context, workId *pb.WorkId) (*pb.Work,
 		logApi("PlanWork", workId.Id, recorder, err)
 	}()
 
-	err = lkafka.GetWriter().WriteMessages(ctx, kafka.Message{
-		Value: []byte(common.IntToStr(int(workId.Id))),
-	})
+	err = writeKafkaMsg(ctx, workId.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -138,11 +139,33 @@ func portWork(work *model.Work) *pb.Work {
 	}
 }
 
+func writeKafkaMsg(ctx context.Context, workId uint32) error {
+	var err error
+	var span opentracing.Span
+	var cancel context.CancelFunc
+
+	ctx, span = jaeger.NewKafkaSpan(ctx, "Service.Rpc.Kafka")
+	ctx, cancel = context.WithTimeout(ctx, time.Duration(10)*time.Second)
+	defer func() {
+		cancel()
+		jaeger.FinishKafkaSpan(span, err)
+	}()
+
+	err = lkafka.GetWriter().WriteMessages(ctx, kafka.Message{
+		Value: []byte(common.IntToStr(int(workId))),
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func logApi(api string, workId uint32, recorder *timerecorder.TimeRecorder, err error) {
 	recorder.End()
 
-	if err != nil {
-		logger.Get().Error(fmt.Sprintf("[Service.Rpc] Api: %s: Error.", api), zap.Error(err))
+	if err != nil && err != memcache.ErrCacheMiss {
+		logger.Get().Error(fmt.Sprintf("[Service.Rpc] Api: %s: Error: %s", api, err.Error()), zap.Error(err))
 	} else {
 		logger.Get().Info(fmt.Sprintf("[Service.Rpc] Api: %s.", api),
 			zap.String("api", api),
