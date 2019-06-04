@@ -37,6 +37,7 @@ function service() {
     SERVICE_HOST="127.0.0.1" \
     SERVICE_PORT="16241" \
     KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]' \
+    KAFKA_WRITE_ASYNC="false" \
     JAEGER_SERVICE_NAME="app.service" \
     JAEGER_AGENT_HOST="127.0.0.1" \
     JAEGER_AGENT_PORT="6841" \
