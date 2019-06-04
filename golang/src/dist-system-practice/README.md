@@ -41,6 +41,7 @@ dist-system-practice
 * SERVICE_HOST：Service应用的监听HOST
 * SERVICE_PORT：Service应用的监听PORT
 * KAFKA_BROKERS：Kafka服务的节点列表，json数组字符串，e.g ["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]
+* KAFKA_WRITE_ASYNC：是否在向写入Kafka写入数据的时候使用异步调用，如果给"true"则异步，"false"则同步；异步性能会有飞跃，但极不安全
 * JAEGER_SERVICE_NAME：同上
 * JAEGER_AGENT_HOST：同上
 * JAEGER_AGENT_PORT：同上

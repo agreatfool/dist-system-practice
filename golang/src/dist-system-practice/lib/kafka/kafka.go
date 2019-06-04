@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/segmentio/kafka-go"
+	"strconv"
 	"time"
 )
 
@@ -36,9 +37,11 @@ func NewWriter() *kafka.Writer {
 	}
 
 	writer = kafka.NewWriter(kafka.WriterConfig{
-		Brokers:  getBrokers(),
-		Topic:    "work-topic",
-		Balancer: &kafka.LeastBytes{},
+		Brokers:      getBrokers(),
+		Topic:        "work-topic",
+		Balancer:     &kafka.LeastBytes{},
+		RequiredAcks: 1,            // 1: leader received | 0: no ack at all | -1: all received
+		Async:        writeAsync(), // async/sync writing
 	})
 
 	return writer
@@ -60,4 +63,18 @@ func getBrokers() []string {
 	}
 
 	return config.Servers
+}
+
+func writeAsync() bool {
+	e := common.GetEnv("KAFKA_WRITE_ASYNC", "")
+
+	if e == "" {
+		return false
+	} else {
+		b, err := strconv.ParseBool(e)
+		if err != nil {
+			return false
+		}
+		return b
+	}
 }
