@@ -21,12 +21,6 @@ networks:
   net:
     driver: "bridge"
 
-#volumes:
-#  es_vol_1_logs:
-#    driver: "local"
-#  es_vol_1_data:
-#    driver: "local"
-
 x-jaeger-logging-defaults: &JAEGER_LOGGING_DEFAULTS
   driver: "json-file"
   options:
