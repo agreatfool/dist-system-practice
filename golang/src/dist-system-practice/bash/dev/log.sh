@@ -20,6 +20,8 @@ function consumer() {
 }
 
 function reset() {
+    mkdir -p /tmp/logs/app
+
     rm ${LOG_WEB}
     touch ${LOG_WEB}
     rm ${LOG_SERVICE}

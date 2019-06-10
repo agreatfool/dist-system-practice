@@ -22,7 +22,9 @@ ES_1="http://127.0.0.1:9201"
 # Config path: [/usr/share/filebeat] Data path: [/usr/share/filebeat/data] Logs path: [/usr/share/filebeat/logs]
 
 function start() {
+    rm -rf /private/tmp/elasticsearch.yaml
     cp ${BASEPATH}/conf/dev/elasticsearch.yaml /private/tmp/
+    rm -rf /private/tmp/filebeat.yaml
     cp ${BASEPATH}/conf/dev/filebeat.yaml /private/tmp/
 
     docker-compose -f ${BASEPATH}/conf/dev/elk-cluster.yaml -p "dist" up -d

@@ -1,0 +1,14 @@
+scrape_configs:
+  - job_name: 'federate'
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    scheme: 'http'
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{__name__=~"node_.*"}'
+    static_configs:
+      - targets:
+          - "machine_xx1_node:9090"
+          - "machine_xx2_node:9090"
