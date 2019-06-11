@@ -8,9 +8,15 @@ networks:
   net:
     driver: "bridge"
 
-#volumes:
-#  cas_vol_1:
-#    driver: "local"
+volumes:
+  grafana_vol:
+    driver: "local"
+  prometheus_vol:
+    driver: "local"
+  machine_xx1_node_vol:
+    driver: "local"
+  machine_xx2_node_vol:
+    driver: "local"
 
 x-prom-logging-defaults: &PROM_LOGGING_DEFAULTS
   driver: "json-file"
@@ -22,18 +28,39 @@ services:
     image: "grafana/grafana:6.1.2"
     container_name: "grafana"
     hostname: "grafana"
+    volumes:
+      - /private/tmp/grafana.ini:/etc/grafana/grafana.ini
+      - grafana_vol:/var/lib/grafana
     networks:
       - "net"
     ports:
       - "3000:3000"
     depends_on:
       - prometheus
+    restart: "always"
+    logging:
+      <<: *PROM_LOGGING_DEFAULTS
+    environment:
+      - GF_SERVER_HTTP_ADDR=0.0.0.0
+      - GF_SERVER_HTTP_PORT=3000
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_APP_MODE=production
+      - GF_LOGGING_MODE="console file"
+      - GF_LOGGING_LEVEL=info
+      - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
+      - GF_PATHS_DATA=/var/lib/grafana
+      - GF_PATHS_HOME=/usr/share/grafana
+      - GF_PATHS_LOGS=/var/log/grafana
+      - GF_PATHS_PLUGINS=/var/lib/grafana/plugins
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
   prometheus:
     image: "prom/prometheus:v2.8.1"
     container_name: "prometheus"
     hostname: "prometheus"
     volumes:
       - /private/tmp/prom-master.yaml:/etc/prometheus/prometheus.yml
+      - prometheus_vol:/prometheus
     networks:
       - "net"
     ports:
@@ -56,6 +83,7 @@ services:
     hostname: "machine_xx1_node"
     volumes:
       - /private/tmp/machine_xx1_node.yaml:/etc/prometheus/prometheus.yml
+      - machine_xx1_node_vol:/prometheus
     networks:
       - "net"
     expose:
@@ -75,6 +103,7 @@ services:
     hostname: "machine_xx2_node"
     volumes:
       - /private/tmp/machine_xx2_node.yaml:/etc/prometheus/prometheus.yml
+      - machine_xx2_node_vol:/prometheus
     networks:
       - "net"
     expose:
