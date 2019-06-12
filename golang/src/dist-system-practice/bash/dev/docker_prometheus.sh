@@ -54,11 +54,7 @@ function node() {
 
     kill -9 $(pgrep -lfa "node_exporter" | awk '{print $1}')
 
-    nohup ${BASEPATH}/prometheus/node_exporter \
-        --no-collector.boottime \
-        --no-collector.netdev \
-        --no-collector.textfile \
-        --no-collector.time > /private/tmp/logs/node_exporter.log&
+    nohup ${BASEPATH}/prometheus/node_exporter > /private/tmp/logs/node_exporter.log&
     echo "node_exporter started"
 }
 
