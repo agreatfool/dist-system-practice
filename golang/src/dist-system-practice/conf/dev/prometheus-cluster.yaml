@@ -1,8 +1,8 @@
 version: '2'
 x-prom-environment-defaults:
-  C1: &CONFIG_FILE "--config.file=/etc/prometheus/prometheus.yml"
-  C2: &LOG_LEVEL "--log.level=info"
-  C3: &LOG_FORMAT "--log.format=json"
+  C1: &RPOM_CONFIG_FILE "--config.file=/etc/prometheus/prometheus.yml"
+  C2: &RPOM_LOG_LEVEL "--log.level=info"
+  C3: &RPOM_LOG_FORMAT "--log.format=json"
 
 networks:
   net:
@@ -29,7 +29,9 @@ services:
     container_name: "grafana"
     hostname: "grafana"
     volumes:
-      - /private/tmp/grafana.ini:/etc/grafana/grafana.ini
+      - /private/tmp/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - /private/tmp/grafana/provisioning:/etc/grafana/provisioning
+      - /private/tmp/grafana/dashboards:/etc/grafana/dashboards
       - grafana_vol:/var/lib/grafana
     networks:
       - "net"
@@ -44,7 +46,7 @@ services:
       - GF_SERVER_HTTP_ADDR=0.0.0.0
       - GF_SERVER_HTTP_PORT=3000
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=abc123
       - GF_DEFAULT_APP_MODE=production
       - GF_LOGGING_MODE="console file"
       - GF_LOGGING_LEVEL=info
@@ -74,16 +76,16 @@ services:
       <<: *PROM_LOGGING_DEFAULTS
     command: [
       "--web.listen-address=0.0.0.0:9090",
-      *CONFIG_FILE,
-      *LOG_LEVEL,
-      *LOG_FORMAT,
+      *RPOM_CONFIG_FILE,
+      *RPOM_LOG_LEVEL,
+      *RPOM_LOG_FORMAT,
     ]
   machine_xx1_node:
     image: "prom/prometheus:v2.8.1"
     container_name: "machine_xx1_node"
     hostname: "machine_xx1_node"
     volumes:
-      - /private/tmp/machine_xx1_node.yaml:/etc/prometheus/prometheus.yml
+      - /private/tmp/machines/machine_xx1_node.yaml:/etc/prometheus/prometheus.yml
       - machine_xx1_node_vol:/prometheus
     networks:
       - "net"
@@ -94,16 +96,16 @@ services:
       <<: *PROM_LOGGING_DEFAULTS
     command: [
       "--web.listen-address=0.0.0.0:9090",
-      *CONFIG_FILE,
-      *LOG_LEVEL,
-      *LOG_FORMAT,
+      *RPOM_CONFIG_FILE,
+      *RPOM_LOG_LEVEL,
+      *RPOM_LOG_FORMAT,
     ]
   machine_xx2_node:
     image: "prom/prometheus:v2.8.1"
     container_name: "machine_xx2_node"
     hostname: "machine_xx2_node"
     volumes:
-      - /private/tmp/machine_xx2_node.yaml:/etc/prometheus/prometheus.yml
+      - /private/tmp/machines/machine_xx2_node.yaml:/etc/prometheus/prometheus.yml
       - machine_xx2_node_vol:/prometheus
     networks:
       - "net"
@@ -114,7 +116,7 @@ services:
       <<: *PROM_LOGGING_DEFAULTS
     command: [
       "--web.listen-address=0.0.0.0:9090",
-      *CONFIG_FILE,
-      *LOG_LEVEL,
-      *LOG_FORMAT,
+      *RPOM_CONFIG_FILE,
+      *RPOM_LOG_LEVEL,
+      *RPOM_LOG_FORMAT,
     ]
