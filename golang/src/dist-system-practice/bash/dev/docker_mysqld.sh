@@ -51,11 +51,34 @@ function clear() {
     rm -rf ${BASEPATH}/mysql/log/*
 }
 
-function usage() {
-    echo "Usage: docker_mysqld.sh start|connect|stop|clear"
+function exporter() {
+    docker run --rm -d \
+        --name mysqld-exporter \
+        --network=dist_net \
+        -p 9104:9104 \
+        -e DATA_SOURCE_NAME="${USER}:${PASSWORD}@tcp(mysqld:3306)/${DBNAME}?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true&loc=Local" \
+        prom/mysqld-exporter:v0.11.0 \
+        --collect.binlog_size \
+        --collect.info_schema.processlist \
+        --collect.info_schema.innodb_cmp \
+        --collect.info_schema.innodb_cmpmem \
+        --collect.engine_innodb_status \
+        --collect.info_schema.innodb_metrics \
+        --collect.info_schema.innodb_tablespaces \
+        --collect.perf_schema.eventsstatements \
+        --collect.perf_schema.eventswaits \
+        --collect.perf_schema.file_events \
+        --collect.perf_schema.file_instances \
+        --collect.perf_schema.indexiowaits \
+        --collect.perf_schema.tablelocks \
+        --collect.perf_schema.tableiowaits
 }
 
-if [[ $1 != "start" ]] && [[ $1 != "connect" ]] && [[ $1 != "stop" ]] && [[ $1 != "clear" ]]; then
+function usage() {
+    echo "Usage: docker_mysqld.sh start|connect|stop|clear|exporter"
+}
+
+if [[ $1 != "start" ]] && [[ $1 != "connect" ]] && [[ $1 != "stop" ]] && [[ $1 != "clear" ]] && [[ $1 != "exporter" ]]; then
     usage
     exit 0
 fi

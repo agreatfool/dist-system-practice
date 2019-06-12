@@ -50,8 +50,6 @@ function node() {
     rm -rf /private/tmp/logs/node_exporter.log
     touch /private/tmp/logs/node_exporter.log
 
-    kill -9 $(pgrep -lfa "node_exporter" | awk '{print $1}')
-
     nohup ${BASEPATH}/prometheus/bin/node_exporter > /private/tmp/logs/node_exporter.log&
     echo "node_exporter started"
 }
