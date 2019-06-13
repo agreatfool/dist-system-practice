@@ -18,11 +18,20 @@ function stop() {
     docker stop memcached
 }
 
-function usage() {
-    echo "Usage: docker_memcached.sh start|stop"
+function exporter() {
+    docker run --rm -d \
+        --name memcached-exporter \
+        --network=dist_net \
+        -p 9150:9150 \
+        prom/memcached-exporter:v0.5.0 \
+        --memcached.address=memcached:11211
 }
 
-if [[ $1 != "start" ]] && [[ $1 != "stop" ]]; then
+function usage() {
+    echo "Usage: docker_memcached.sh start|stop|exporter"
+}
+
+if [[ $1 != "start" ]] && [[ $1 != "stop" ]] && [[ $1 != "exporter" ]]; then
     usage
     exit 0
 fi
