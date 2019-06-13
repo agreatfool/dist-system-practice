@@ -13,6 +13,49 @@ scrape_configs:
           - "machine_xx1_node:9090"
           - "machine_xx2_node:9090"
 
+  - job_name: 'cadvisor'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    scheme: 'http'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ["cadvisor:28080"]
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: "(\
+          go_gc_duration_seconds|\
+          go_gc_duration_seconds_sum|\
+          go_gc_duration_seconds_count|\
+          go_goroutines|\
+          go_info|\
+          go_memstats_alloc_bytes|\
+          go_memstats_alloc_bytes_total|\
+          go_memstats_buck_hash_sys_bytes|\
+          go_memstats_frees_total|\
+          go_memstats_gc_cpu_fraction|\
+          go_memstats_gc_sys_bytes|\
+          go_memstats_heap_alloc_bytes|\
+          go_memstats_heap_idle_bytes|\
+          go_memstats_heap_inuse_bytes|\
+          go_memstats_heap_objects|\
+          go_memstats_heap_released_bytes|\
+          go_memstats_heap_sys_bytes|\
+          go_memstats_last_gc_time_seconds|\
+          go_memstats_lookups_total|\
+          go_memstats_mallocs_total|\
+          go_memstats_mcache_inuse_bytes|\
+          go_memstats_mcache_sys_bytes|\
+          go_memstats_mspan_inuse_bytes|\
+          go_memstats_mspan_sys_bytes|\
+          go_memstats_next_gc_bytes|\
+          go_memstats_other_sys_bytes|\
+          go_memstats_stack_inuse_bytes|\
+          go_memstats_stack_sys_bytes|\
+          go_memstats_sys_bytes|\
+          go_threads|\
+        )"
+        action: drop
+
   - job_name: 'mysqld'
     scrape_interval: 10s
     scrape_timeout: 5s
