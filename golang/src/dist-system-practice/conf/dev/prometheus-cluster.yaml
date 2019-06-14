@@ -13,9 +13,9 @@ volumes:
     driver: "local"
   prometheus_vol:
     driver: "local"
-  machine_xx1_node_vol:
+  machine_xx1_federate_vol:
     driver: "local"
-  machine_xx2_node_vol:
+  machine_xx2_federate_vol:
     driver: "local"
 
 x-prom-logging-defaults: &PROM_LOGGING_DEFAULTS
@@ -69,8 +69,8 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - machine_xx1_node
-      - machine_xx2_node
+      - machine_xx1_federate
+      - machine_xx2_federate
     restart: "always"
     logging:
       <<: *PROM_LOGGING_DEFAULTS
@@ -80,15 +80,17 @@ services:
       *RPOM_LOG_LEVEL,
       *RPOM_LOG_FORMAT,
     ]
-  machine_xx1_node:
+  machine_xx1_federate:
     image: "prom/prometheus:v2.8.1"
-    container_name: "machine_xx1_node"
-    hostname: "machine_xx1_node"
+    container_name: "machine_xx1_federate"
+    hostname: "machine_xx1_federate"
     volumes:
-      - /private/tmp/machines/machine_xx1_node.yaml:/etc/prometheus/prometheus.yml
-      - machine_xx1_node_vol:/prometheus
+      - /private/tmp/machines/machine_xx1_federate.yaml:/etc/prometheus/prometheus.yml
+      - machine_xx1_federate_vol:/prometheus
     networks:
       - "net"
+    ports:
+      - "19090:9090"
     expose:
       - "9090"
     restart: "always"
@@ -100,15 +102,17 @@ services:
       *RPOM_LOG_LEVEL,
       *RPOM_LOG_FORMAT,
     ]
-  machine_xx2_node:
+  machine_xx2_federate:
     image: "prom/prometheus:v2.8.1"
-    container_name: "machine_xx2_node"
-    hostname: "machine_xx2_node"
+    container_name: "machine_xx2_federate"
+    hostname: "machine_xx2_federate"
     volumes:
-      - /private/tmp/machines/machine_xx2_node.yaml:/etc/prometheus/prometheus.yml
-      - machine_xx2_node_vol:/prometheus
+      - /private/tmp/machines/machine_xx2_federate.yaml:/etc/prometheus/prometheus.yml
+      - machine_xx2_federate_vol:/prometheus
     networks:
       - "net"
+    ports:
+      - "29090:9090"
     expose:
       - "9090"
     restart: "always"
