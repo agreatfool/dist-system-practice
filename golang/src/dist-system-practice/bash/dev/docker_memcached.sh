@@ -12,9 +12,21 @@ function start() {
         -l "0.0.0.0" \
         -p 11211 \
         -m 64
+
+    docker run --rm -d \
+        --name memcached-admin \
+        --network=dist_net \
+        -e MEMCACHE_HOST=memcached \
+        -e MEMCACHE_PORT=11211 \
+        -p 9083:9083 \
+        plopix/docker-memcacheadmin:latest
+
+    exporter
 }
 
 function stop() {
+    docker stop memcached-admin
+    docker stop memcached-exporter
     docker stop memcached
 }
 

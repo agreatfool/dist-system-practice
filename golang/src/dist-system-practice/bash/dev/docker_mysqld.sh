@@ -32,6 +32,8 @@ function start() {
         -v ${BASEPATH}/mysql/data:/var/lib/mysql \
         -v ${BASEPATH}/mysql/log:/var/log/mysql \
         mysql:5.7.26
+
+    exporter
 }
 
 function connect() {
@@ -42,6 +44,7 @@ function connect() {
 }
 
 function stop() {
+    docker stop mysqld-exporter
     docker stop mysqld
 }
 

@@ -81,12 +81,9 @@ dist-system-practice
 ## Deployment
 ### Dev
 #### Deploy
-* bash/dev/docker_cadvisor.sh start
 * bash/dev/docker_memcached.sh start
-* bash/dev/docker_memcached.sh exporter
 * bash/dev/docker_mysqld.sh start
 * bash/dev/docker_mysqld.sh connect | use dist; | insert into work values (); | select * from work \G
-* bash/dev/docker_mysqld.sh exporter
 * bash/dev/docker_kafka.sh start
 * bash/dev/docker_kafka.sh init
 * bash/dev/docker_cassandra.sh start
