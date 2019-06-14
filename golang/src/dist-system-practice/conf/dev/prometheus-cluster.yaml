@@ -120,3 +120,43 @@ services:
       *RPOM_LOG_LEVEL,
       *RPOM_LOG_FORMAT,
     ]
+  machine_xx1_cadvisor:
+    image: "google/cadvisor:v0.33.0"
+    container_name: "machine_xx1_cadvisor"
+    hostname: "machine_xx1_cadvisor"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - "net"
+    expose:
+      - "8080"
+    restart: "always"
+    logging:
+      <<: *PROM_LOGGING_DEFAULTS
+    command: [
+      "--listen_ip=0.0.0.0",
+      "--port=8080",
+    ]
+  machine_xx2_cadvisor:
+    image: "google/cadvisor:v0.33.0"
+    container_name: "machine_xx2_cadvisor"
+    hostname: "machine_xx2_cadvisor"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - "net"
+    expose:
+      - "8080"
+    restart: "always"
+    logging:
+      <<: *PROM_LOGGING_DEFAULTS
+    command: [
+      "--listen_ip=0.0.0.0",
+      "--port=8080",
+    ]
