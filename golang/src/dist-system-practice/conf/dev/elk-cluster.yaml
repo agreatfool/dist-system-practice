@@ -59,7 +59,7 @@ services:
       - SERVER_PORT=5601
       - SERVER_HOST=0.0.0.0
       - SERVER_NAME=es_cluster
-      - ELASTICSEARCH_HOSTS=["http://es_1:9201"]
+      - ELASTICSEARCH_HOSTS=["http://es_1:9200"]
       - KIBANA_INDEX=.kibana
       - DIBANA_DEFAULTAPPID=home
       - ELASTICSEARCH_PINGTIMEOUT=1500
@@ -82,7 +82,7 @@ services:
     logging:
       <<: *ES_LOGGING_DEFAULTS
     environment:
-      - ES_HOSTS=es_1:9201,es_2:9202,es_3:9203
+      - ES_HOSTS=es_1:9200,es_2:9200,es_3:9200
       - LOGGING_LEVEL=debug # error, warning, info, debug
       - NUM_OF_OUTPUT_WORKERS=9 # node count * 3, 3 workers per node
       - NUM_OF_SHARDS=3
@@ -98,7 +98,7 @@ services:
     networks:
       - "net"
     ports:
-      - "9201:9201"
+      - "9201:9200"
     expose:
       - "9300"
     restart: "always"
@@ -106,7 +106,7 @@ services:
       <<: *ES_LOGGING_DEFAULTS
     environment:
       - node.name=es_1
-      - http.port=9201
+      - http.port=9200
       - node.master=true
       - node.data=true
       - *DISCOVERY_SEED_HOSTS
@@ -125,7 +125,7 @@ services:
     networks:
       - "net"
     ports:
-      - "9202:9202"
+      - "9202:9200"
     expose:
       - "9300"
     restart: "always"
@@ -133,7 +133,7 @@ services:
       <<: *ES_LOGGING_DEFAULTS
     environment:
       - node.name=es_2
-      - http.port=9202
+      - http.port=9200
       - node.master=true
       - node.data=true
       - *DISCOVERY_SEED_HOSTS
@@ -152,7 +152,7 @@ services:
     networks:
       - "net"
     ports:
-      - "9203:9203"
+      - "9203:9200"
     expose:
       - "9300"
     restart: "always"
@@ -160,7 +160,7 @@ services:
       <<: *ES_LOGGING_DEFAULTS
     environment:
       - node.name=es_3
-      - http.port=9203
+      - http.port=9200
       - node.master=true
       - node.data=true
       - *DISCOVERY_SEED_HOSTS
@@ -168,3 +168,34 @@ services:
       - *ES_JAVA_OPTS
     ulimits:
       <<: *ES_ULIMIT_DEFAULTS
+  es_exporter:
+    image: "justwatch/elasticsearch_exporter:1.1.0rc1"
+    container_name: "es_exporter"
+    hostname: "es_exporter"
+    depends_on:
+      - "es_1"
+      - "es_2"
+      - "es_3"
+    networks:
+      - "net"
+    ports:
+      - "9114:9114"
+    expose:
+      - "9114"
+    restart: "always"
+    logging:
+      <<: *ES_LOGGING_DEFAULTS
+    command: [
+      "--web.listen-address=0.0.0.0:9114",
+      "--web.telemetry-path=/metrics",
+      "--es.uri=http://es_1:9200",
+      "--es.all",
+      "--es.cluster_settings",
+      "--es.shards",
+      "--es.indices",
+      "--es.indices_settings",
+      "--es.snapshots",
+      "--log.level=info",
+      "--log.format=json",
+      "--log.output=stdout",
+    ]
