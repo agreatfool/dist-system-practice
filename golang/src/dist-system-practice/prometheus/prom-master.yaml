@@ -1,5 +1,5 @@
 scrape_configs:
-  - job_name: 'federate'
+  - job_name: 'nodes'
     scrape_interval: 15s
     scrape_timeout: 5s
     scheme: 'http'
@@ -19,7 +19,8 @@ scrape_configs:
     scheme: 'http'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ["prometheus:9090"]
+      - targets:
+          - "prometheus:9090"
     metric_relabel_configs:
       - source_labels: [__name__]
         regex: "(\
@@ -62,7 +63,8 @@ scrape_configs:
     scheme: 'http'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ["mysqld-exporter:9104"]
+      - targets:
+          - "mysqld-exporter:9104"
     metric_relabel_configs:
       - source_labels: [__name__]
         regex: "(\
@@ -105,7 +107,8 @@ scrape_configs:
     scheme: 'http'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ["memcached-exporter:9150"]
+      - targets:
+          - "memcached-exporter:9150"
     metric_relabel_configs:
       - source_labels: [__name__]
         regex: "(\
@@ -142,13 +145,16 @@ scrape_configs:
         )"
         action: drop
 
-  - job_name: 'jagent_service'
+  - job_name: 'jaeger-agent'
     scrape_interval: 10s
     scrape_timeout: 5s
     scheme: 'http'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ["jagent_service:5778"]
+      - targets:
+          - "jagent_web:5778"
+          - "jagent_service:5778"
+          - "jagent_consumer:5778"
     metric_relabel_configs:
       - source_labels: [__name__]
         regex: "(\
@@ -185,13 +191,15 @@ scrape_configs:
         )"
         action: drop
 
-  - job_name: 'jagent_consumer'
+  - job_name: 'jaeger-collector'
     scrape_interval: 10s
     scrape_timeout: 5s
     scheme: 'http'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ["jagent_consumer:5778"]
+      - targets:
+          - "jcollector_1:14268"
+          - "jcollector_2:14268"
     metric_relabel_configs:
       - source_labels: [__name__]
         regex: "(\
@@ -228,99 +236,25 @@ scrape_configs:
         )"
         action: drop
 
-  - job_name: 'jagent_web'
+  - job_name: 'kafka'
     scrape_interval: 10s
     scrape_timeout: 5s
     scheme: 'http'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ["jagent_web:5778"]
-    metric_relabel_configs:
-      - source_labels: [__name__]
-        regex: "(\
-          go_gc_duration_seconds|\
-          go_gc_duration_seconds_sum|\
-          go_gc_duration_seconds_count|\
-          go_goroutines|\
-          go_info|\
-          go_memstats_alloc_bytes|\
-          go_memstats_alloc_bytes_total|\
-          go_memstats_buck_hash_sys_bytes|\
-          go_memstats_frees_total|\
-          go_memstats_gc_cpu_fraction|\
-          go_memstats_gc_sys_bytes|\
-          go_memstats_heap_alloc_bytes|\
-          go_memstats_heap_idle_bytes|\
-          go_memstats_heap_inuse_bytes|\
-          go_memstats_heap_objects|\
-          go_memstats_heap_released_bytes|\
-          go_memstats_heap_sys_bytes|\
-          go_memstats_last_gc_time_seconds|\
-          go_memstats_lookups_total|\
-          go_memstats_mallocs_total|\
-          go_memstats_mcache_inuse_bytes|\
-          go_memstats_mcache_sys_bytes|\
-          go_memstats_mspan_inuse_bytes|\
-          go_memstats_mspan_sys_bytes|\
-          go_memstats_next_gc_bytes|\
-          go_memstats_other_sys_bytes|\
-          go_memstats_stack_inuse_bytes|\
-          go_memstats_stack_sys_bytes|\
-          go_memstats_sys_bytes|\
-          go_threads|\
-        )"
-        action: drop
+      - targets:
+          - "kafka_1:7071"
+          - "kafka_2:7071"
+          - "kafka_3:7071"
 
-  - job_name: 'jcollector_1'
+  - job_name: 'kafka-exporter'
     scrape_interval: 10s
     scrape_timeout: 5s
     scheme: 'http'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ["jcollector_1:14268"]
-    metric_relabel_configs:
-      - source_labels: [__name__]
-        regex: "(\
-          go_gc_duration_seconds|\
-          go_gc_duration_seconds_sum|\
-          go_gc_duration_seconds_count|\
-          go_goroutines|\
-          go_info|\
-          go_memstats_alloc_bytes|\
-          go_memstats_alloc_bytes_total|\
-          go_memstats_buck_hash_sys_bytes|\
-          go_memstats_frees_total|\
-          go_memstats_gc_cpu_fraction|\
-          go_memstats_gc_sys_bytes|\
-          go_memstats_heap_alloc_bytes|\
-          go_memstats_heap_idle_bytes|\
-          go_memstats_heap_inuse_bytes|\
-          go_memstats_heap_objects|\
-          go_memstats_heap_released_bytes|\
-          go_memstats_heap_sys_bytes|\
-          go_memstats_last_gc_time_seconds|\
-          go_memstats_lookups_total|\
-          go_memstats_mallocs_total|\
-          go_memstats_mcache_inuse_bytes|\
-          go_memstats_mcache_sys_bytes|\
-          go_memstats_mspan_inuse_bytes|\
-          go_memstats_mspan_sys_bytes|\
-          go_memstats_next_gc_bytes|\
-          go_memstats_other_sys_bytes|\
-          go_memstats_stack_inuse_bytes|\
-          go_memstats_stack_sys_bytes|\
-          go_memstats_sys_bytes|\
-          go_threads|\
-        )"
-        action: drop
-
-  - job_name: 'jcollector_2'
-    scrape_interval: 10s
-    scrape_timeout: 5s
-    scheme: 'http'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets: ["jcollector_2:14268"]
+      - targets:
+          - "kafka_exporter:9308"
     metric_relabel_configs:
       - source_labels: [__name__]
         regex: "(\

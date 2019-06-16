@@ -10,6 +10,11 @@ BOOTSTRAP_SERVER="127.0.0.1:19092"
 BROKER_LIST="127.0.0.1:19092,127.0.0.1:29092,127.0.0.1:39092"
 
 function start() {
+    rm -rf /private/tmp/jmx_prometheus_javaagent-0.9.jar
+    cp ${BASEPATH}/kafka/jmx_prometheus_javaagent-0.9.jar /private/tmp/jmx_prometheus_javaagent-0.9.jar
+    rm -rf /private/tmp/jmx-kafka-2_0_0.yaml
+    cp ${BASEPATH}/kafka/jmx-kafka-2_0_0.yaml /private/tmp/jmx-kafka-2_0_0.yaml
+
     docker-compose -f ${BASEPATH}/conf/dev/kafka-cluster.yaml -p "dist" up -d
 }
 

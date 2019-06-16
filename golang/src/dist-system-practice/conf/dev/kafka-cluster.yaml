@@ -58,13 +58,19 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
+      - /private/tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar
+      - /private/tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml
       - kafka_vol_1:/tmp/kafka/data
     networks:
       - "net"
     ports:
-      - "19092:9092"
+      - "19092:9092" # client port
+      - "17071:7071" # jmx prometheus metrics
     expose:
-      - "9093"
+      - "9092" # client port
+      - "9093" # internal traffic
+      - "9991" # jmx
+      - "7071" # jmx prometheus metrics
     restart: "always"
     logging:
       <<: *KAFKA_LOGGING_DEFAULTS
@@ -74,6 +80,8 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_BROKER_ID: 0
+      JMX_PORT: 9991
+      KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar=7071:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml"
       <<: *KAFKA_ENV_DEFAULTS
   kafka_2:
     image: "wurstmeister/kafka:2.12-2.2.0"
@@ -82,13 +90,19 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
+      - /private/tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar
+      - /private/tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml
       - kafka_vol_2:/tmp/kafka/data
     networks:
       - "net"
     ports:
-      - "29092:9092"
+      - "29092:9092" # client port
+      - "27071:7071" # jmx prometheus metrics
     expose:
-      - "9093"
+      - "9092" # client port
+      - "9093" # internal traffic
+      - "9991" # jmx
+      - "7071" # jmx prometheus metrics
     restart: "always"
     logging:
       <<: *KAFKA_LOGGING_DEFAULTS
@@ -98,6 +112,8 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_BROKER_ID: 1
+      JMX_PORT: 9991
+      KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar=7071:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml"
       <<: *KAFKA_ENV_DEFAULTS
   kafka_3:
     image: "wurstmeister/kafka:2.12-2.2.0"
@@ -106,13 +122,19 @@ services:
     depends_on:
       - "zookeeper"
     volumes:
+      - /private/tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar
+      - /private/tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml
       - kafka_vol_3:/tmp/kafka/data
     networks:
       - "net"
     ports:
-      - "39092:9092"
+      - "39092:9092" # client port
+      - "37071:7071" # jmx prometheus metrics
     expose:
-      - "9093"
+      - "9092" # client port
+      - "9093" # internal traffic
+      - "9991" # jmx
+      - "7071" # jmx prometheus metrics
     restart: "always"
     logging:
       <<: *KAFKA_LOGGING_DEFAULTS
@@ -122,4 +144,33 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_BROKER_ID: 2
+      JMX_PORT: 9991
+      KAFKA_OPTS: "-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar=7071:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml"
       <<: *KAFKA_ENV_DEFAULTS
+  kafka_exporter:
+    image: "danielqsj/kafka-exporter:v1.2.0"
+    hostname: "kafka_exporter"
+    container_name: "kafka_exporter"
+    depends_on:
+      - "kafka_1"
+      - "kafka_2"
+      - "kafka_3"
+    networks:
+      - "net"
+    ports:
+      - "9308:9308"
+    expose:
+      - "9308"
+    restart: "always"
+    logging:
+      <<: *KAFKA_LOGGING_DEFAULTS
+    command: [
+      "--kafka.server=kafka_1:9092",
+      "--kafka.server=kafka_2:9092",
+      "--kafka.server=kafka_3:9092",
+      "--web.listen-address=0.0.0.0:9308",
+      "--web.telemetry-path=/metrics",
+      "--log.level=info",
+      "--topic.filter=.*",
+      "--group.filter=.*",
+    ]
