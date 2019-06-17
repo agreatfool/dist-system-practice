@@ -13,7 +13,7 @@ function web() {
 
     APP_NAME="app.web" \
     LOGGER_CONF_PATH="${BASEPATH}/conf/dev/logger.yaml" \
-    WEB_HOST="127.0.0.1" \
+    WEB_HOST="0.0.0.0" \
     WEB_PORT="8000" \
     MAX_WORK_ID="1" \
     RPC_CONF_PATH="${BASEPATH}/conf/dev/rpc.yaml" \
