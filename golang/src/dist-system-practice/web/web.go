@@ -10,6 +10,7 @@ import (
 	"github.com/gin-contrib/location"
 	"github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 	"time"
@@ -53,6 +54,7 @@ func main() {
 	router.GET("/viewed", handler.HandleUpdateViewed)
 	router.GET("/achievement", handler.HandleGetAchievement)
 	router.GET("/plan", handler.HandlePlanWork)
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	host := common.GetEnv("WEB_HOST", "0.0.0.0")
 	port := common.GetEnv("WEB_PORT", "8000")

@@ -12,8 +12,10 @@ import (
 	"dist-system-practice/service/rpc"
 	"fmt"
 	"github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"net"
+	"net/http"
 	"os"
 )
 
@@ -38,6 +40,8 @@ func main() {
 	host := common.GetEnv("SERVICE_HOST", "0.0.0.0")
 	port := common.GetEnv("SERVICE_PORT", "16241")
 
+	go prometheus()
+
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", host, port))
 	if err != nil {
 		panic(fmt.Sprintf("[Service] Failed to listen: %s", err.Error()))
@@ -47,5 +51,15 @@ func main() {
 
 	if err := s.Serve(lis); err != nil {
 		panic(fmt.Sprintf("[Service] Failed to serve: %s", err.Error()))
+	}
+}
+
+func prometheus() {
+	host := common.GetEnv("WEB_HOST", "0.0.0.0")
+	port := common.GetEnv("WEB_PORT", "8001")
+
+	http.Handle("/metrics", promhttp.Handler())
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), nil); err != nil {
+		fmt.Println(err)
 	}
 }

@@ -12,10 +12,12 @@ import (
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/opentracing/opentracing-go"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/satori/go.uuid"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
+	"net/http"
 	"os"
 )
 
@@ -68,8 +70,20 @@ func main() {
 		}(i)
 	}
 
+	go prometheus()
+
 	// wait
 	select {}
+}
+
+func prometheus() {
+	host := common.GetEnv("WEB_HOST", "0.0.0.0")
+	port := common.GetEnv("WEB_PORT", "8002")
+
+	http.Handle("/metrics", promhttp.Handler())
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), nil); err != nil {
+		fmt.Println(err)
+	}
 }
 
 func consume(reader *kafka.Reader) {
