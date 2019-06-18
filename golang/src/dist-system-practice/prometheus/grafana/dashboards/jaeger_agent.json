@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 15,
-  "iteration": 1560521011853,
+  "iteration": 1560868430252,
   "links": [],
   "panels": [
     {
@@ -155,7 +154,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_agent_reporter_batches_submitted_total{format=\"jaeger\",protocol=\"grpc\"}[1m])) by (instance)",
+          "expr": "increase(jaeger_agent_reporter_batches_submitted_total{format=\"jaeger\",protocol=\"grpc\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -240,7 +239,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_agent_reporter_batches_failures_total{format=\"jaeger\",protocol=\"grpc\"}[1m])) by (instance)",
+          "expr": "increase(jaeger_agent_reporter_batches_failures_total{format=\"jaeger\",protocol=\"grpc\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -338,7 +337,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_agent_reporter_spans_submitted_total{format=\"jaeger\",protocol=\"grpc\"}[1m])) by (instance)",
+          "expr": "increase(jaeger_agent_reporter_spans_submitted_total{format=\"jaeger\",protocol=\"grpc\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -423,7 +422,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_agent_reporter_spans_failures_total{format=\"jaeger\",protocol=\"grpc\"}[1m])) by (instance)",
+          "expr": "increase(jaeger_agent_reporter_spans_failures_total{format=\"jaeger\",protocol=\"grpc\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -606,7 +605,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_agent_thrift_udp_server_read_errors_total{model=\"jaeger\",protocol=\"compact\"}[1m])) by (instance)",
+          "expr": "increase(jaeger_agent_thrift_udp_server_read_errors_total{model=\"jaeger\",protocol=\"compact\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -776,7 +775,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_agent_thrift_udp_server_packets_processed_total[1m])) by (instance)",
+          "expr": "increase(jaeger_agent_thrift_udp_server_packets_processed_total{model=\"jaeger\",protocol=\"compact\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -861,7 +860,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_agent_thrift_udp_server_packets_dropped_total[1m])) by (instance)",
+          "expr": "increase(jaeger_agent_thrift_udp_server_packets_dropped_total{model=\"jaeger\",protocol=\"compact\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -959,7 +958,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -990,5 +989,5 @@
   "timezone": "",
   "title": "Jaeger Agent",
   "uid": "Z8ieXpnWk",
-  "version": 2
+  "version": 1
 }
