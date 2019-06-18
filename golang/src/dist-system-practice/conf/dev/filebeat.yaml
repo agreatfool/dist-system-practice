@@ -215,9 +215,13 @@ processors:
   - add_fields:
       when:
         contains:
-          logger: "7c4b822813e7" # "logger":"zap@v0.0.0-20190405225521-7c4b822813e7/zap.go:46"
+          message: "user-agent"
       fields:
         module: "gin"
+  - drop_event:
+      when:
+        contains:
+          message: "/metrics" # remove web server prometheus metrics requests
   - add_fields:
       when:
         contains:
