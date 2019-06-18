@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": 7439,
   "graphTooltip": 0,
-  "id": 14,
-  "iteration": 1560516454038,
+  "iteration": 1560867211073,
   "links": [],
   "panels": [
     {
@@ -70,10 +69,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_collector_traces_received_total[1m])) by (instance)",
+          "expr": "increase(jaeger_collector_traces_received_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m]) ",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{instance}}-{{svc}}",
           "refId": "A"
         }
       ],
@@ -155,10 +154,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_collector_traces_rejected_total[1m])) by (instance)",
+          "expr": "increase(jaeger_collector_traces_rejected_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{instance}}-{{svc}}",
           "refId": "A"
         }
       ],
@@ -240,10 +239,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_collector_spans_received_total[1m])) by (instance)",
+          "expr": "increase(jaeger_collector_spans_received_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{instance}}-{{svc}}",
           "refId": "A"
         }
       ],
@@ -325,10 +324,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_collector_spans_dropped_total[1m])) by (instance)",
+          "expr": "increase(jaeger_collector_spans_dropped_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{instance}}-{{svc}}",
           "refId": "A"
         }
       ],
@@ -410,10 +409,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_collector_spans_rejected_total[1m])) by (instance)",
+          "expr": "increase(jaeger_collector_spans_rejected_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{instance}}-{{svc}}",
           "refId": "A"
         }
       ],
@@ -607,7 +606,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "s",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -692,7 +691,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "s",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -763,7 +762,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_cassandra_attempts_total[1m])) by (instance)",
+          "expr": "sum(rate(jaeger_cassandra_attempts_total{table=\"traces\"}[1m])) by (instance)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -848,7 +847,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_cassandra_errors_total[1m])) by (instance)",
+          "expr": "sum(rate(jaeger_cassandra_errors_total{table=\"traces\"}[1m])) by (instance)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -962,5 +961,5 @@
   "timezone": "",
   "title": "Jaeger Collector",
   "uid": "mb6-JR5iz",
-  "version": 15
+  "version": 1
 }
