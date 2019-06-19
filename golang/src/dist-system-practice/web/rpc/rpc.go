@@ -5,12 +5,11 @@ import (
 	"dist-system-practice/lib/common"
 	"dist-system-practice/lib/jaeger"
 	pb "dist-system-practice/message"
+	"encoding/json"
 	"fmt"
 	"github.com/hlts2/round-robin"
 	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"net/url"
 	"time"
 )
@@ -141,23 +140,16 @@ func New() *Client {
 	client := &Client{}
 	config := Config{}
 
-	var conf []byte
-
-	// get config path string
-	confPath := common.GetEnv("RPC_CONF_PATH", "")
-	if confPath == "" {
-		panic("[RPC] No conf path provided: RPC_CONF_PATH")
+	// get config
+	conf := common.GetEnv("RPC_SERVERS", "")
+	if conf == "" {
+		panic("[RPC] No conf provided: RPC_SERVERS")
 	}
-
-	// read config into string
-	var ioErr error
-	if conf, ioErr = ioutil.ReadFile(confPath); ioErr != nil {
-		panic(fmt.Sprintf("[RPC] Failed to read conf file: %s", ioErr.Error()))
-	}
+	conf = fmt.Sprintf("{\"servers\":%s}", conf)
 
 	// parse config yaml
-	if err := yaml.Unmarshal(conf, &config); err != nil {
-		panic(fmt.Sprintf("[RPC] Failed to parse yaml: %s", err.Error()))
+	if err := json.Unmarshal([]byte(conf), &config); err != nil {
+		panic(fmt.Sprintf("[RPC] Failed to parse json: %s", err.Error()))
 	}
 
 	// check servers count

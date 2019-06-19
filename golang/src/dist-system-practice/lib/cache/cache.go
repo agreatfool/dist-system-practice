@@ -2,10 +2,9 @@ package cache
 
 import (
 	"dist-system-practice/lib/common"
+	"encoding/json"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 )
 
 var instance *memcache.Client
@@ -28,21 +27,16 @@ func New() *memcache.Client {
 
 	config := Config{}
 
-	// get config path string
-	confPath := common.GetEnv("CACHE_CONF_PATH", "")
-	if confPath == "" {
-		panic("[Cache] No conf path provided: CACHE_CONF_PATH")
+	// get config
+	conf := common.GetEnv("CACHE_SERVERS", "")
+	if conf == "" {
+		panic("[Cache] No conf provided: CACHE_SERVERS")
 	}
+	conf = fmt.Sprintf("{\"servers\":%s}", conf)
 
-	// read config into string
-	conf, ioErr := ioutil.ReadFile(confPath)
-	if ioErr != nil {
-		panic(fmt.Sprintf("[Cache] Failed to read conf file: %s", ioErr.Error()))
-	}
-
-	// parse config yaml
-	if err := yaml.Unmarshal(conf, &config); err != nil {
-		panic(fmt.Sprintf("[Cache] Failed to parse yaml: %s", err.Error()))
+	// parse config json
+	if err := json.Unmarshal([]byte(conf), &config); err != nil {
+		panic(fmt.Sprintf("[Cache] Failed to parse json: %s", err.Error()))
 	}
 
 	// loop & confirm servers available

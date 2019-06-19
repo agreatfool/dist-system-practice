@@ -4,8 +4,6 @@ dist-system-practice
 ## ENV
 * APP_NAME：应用名称：web、service、consumer，etc...
 * LOGGER_CONF_PATH：日志配置文件位置
-* CACHE_CONF_PATH：缓存配置文件位置
-* MYSQL_CONF_PATH：数据库配置文件位置
 * JAEGER_SERVICE_NAME：值应该同APP_NAME
 * JAEGER_AGENT_HOST：agent的host
 * JAEGER_AGENT_PORT：agent的port
@@ -24,7 +22,7 @@ dist-system-practice
 * API_UPDATE_VIEWED_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * API_GET_ACHIEVEMENT_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
 * API_PLAN_WORK_PERCENTAGE_COUNT：随机API调用的概率配置，`count / total_count`就是该API会被调用的概率
-* RPC_CONF_PATH：RPC配置文件位置
+* RPC_SERVERS：RPC服务器的节点列表，json数组字符串，e.g ["127.0.0.1:16241"]
 * JAEGER_SERVICE_NAME：同上
 * JAEGER_AGENT_HOST：同上
 * JAEGER_AGENT_PORT：同上
@@ -36,8 +34,17 @@ dist-system-practice
 ### Service
 * APP_NAME：同上
 * LOGGER_CONF_PATH：同上
-* CACHE_CONF_PATH：同上
-* MYSQL_CONF_PATH：同上
+* CACHE_SERVERS：Cache服务的节点列表，json数组字符串，e.g ["127.0.0.1:11211"]
+* DB_HOST：Db host，e.g 127.0.0.1
+* DB_PORT：Db port，e.g 3306
+* DB_USER：Db username，e.g root
+* DB_PWD：Db password
+* DB_NAME：Db database name
+* DB_CHARSET：Db charset，e.g utf8mb4
+* DB_COLLATION：Db collation，e.g utf8mb4_general_ci
+* DB_MAX_OPEN_CONN：Db max open connection count，e.g 10
+* DB_MAX_IDLE_CONN：Db max idle connection count，e.g 10
+* DB_CONN_MAX_LIFE_TIME：Db connection max life time in seconds，e.g 300
 * SERVICE_HOST：Service应用的监听HOST，默认：0.0.0.0
 * SERVICE_PORT：Service应用的监听PORT，默认：16241
 * WEB_HOST：同上，默认：0.0.0.0；用来输出prometheus metrics
@@ -55,8 +62,17 @@ dist-system-practice
 ### Consumer
 * APP_NAME：同上
 * LOGGER_CONF_PATH：同上
-* CACHE_CONF_PATH：同上
-* MYSQL_CONF_PATH：同上
+* CACHE_SERVERS：同上
+* DB_HOST：同上
+* DB_PORT：同上
+* DB_USER：同上
+* DB_PWD：同上
+* DB_NAME：同上
+* DB_CHARSET：同上
+* DB_COLLATION：同上
+* DB_MAX_OPEN_CONN：同上
+* DB_MAX_IDLE_CONN：同上
+* DB_CONN_MAX_LIFE_TIME：同上
 * WEB_HOST：同上，默认：0.0.0.0；用来输出prometheus metrics
 * WEB_PORT：同上，默认：8002
 * CONSUMER_ROUTINES：在启动consumer app的时候，同时启动多少个routine并发处理message，默认为1；这个数值 = partition / consumer app count

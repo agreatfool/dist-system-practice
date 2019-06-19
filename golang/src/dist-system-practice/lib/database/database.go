@@ -7,26 +7,11 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/wantedly/gorm-zap"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"time"
 )
 
 var instance *gorm.DB
 var address string
-
-type Config struct {
-	Host            string `json:"host" yaml:"host"`
-	Port            int    `json:"port" yaml:"port"`
-	User            string `json:"user" yaml:"user"`
-	Password        string `json:"password" yaml:"password"`
-	Database        string `json:"database" yaml:"database"`
-	Charset         string `json:"charset" yaml:"charset"`
-	Collation       string `json:"collation" yaml:"collation"`
-	MaxOpenConn     int    `json:"maxOpenConn" yaml:"maxOpenConn"`
-	MaxIdleConn     int    `json:"maxIdleConn" yaml:"maxIdleConn"`
-	ConnMaxLifetime int    `json:"connMaxLifetime" yaml:"connMaxLifetime"`
-}
 
 func Get() *gorm.DB {
 	return instance
@@ -37,28 +22,70 @@ func New() *gorm.DB {
 		return instance
 	}
 
-	config := Config{}
+	var err error
 
-	// get config path string
-	confPath := common.GetEnv("MYSQL_CONF_PATH", "")
-	if confPath == "" {
-		panic("[Database] No conf path provided: MYSQL_CONF_PATH")
+	// get config
+	dbHost := common.GetEnv("DB_HOST", "")
+	if dbHost == "" {
+		panic("[Database] No conf provided: DB_HOST")
+	}
+	var dbPort int
+	dbPortConf := common.GetEnv("DB_PORT", "")
+	if dbPortConf == "" {
+		panic("[Database] No conf provided: DB_PORT")
+	}
+	if dbPort, err = common.StrToInt(dbPortConf); err != nil {
+		panic(fmt.Sprintf("[Database] Err in converting DB_PORT: %s", err.Error()))
+	}
+	dbUser := common.GetEnv("DB_USER", "")
+	if dbUser == "" {
+		panic("[Database] No conf provided: DB_USER")
+	}
+	dbPwd := common.GetEnv("DB_PWD", "")
+	if dbPwd == "" {
+		panic("[Database] No conf provided: DB_PWD")
+	}
+	dbName := common.GetEnv("DB_NAME", "")
+	if dbName == "" {
+		panic("[Database] No conf provided: DB_NAME")
+	}
+	dbCharset := common.GetEnv("DB_CHARSET", "")
+	if dbCharset == "" {
+		panic("[Database] No conf provided: DB_CHARSET")
+	}
+	dbCollation := common.GetEnv("DB_COLLATION", "")
+	if dbCollation == "" {
+		panic("[Database] No conf provided: DB_COLLATION")
+	}
+	var dbMaxOpenConn int
+	dbMaxOpenConnConf := common.GetEnv("DB_MAX_OPEN_CONN", "")
+	if dbMaxOpenConnConf == "" {
+		panic("[Database] No conf provided: DB_MAX_OPEN_CONN")
+	}
+	if dbMaxOpenConn, err = common.StrToInt(dbMaxOpenConnConf); err != nil {
+		panic(fmt.Sprintf("[Database] Err in converting DB_MAX_OPEN_CONN: %s", err.Error()))
+	}
+	var dbMaxIdleConn int
+	dbMaxIdleConnConf := common.GetEnv("DB_MAX_IDLE_CONN", "")
+	if dbMaxIdleConnConf == "" {
+		panic("[Database] No conf provided: DB_MAX_IDLE_CONN")
+	}
+	if dbMaxIdleConn, err = common.StrToInt(dbMaxIdleConnConf); err != nil {
+		panic(fmt.Sprintf("[Database] Err in converting DB_MAX_IDLE_CONN: %s", err.Error()))
+	}
+	var dbConnMaxLifeTime int
+	dbConnMaxLifeTimeConf := common.GetEnv("DB_CONN_MAX_LIFE_TIME", "")
+	if dbConnMaxLifeTimeConf == "" {
+		panic("[Database] No conf provided: DB_CONN_MAX_LIFE_TIME")
+	}
+	if dbConnMaxLifeTime, err = common.StrToInt(dbConnMaxLifeTimeConf); err != nil {
+		panic(fmt.Sprintf("[Database] Err in converting DB_CONN_MAX_LIFE_TIME: %s", err.Error()))
 	}
 
-	// read config into string
-	conf, ioErr := ioutil.ReadFile(confPath)
-	if ioErr != nil {
-		panic(fmt.Sprintf("[Database] Failed to read conf file: %s", ioErr.Error()))
-	}
-
-	// parse config yaml
-	if err := yaml.Unmarshal(conf, &config); err != nil {
-		panic(fmt.Sprintf("[Database] Failed to parse yaml: %s", err.Error()))
-	}
-
+	// make DSN (Data Source Name)
 	address = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&collation=%s&parseTime=true&loc=Local",
-		config.User, config.Password, config.Host, config.Port, config.Database,
-		config.Charset, config.Collation)
+		dbUser, dbPwd, dbHost, dbPort, dbName,
+		dbCharset, dbCollation)
 
 	// open database connection
 	db, dbErr := gorm.Open("mysql", address)
@@ -66,9 +93,9 @@ func New() *gorm.DB {
 		panic(fmt.Sprintf("[Database] Failed to connect to mysql: %s", dbErr.Error()))
 	}
 
-	db.DB().SetMaxOpenConns(config.MaxOpenConn)
-	db.DB().SetMaxIdleConns(config.MaxIdleConn)
-	db.DB().SetConnMaxLifetime(time.Second * time.Duration(config.ConnMaxLifetime))
+	db.DB().SetMaxOpenConns(dbMaxOpenConn)
+	db.DB().SetMaxIdleConns(dbMaxIdleConn)
+	db.DB().SetConnMaxLifetime(time.Second * time.Duration(dbConnMaxLifeTime))
 
 	db.LogMode(true)
 	db.SetLogger(gormzap.New(logger.New()))

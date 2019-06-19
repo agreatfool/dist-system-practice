@@ -19,7 +19,7 @@ function web() {
     WEB_HOST="0.0.0.0" \
     WEB_PORT="8000" \
     MAX_WORK_ID="1" \
-    RPC_CONF_PATH="${BASEPATH}/conf/dev/rpc.yaml" \
+    RPC_SERVERS="[\"127.0.0.1:16241\"]" \
     JAEGER_SERVICE_NAME="app.web" \
     JAEGER_AGENT_HOST="127.0.0.1" \
     JAEGER_AGENT_PORT="6831" \
@@ -35,8 +35,17 @@ function service() {
 
     APP_NAME="app.service" \
     LOGGER_CONF_PATH="${BASEPATH}/conf/dev/logger.yaml" \
-    CACHE_CONF_PATH="${BASEPATH}/conf/dev/cache.yaml" \
-    MYSQL_CONF_PATH="${BASEPATH}/conf/dev/mysql.yaml" \
+    CACHE_SERVERS="[\"127.0.0.1:11211\"]" \
+    DB_HOST="127.0.0.1" \
+    DB_PORT="3306" \
+    DB_USER="root" \
+    DB_PWD="abc123" \
+    DB_NAME="dist" \
+    DB_CHARSET="utf8mb4" \
+    DB_COLLATION="utf8mb4_general_ci" \
+    DB_MAX_OPEN_CONN="10" \
+    DB_MAX_IDLE_CONN="10" \
+    DB_CONN_MAX_LIFE_TIME="300" \
     SERVICE_HOST="127.0.0.1" \
     SERVICE_PORT="16241" \
     WEB_HOST="0.0.0.0" \
@@ -58,8 +67,17 @@ function consumer() {
 
     APP_NAME="app.consumer" \
     LOGGER_CONF_PATH="${BASEPATH}/conf/dev/logger.yaml" \
-    CACHE_CONF_PATH="${BASEPATH}/conf/dev/cache.yaml" \
-    MYSQL_CONF_PATH="${BASEPATH}/conf/dev/mysql.yaml" \
+    CACHE_SERVERS="[\"127.0.0.1:11211\"]" \
+    DB_HOST="127.0.0.1" \
+    DB_PORT="3306" \
+    DB_USER="root" \
+    DB_PWD="abc123" \
+    DB_NAME="dist" \
+    DB_CHARSET="utf8mb4" \
+    DB_COLLATION="utf8mb4_general_ci" \
+    DB_MAX_OPEN_CONN="10" \
+    DB_MAX_IDLE_CONN="10" \
+    DB_CONN_MAX_LIFE_TIME="300" \
     WEB_HOST="0.0.0.0" \
     WEB_PORT="8002" \
     CONSUMER_ROUTINES="3" \

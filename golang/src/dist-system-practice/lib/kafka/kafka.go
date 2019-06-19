@@ -57,7 +57,7 @@ func getBrokers() []string {
 	}
 	conf = fmt.Sprintf("{\"servers\":%s}", conf)
 
-	// parse config yaml
+	// parse config json
 	if err := json.Unmarshal([]byte(conf), &config); err != nil {
 		panic(fmt.Sprintf("[Kafka] Failed to parse json: %s", err.Error()))
 	}
