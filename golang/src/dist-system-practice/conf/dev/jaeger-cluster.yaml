@@ -74,9 +74,9 @@ services:
     command: [
       *AGENT_REPORTER_ADDS,
       *AGENT_REPORTER_TYPE,
-      "--processor.jaeger-binary.server-host-port=0.0.0.0:6832",
-      "--processor.jaeger-compact.server-host-port=0.0.0.0:6831",
-      "--http-server.host-port=0.0.0.0:5778",
+      *AGENT_BINARY_PORT,
+      *AGENT_COMPACT_PORT,
+      *AGENT_HTTP_PORT,
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG
@@ -104,9 +104,9 @@ services:
     command: [
       *AGENT_REPORTER_ADDS,
       *AGENT_REPORTER_TYPE,
-      "--processor.jaeger-binary.server-host-port=0.0.0.0:6832",
-      "--processor.jaeger-compact.server-host-port=0.0.0.0:6831",
-      "--http-server.host-port=0.0.0.0:5778",
+      *AGENT_BINARY_PORT,
+      *AGENT_COMPACT_PORT,
+      *AGENT_HTTP_PORT,
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG
@@ -134,9 +134,9 @@ services:
     command: [
       *AGENT_REPORTER_ADDS,
       *AGENT_REPORTER_TYPE,
-      "--processor.jaeger-binary.server-host-port=0.0.0.0:6832",
-      "--processor.jaeger-compact.server-host-port=0.0.0.0:6831",
-      "--http-server.host-port=0.0.0.0:5778",
+      *AGENT_BINARY_PORT,
+      *AGENT_COMPACT_PORT,
+      *AGENT_HTTP_PORT,
       *METRICS_BACKEND,
       *METRICS_HTTP_ROUTE,
       *LOG_LEVEL_DEBUG

@@ -11,7 +11,7 @@ scrape_configs:
     static_configs:
       - targets:
           - "machine_xx1_federate:9090"
-          - "machine_xx2_federate:9090"
+#          - "machine_xx2_federate:9090"
 
   - job_name: 'prometheus'
     scrape_interval: 10s
@@ -244,8 +244,8 @@ scrape_configs:
     static_configs:
       - targets:
           - "kafka_1:7071"
-          - "kafka_2:7071"
-          - "kafka_3:7071"
+#          - "kafka_2:7071"
+#          - "kafka_3:7071"
 
   - job_name: 'kafka-exporter'
     scrape_interval: 10s

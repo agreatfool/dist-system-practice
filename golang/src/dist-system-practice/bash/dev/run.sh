@@ -8,6 +8,9 @@ export GOBIN="${GOPATH}/bin"
 export GOROOT="/usr/local/Cellar/go/1.12/libexec" # OSX brew
 export GO111MODULE=on # see: https://github.com/golang/go/wiki/Modules#how-to-install-and-activate-module-support
 
+#KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]'
+KAFKA_BROKERS='["127.0.0.1:19092"]'
+
 function web() {
     cd ${BASEPATH}/web
 
@@ -38,7 +41,7 @@ function service() {
     SERVICE_PORT="16241" \
     WEB_HOST="0.0.0.0" \
     WEB_PORT="8001" \
-    KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]' \
+    KAFKA_BROKERS=${KAFKA_BROKERS} \
     KAFKA_WRITE_ASYNC="false" \
     JAEGER_SERVICE_NAME="app.service" \
     JAEGER_AGENT_HOST="127.0.0.1" \
@@ -61,7 +64,7 @@ function consumer() {
     WEB_PORT="8002" \
     CONSUMER_ROUTINES="3" \
     CONSUMER_FACTOR="37" \
-    KAFKA_BROKERS='["127.0.0.1:19092","127.0.0.1:29092","127.0.0.1:39092"]' \
+    KAFKA_BROKERS=${KAFKA_BROKERS} \
     JAEGER_SERVICE_NAME="app.consumer" \
     JAEGER_AGENT_HOST="127.0.0.1" \
     JAEGER_AGENT_PORT="6851" \

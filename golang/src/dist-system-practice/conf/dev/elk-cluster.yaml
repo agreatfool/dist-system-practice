@@ -3,9 +3,9 @@ x-es-environment-defaults:
   C1: &DISCOVERY_SEED_HOSTS "discovery.seed_hosts=es_1:9300,es_2:9300,es_3:9300"
   C2: &CLUSTER_INITIAL_MASTER_NODES "cluster.initial_master_nodes=es_1,es_2,es_3"
   C4: &ES_JAVA_OPTS "ES_JAVA_OPTS=\
-      -Xms256m \
-      -Xmx256m \
-    "
+        -Xms1g \
+        -Xmx1g \
+      "
 
 x-es-ulimit-defaults: &ES_ULIMIT_DEFAULTS
   nproc: 65535
@@ -46,8 +46,8 @@ services:
     hostname: "kibana"
     depends_on:
       - "es_1"
-      - "es_2"
-      - "es_3"
+#      - "es_2"
+#      - "es_3"
     networks:
       - "net"
     ports:
@@ -71,8 +71,8 @@ services:
     hostname: "filebeat"
     depends_on:
       - "es_1"
-      - "es_2"
-      - "es_3"
+#      - "es_2"
+#      - "es_3"
     networks:
       - "net"
     volumes:
@@ -82,100 +82,124 @@ services:
     logging:
       <<: *ES_LOGGING_DEFAULTS
     environment:
-      - ES_HOSTS=es_1:9200,es_2:9200,es_3:9200
+#      - ES_HOSTS=es_1:9200,es_2:9200,es_3:9200
+      - ES_HOSTS=es_1:9200
       - LOGGING_LEVEL=debug # error, warning, info, debug
       - NUM_OF_OUTPUT_WORKERS=9 # node count * 3, 3 workers per node
       - NUM_OF_SHARDS=3
       - NUM_OF_REPLICAS=1 # replicas count per shard, total count is num_of_shards * (1 + num_of_replicas)
   es_1:
-    image: "elasticsearch:7.0.0"
+    image: "elasticsearch:7.1.1"
     container_name: "es_1"
     hostname: "es_1"
     volumes:
       - es_vol_1_data:/usr/share/elasticsearch/data
       - es_vol_1_logs:/usr/share/elasticsearch/logs
-      - /private/tmp/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml
     networks:
       - "net"
     ports:
       - "9201:9200"
-    expose:
-      - "9300"
     restart: "always"
     logging:
       <<: *ES_LOGGING_DEFAULTS
     environment:
-      - node.name=es_1
-      - http.port=9200
-      - node.master=true
-      - node.data=true
-      - *DISCOVERY_SEED_HOSTS
-      - *CLUSTER_INITIAL_MASTER_NODES
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
       - *ES_JAVA_OPTS
     ulimits:
       <<: *ES_ULIMIT_DEFAULTS
-  es_2:
-    image: "elasticsearch:7.0.0"
-    container_name: "es_2"
-    hostname: "es_2"
-    volumes:
-      - es_vol_2_data:/usr/share/elasticsearch/data
-      - es_vol_2_logs:/usr/share/elasticsearch/logs
-      - /private/tmp/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml
-    networks:
-      - "net"
-    ports:
-      - "9202:9200"
-    expose:
-      - "9300"
-    restart: "always"
-    logging:
-      <<: *ES_LOGGING_DEFAULTS
-    environment:
-      - node.name=es_2
-      - http.port=9200
-      - node.master=true
-      - node.data=true
-      - *DISCOVERY_SEED_HOSTS
-      - *CLUSTER_INITIAL_MASTER_NODES
-      - *ES_JAVA_OPTS
-    ulimits:
-      <<: *ES_ULIMIT_DEFAULTS
-  es_3:
-    image: "elasticsearch:7.0.0"
-    container_name: "es_3"
-    hostname: "es_3"
-    volumes:
-      - es_vol_3_data:/usr/share/elasticsearch/data
-      - es_vol_3_logs:/usr/share/elasticsearch/logs
-      - /private/tmp/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml
-    networks:
-      - "net"
-    ports:
-      - "9203:9200"
-    expose:
-      - "9300"
-    restart: "always"
-    logging:
-      <<: *ES_LOGGING_DEFAULTS
-    environment:
-      - node.name=es_3
-      - http.port=9200
-      - node.master=true
-      - node.data=true
-      - *DISCOVERY_SEED_HOSTS
-      - *CLUSTER_INITIAL_MASTER_NODES
-      - *ES_JAVA_OPTS
-    ulimits:
-      <<: *ES_ULIMIT_DEFAULTS
+#  es_1:
+#    image: "elasticsearch:7.0.0"
+#    container_name: "es_1"
+#    hostname: "es_1"
+#    volumes:
+#      - es_vol_1_data:/usr/share/elasticsearch/data
+#      - es_vol_1_logs:/usr/share/elasticsearch/logs
+#      - /private/tmp/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml
+#    networks:
+#      - "net"
+#    ports:
+#      - "9201:9200"
+#    expose:
+#      - "9300"
+#    restart: "always"
+#    logging:
+#      <<: *ES_LOGGING_DEFAULTS
+#    environment:
+#      - node.name=es_1
+#      - http.port=9200
+#      - transport.tcp.port=9300
+#      - node.master=true
+#      - node.data=true
+#      - *DISCOVERY_SEED_HOSTS
+#      - *CLUSTER_INITIAL_MASTER_NODES
+#      - *ES_JAVA_OPTS
+#    ulimits:
+#      <<: *ES_ULIMIT_DEFAULTS
+#  es_2:
+#    image: "elasticsearch:7.0.0"
+#    container_name: "es_2"
+#    hostname: "es_2"
+#    volumes:
+#      - es_vol_2_data:/usr/share/elasticsearch/data
+#      - es_vol_2_logs:/usr/share/elasticsearch/logs
+#      - /private/tmp/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml
+#    networks:
+#      - "net"
+#    ports:
+#      - "9202:9200"
+#    expose:
+#      - "9300"
+#    restart: "always"
+#    logging:
+#      <<: *ES_LOGGING_DEFAULTS
+#    environment:
+#      - node.name=es_2
+#      - http.port=9200
+#      - transport.tcp.port=9300
+#      - node.master=true
+#      - node.data=true
+#      - *DISCOVERY_SEED_HOSTS
+#      - *CLUSTER_INITIAL_MASTER_NODES
+#      - *ES_JAVA_OPTS
+#    ulimits:
+#      <<: *ES_ULIMIT_DEFAULTS
+#  es_3:
+#    image: "elasticsearch:7.0.0"
+#    container_name: "es_3"
+#    hostname: "es_3"
+#    volumes:
+#      - es_vol_3_data:/usr/share/elasticsearch/data
+#      - es_vol_3_logs:/usr/share/elasticsearch/logs
+#      - /private/tmp/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml
+#    networks:
+#      - "net"
+#    ports:
+#      - "9203:9200"
+#    expose:
+#      - "9300"
+#    restart: "always"
+#    logging:
+#      <<: *ES_LOGGING_DEFAULTS
+#    environment:
+#      - node.name=es_3
+#      - http.port=9200
+#      - transport.tcp.port=9300
+#      - node.master=true
+#      - node.data=true
+#      - *DISCOVERY_SEED_HOSTS
+#      - *CLUSTER_INITIAL_MASTER_NODES
+#      - *ES_JAVA_OPTS
+#    ulimits:
+#      <<: *ES_ULIMIT_DEFAULTS
   es_exporter:
     image: "justwatch/elasticsearch_exporter:1.1.0rc1"
     container_name: "es_exporter"
     hostname: "es_exporter"
     depends_on:
       - "es_1"
-      - "es_2"
-      - "es_3"
+#      - "es_2"
+#      - "es_3"
     networks:
       - "net"
     ports:

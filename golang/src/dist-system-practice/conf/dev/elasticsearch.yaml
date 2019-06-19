@@ -59,7 +59,7 @@ network.host: 0.0.0.0
 #http.port: 9200
 #
 # For more information, consult the network module documentation.
-transport.tcp.port: 9300
+#transport.tcp.port: 9300
 #
 # --------------------------------- Discovery ----------------------------------
 #

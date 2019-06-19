@@ -70,7 +70,7 @@ services:
       - "9090:9090"
     depends_on:
       - machine_xx1_federate
-      - machine_xx2_federate
+#      - machine_xx2_federate
     restart: "always"
     logging:
       <<: *PROM_LOGGING_DEFAULTS
@@ -102,28 +102,28 @@ services:
       *RPOM_LOG_LEVEL,
       *RPOM_LOG_FORMAT,
     ]
-  machine_xx2_federate:
-    image: "prom/prometheus:v2.8.1"
-    container_name: "machine_xx2_federate"
-    hostname: "machine_xx2_federate"
-    volumes:
-      - /private/tmp/machines/machine_xx2_federate.yaml:/etc/prometheus/prometheus.yml
-      - machine_xx2_federate_vol:/prometheus
-    networks:
-      - "net"
-    ports:
-      - "29090:9090"
-    expose:
-      - "9090"
-    restart: "always"
-    logging:
-      <<: *PROM_LOGGING_DEFAULTS
-    command: [
-      "--web.listen-address=0.0.0.0:9090",
-      *RPOM_CONFIG_FILE,
-      *RPOM_LOG_LEVEL,
-      *RPOM_LOG_FORMAT,
-    ]
+#  machine_xx2_federate:
+#    image: "prom/prometheus:v2.8.1"
+#    container_name: "machine_xx2_federate"
+#    hostname: "machine_xx2_federate"
+#    volumes:
+#      - /private/tmp/machines/machine_xx2_federate.yaml:/etc/prometheus/prometheus.yml
+#      - machine_xx2_federate_vol:/prometheus
+#    networks:
+#      - "net"
+#    ports:
+#      - "29090:9090"
+#    expose:
+#      - "9090"
+#    restart: "always"
+#    logging:
+#      <<: *PROM_LOGGING_DEFAULTS
+#    command: [
+#      "--web.listen-address=0.0.0.0:9090",
+#      *RPOM_CONFIG_FILE,
+#      *RPOM_LOG_LEVEL,
+#      *RPOM_LOG_FORMAT,
+#    ]
   machine_xx1_cadvisor:
     image: "google/cadvisor:v0.33.0"
     container_name: "machine_xx1_cadvisor"
@@ -144,23 +144,23 @@ services:
       "--listen_ip=0.0.0.0",
       "--port=8080",
     ]
-  machine_xx2_cadvisor:
-    image: "google/cadvisor:v0.33.0"
-    container_name: "machine_xx2_cadvisor"
-    hostname: "machine_xx2_cadvisor"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    networks:
-      - "net"
-    expose:
-      - "8080"
-    restart: "always"
-    logging:
-      <<: *PROM_LOGGING_DEFAULTS
-    command: [
-      "--listen_ip=0.0.0.0",
-      "--port=8080",
-    ]
+#  machine_xx2_cadvisor:
+#    image: "google/cadvisor:v0.33.0"
+#    container_name: "machine_xx2_cadvisor"
+#    hostname: "machine_xx2_cadvisor"
+#    volumes:
+#      - /:/rootfs:ro
+#      - /var/run:/var/run:rw
+#      - /sys:/sys:ro
+#      - /var/lib/docker/:/var/lib/docker:ro
+#    networks:
+#      - "net"
+#    expose:
+#      - "8080"
+#    restart: "always"
+#    logging:
+#      <<: *PROM_LOGGING_DEFAULTS
+#    command: [
+#      "--listen_ip=0.0.0.0",
+#      "--port=8080",
+#    ]

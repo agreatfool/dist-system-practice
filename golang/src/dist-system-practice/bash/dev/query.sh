@@ -23,11 +23,15 @@ function plan() {
     curl -v "http://127.0.0.1:8000/plan"
 }
 
+function interval() {
+    while true; do api; sleep 1; done
+}
+
 function usage() {
     echo "Usage: query.sh api|work|viewed|achievement|plan"
 }
 
-if [[ $1 != "api" ]] && [[ $1 != "work" ]] && [[ $1 != "viewed" ]] && [[ $1 != "achievement" ]] && [[ $1 != "plan" ]]; then
+if [[ $1 != "api" ]] && [[ $1 != "work" ]] && [[ $1 != "viewed" ]] && [[ $1 != "achievement" ]] && [[ $1 != "plan" ]] && [[ $1 != "interval" ]]; then
     usage
     exit 0
 fi

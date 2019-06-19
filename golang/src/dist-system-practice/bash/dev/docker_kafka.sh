@@ -7,7 +7,8 @@ KAFKA_LOCAL_BIN_PATH="${BASEPATH}/../../../experiment/bin/kafka/bin"
 TOPIC_NAME="work-topic"
 ZOOKEEPER="127.0.0.1:2181"
 BOOTSTRAP_SERVER="127.0.0.1:19092"
-BROKER_LIST="127.0.0.1:19092,127.0.0.1:29092,127.0.0.1:39092"
+#BROKER_LIST="127.0.0.1:19092,127.0.0.1:29092,127.0.0.1:39092"
+BROKER_LIST="127.0.0.1:19092"
 
 function start() {
     rm -rf /private/tmp/jmx_prometheus_javaagent-0.9.jar
@@ -38,8 +39,8 @@ function init() {
     ${KAFKA_LOCAL_BIN_PATH}/kafka-topics.sh \
         --create \
         --bootstrap-server ${BOOTSTRAP_SERVER} \
-        --replication-factor 3 \
-        --partitions 3 \
+        --replication-factor 1 \
+        --partitions 1 \
         --topic ${TOPIC_NAME}
     echo "Topic created: ${TOPIC_NAME}"
 

@@ -209,41 +209,40 @@ processors:
   - add_fields:
       when:
         contains:
-          message: "Web.Handler"
+          message: "Web.Handler" # "message":"[Web.Handler] ..."
       fields:
         module: "web"
   - add_fields:
       when:
-        contains:
-          message: "user-agent"
+        has_fields: ['user-agent']
       fields:
         module: "gin"
   - drop_event:
       when:
         contains:
-          message: "/metrics" # remove web server prometheus metrics requests
+          message: "/metrics" # remove gin web server prometheus metrics requests
   - add_fields:
       when:
         contains:
-          message: "gorm"
+          message: "gorm" # "message":"gorm"
       fields:
         module: "gorm"
   - add_fields:
       when:
         contains:
-          message: "Service.Rpc"
+          message: "Service.Rpc" # "message":"[Service.Rpc] ..."
       fields:
         module: "service"
   - add_fields:
       when:
         contains:
-          message: "Consumer"
+          message: "Consumer" # "message":"[Consumer] ..."
       fields:
         module: "consumer"
   - add_fields:
       when:
         contains:
-          message: "Dao"
+          message: "Dao" # "message":"[Dao] ..."
       fields:
         module: "dao"
 

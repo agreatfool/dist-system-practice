@@ -6,6 +6,20 @@ x-cas-environment-defaults:
   C4: &CASSANDRA_START_RPC "CASSANDRA_START_RPC=true"
   C5: &CASSANDRA_CLUSTER_NAME "CASSANDRA_CLUSTER_NAME=cassandra_cluster"
   C6: &CASSANDRA_SEEDS "CASSANDRA_SEEDS=cas_1"
+  C7: &CASSANDRA_JVM "JAVA_OPTS=\
+        -Dfile.encoding=UTF-8 \
+        -Xms1g \
+        -Xmx1g \
+      "
+
+x-cas-ulimit-defaults: &CAS_ULIMIT_DEFAULTS
+  nproc: 65535
+  nofile:
+    soft: 65535
+    hard: 65535
+  memlock:
+    soft: -1
+    hard: -1
 
 networks:
   net:
@@ -46,3 +60,6 @@ services:
       - *CASSANDRA_START_RPC
       - *CASSANDRA_CLUSTER_NAME
       - *CASSANDRA_SEEDS
+      - *CASSANDRA_JVM
+    ulimits:
+      <<: *CAS_ULIMIT_DEFAULTS
