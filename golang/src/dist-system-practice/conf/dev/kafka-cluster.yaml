@@ -35,11 +35,21 @@ networks:
     driver: "bridge"
 
 volumes:
-  kafka_vol_1:
+  kafka_data_1:
     driver: "local"
-  kafka_vol_2:
+  kafka_home_1:
     driver: "local"
-  kafka_vol_3:
+  kafka_data_2:
+    driver: "local"
+  kafka_home_2:
+    driver: "local"
+  kafka_data_3:
+    driver: "local"
+  kafka_home_3:
+    driver: "local"
+  zookeeper_data:
+    driver: "local"
+  zookeeper_conf:
     driver: "local"
 
 services:
@@ -47,6 +57,9 @@ services:
     image: "wurstmeister/zookeeper:latest"
     hostname: "zookeeper"
     container_name: "zookeeper"
+    volumes:
+      - zookeeper_data:/opt/zookeeper-3.4.13/data
+      - zookeeper_conf:/opt/zookeeper-3.4.13/conf
     networks:
       - "net"
     ports:
@@ -63,7 +76,8 @@ services:
     volumes:
       - /private/tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar
       - /private/tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml
-      - kafka_vol_1:/tmp/kafka/data
+      - kafka_data_1:/tmp/kafka/data
+      - kafka_home_1:/kafka
     networks:
       - "net"
     ports:
@@ -93,7 +107,8 @@ services:
 #    volumes:
 #      - /private/tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar
 #      - /private/tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml
-#      - kafka_vol_2:/tmp/kafka/data
+#      - kafka_data_2:/tmp/kafka/data
+#      - kafka_home_2:/kafka
 #    networks:
 #      - "net"
 #    ports:
@@ -123,7 +138,8 @@ services:
 #    volumes:
 #      - /private/tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar
 #      - /private/tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml
-#      - kafka_vol_3:/tmp/kafka/data
+#      - kafka_data_3:/tmp/kafka/data
+#      - kafka_home_3:/kafka
 #    networks:
 #      - "net"
 #    ports:
