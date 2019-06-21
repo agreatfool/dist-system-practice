@@ -24,11 +24,11 @@ BASEPATH="${FULLPATH}/../.."
 
 function start() {
     rm -rf /private/tmp/prom-master.yaml
-    cp ${BASEPATH}/prometheus/prom-master.yaml /private/tmp/prom-master.yaml
+    cp ${BASEPATH}/vendors/prometheus/prom-master.yaml /private/tmp/prom-master.yaml
     rm -rf /private/tmp/machines
-    cp -R ${BASEPATH}/prometheus/machines /private/tmp/machines
+    cp -R ${BASEPATH}/vendors/prometheus/machines /private/tmp/machines
     rm -rf /private/tmp/grafana
-    cp -R ${BASEPATH}/prometheus/grafana /private/tmp/grafana
+    cp -R ${BASEPATH}/vendors/prometheus/grafana /private/tmp/grafana
 
     node
 
@@ -50,7 +50,7 @@ function node() {
     rm -rf /private/tmp/logs/node_exporter.log
     touch /private/tmp/logs/node_exporter.log
 
-    nohup ${BASEPATH}/prometheus/bin/node_exporter > /private/tmp/logs/node_exporter.log&
+    nohup ${BASEPATH}/vendors/prometheus/bin/node_exporter > /private/tmp/logs/node_exporter.log&
     echo "node_exporter started"
 }
 
