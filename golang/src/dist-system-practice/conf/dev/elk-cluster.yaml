@@ -77,7 +77,7 @@ services:
       - "net"
     volumes:
       - /private/tmp/filebeat.yaml:/usr/share/filebeat/filebeat.yml
-      - /private/tmp/logs/app:/tmp/app/logs
+      - /private/tmp/logs/app:/tmp/logs/app
     restart: "always"
     logging:
       <<: *ES_LOGGING_DEFAULTS

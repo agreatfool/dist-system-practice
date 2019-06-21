@@ -21,7 +21,7 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /tmp/app/logs/app.web.stdout.log
+    - /tmp/logs/app/app.web.stdout.log
   json.keys_under_root: true
   fields:
     app: web
@@ -29,7 +29,7 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /tmp/app/logs/app.service.stdout.log
+    - /tmp/logs/app/app.service.stdout.log
   json.keys_under_root: true
   fields:
     app: service
@@ -37,7 +37,7 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /tmp/app/logs/app.consumer.stdout.log
+    - /tmp/logs/app/app.consumer.stdout.log
   json.keys_under_root: true
   fields:
     app: consumer
