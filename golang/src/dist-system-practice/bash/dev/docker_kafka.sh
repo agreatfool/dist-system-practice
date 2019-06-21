@@ -12,9 +12,9 @@ BROKER_LIST="192.168.3.111:19092"
 
 function start() {
     rm -rf /private/tmp/jmx_prometheus_javaagent-0.9.jar
-    cp ${BASEPATH}/kafka/jmx_prometheus_javaagent-0.9.jar /private/tmp/jmx_prometheus_javaagent-0.9.jar
+    cp ${BASEPATH}/vendors/kafka/jmx_prometheus_javaagent-0.9.jar /private/tmp/jmx_prometheus_javaagent-0.9.jar
     rm -rf /private/tmp/jmx-kafka-2_0_0.yaml
-    cp ${BASEPATH}/kafka/jmx-kafka-2_0_0.yaml /private/tmp/jmx-kafka-2_0_0.yaml
+    cp ${BASEPATH}/vendors/kafka/jmx-kafka-2_0_0.yaml /private/tmp/jmx-kafka-2_0_0.yaml
 
     docker-compose -f ${BASEPATH}/conf/dev/kafka-cluster.yaml -p "dist" up -d
 }
@@ -57,7 +57,7 @@ function topic() {
         --broker-list ${BROKER_LIST} \
         --property "parse.key=true" \
         --property "key.separator=:" \
-        --topic ${TOPIC_NAME} < ${BASEPATH}/kafka/messages.txt
+        --topic ${TOPIC_NAME} < ${BASEPATH}/vendors/kafka/messages.txt
     echo ""
 
     echo "Read ${TOPIC_NAME} message:"

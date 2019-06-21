@@ -7,6 +7,15 @@ DBNAME=dist
 USER=root
 PASSWORD=abc123
 
+# mysql
+# /docker-entrypoint-initdb.d
+# *.sql
+# /etc/mysql/conf.d
+# docker.cnf  mysql.cnf  mysqldump.cnf
+# /var/lib/mysql
+# db data
+# /var/log/mysql
+
 function start() {
     # remove any files in data dir
     # data dir have to be empty when mysql starting, otherwise error would be encountered
@@ -28,9 +37,7 @@ function start() {
         -e MYSQL_ROOT_PASSWORD=${PASSWORD} \
         -p 3306:3306 \
         -v ${BASEPATH}/schema:/docker-entrypoint-initdb.d \
-        -v ${BASEPATH}/mysql/conf:/etc/mysql/conf.d \
-        -v ${BASEPATH}/mysql/data:/var/lib/mysql \
-        -v ${BASEPATH}/mysql/log:/var/log/mysql \
+        -v mysqld_data:/var/lib/mysql \
         mysql:5.7.26
 
     exporter
