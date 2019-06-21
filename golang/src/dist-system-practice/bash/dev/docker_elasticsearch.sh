@@ -23,9 +23,9 @@ ES_1="http://127.0.0.1:9201"
 
 function start() {
     rm -rf /private/tmp/elasticsearch.yaml
-    cp ${BASEPATH}/conf/dev/elasticsearch.yaml /private/tmp/
+    cp ${BASEPATH}/conf/dev/elasticsearch/elasticsearch.yaml /private/tmp/
     rm -rf /private/tmp/filebeat.yaml
-    cp ${BASEPATH}/conf/dev/filebeat.yaml /private/tmp/
+    cp ${BASEPATH}/conf/dev/elasticsearch/filebeat.yaml /private/tmp/
 
     docker-compose -f ${BASEPATH}/conf/dev/elk-cluster.yaml -p "dist" up -d
 }
@@ -42,7 +42,7 @@ function init() {
     curl \
         -H "Content-Type: application/json" \
         -PUT "${ES_1}/_template/dist?pretty" \
-        -d @${BASEPATH}/conf/dev/elk-index-template.json
+        -d @${BASEPATH}/conf/dev/elasticsearch/elk-index-template.json
 }
 
 function health() {
