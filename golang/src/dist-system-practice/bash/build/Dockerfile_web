@@ -1,0 +1,21 @@
+# stage builder
+FROM golang:1.12-alpine AS builder
+
+WORKDIR /opt/dist-system-practice
+COPY ./dist-system-practice ./
+
+RUN apk add git
+
+RUN cd web \
+    && go build web.go \
+    && pwd \
+    && ls -l
+
+# stage app
+FROM alpine:3.9.4
+
+WORKDIR /app
+
+COPY --from=builder /opt/dist-system-practice/web/web .
+
+CMD ["./web"]
