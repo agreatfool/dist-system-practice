@@ -23,3 +23,14 @@ ES_JVM_MEM="6G"
 # PROMETHEUS
 GRAFANA_USER="admin"
 GRAFANA_PWD="abc123_"
+
+function usage() {
+    echo "Usage: cluster.sh web|service|consumer|reset"
+}
+
+if [[ $1 != "web" ]] && [[ $1 != "service" ]] && [[ $1 != "consumer" ]] && [[ $1 != "reset" ]]; then
+    usage
+    exit 0
+fi
+
+eval $1
