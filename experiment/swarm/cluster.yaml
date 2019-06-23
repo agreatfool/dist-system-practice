@@ -1,0 +1,50 @@
+version: '3'
+
+networks:
+  net:
+    driver: overlay
+
+services:
+  memcached:
+    image: memcached:1.5.14-alpine
+    networks:
+      - net
+    ports:
+      - 11211:11211
+    command: [
+      "-l 0.0.0.0",
+      "-p 11211",
+      "-m 64",
+    ]
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname==host1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  memcache_admin:
+    image: plopix/docker-memcacheadmin:latest
+    depends_on:
+      - memcached
+    networks:
+      - net
+    ports:
+      - 9083:9083
+    environment:
+      - MEMCACHE_HOST=memcached
+      - MEMCACHE_PORT=11211
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname==host2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
