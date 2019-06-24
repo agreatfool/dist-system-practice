@@ -4,7 +4,7 @@ Docker Swarm
 当前文件夹下的内容是为了演示Docker Swarm集群做的一个简单范例。
 
 ## 架构
-集群一共2个节点，一个节点上行运行memcached进程，另一个节点上运行memcache_admin，通过overlay网络将两个节点连接起来，做到admin可以访问到memcached进程。
+集群一共2个节点，一个节点上运行memcached进程，另一个节点上运行memcache_admin，通过overlay网络将两个节点连接起来，做到admin可以访问到memcached进程。
 
 ## 文件
 * cluster.yaml：集群描述compose配置文件
