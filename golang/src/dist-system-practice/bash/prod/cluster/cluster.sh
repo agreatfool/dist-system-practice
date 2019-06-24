@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-node build/index.js
+node build/index.js "$@"
