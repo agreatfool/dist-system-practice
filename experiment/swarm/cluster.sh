@@ -91,7 +91,14 @@ function service_list() {
 }
 
 function service_stop() {
-    docker-machine ssh host1 "docker stack rm dist"
+    eval "$(docker-machine env host1)"
+
+    docker service rm memcached
+    docker service rm memcache_admin
+
+#    docker stack rm dist
+
+    eval "$(docker-machine env -u)"
 }
 
 function service_log() {
