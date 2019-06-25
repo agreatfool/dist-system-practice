@@ -14,14 +14,20 @@ const mkdirp = LibUtil.promisify(mkdir) as (path: string) => void;
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* CONSTANTS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+const MACHINE_TYPE_CLIENT = 'client';
+
 const MACHINES: Array<Machine> = [
     {
         "name": "client",
+        "type": MACHINE_TYPE_CLIENT,
         "ip": process.env.HOST_IP_CLIENT,
-        "services": [],
+        "services": [
+            {"name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+        ],
     },
     {
         "name": "storage",
+        "type": "storage",
         "ip": process.env.HOST_IP_STORAGE,
         "services": [
             {"name": "node_storage", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
@@ -33,7 +39,8 @@ const MACHINES: Array<Machine> = [
         ],
     },
     {
-        "name": "kafka",
+        "name": "kafka_1",
+        "type": "kafka",
         "ip": process.env.HOST_IP_KAFKA_1,
         "services": [
             {"name": "node_kafka_1", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
@@ -44,18 +51,20 @@ const MACHINES: Array<Machine> = [
         ],
     },
     {
-        "name": "kafka",
+        "name": "kafka_2",
+        "type": "kafka",
         "ip": process.env.HOST_IP_KAFKA_2,
         "services": [
             {"name": "node_kafka_2", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
             {"name": "cadvisor_kafka_2", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "kafka_3", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0"},
             {"name": "kafka_4", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0"},
-            {"name": "kafka_exporter", "type": "kafka-exporter", "image": "danielqsj/kafka-exporter:v1.2.0"},
+            {"name": "kafka_exporter", "type": "kafka_exporter", "image": "danielqsj/kafka-exporter:v1.2.0"},
         ],
     },
     {
-        "name": "elasticsearch",
+        "name": "es_1",
+        "type": "elasticsearch",
         "ip": process.env.HOST_IP_ES_1,
         "services": [
             {"name": "node_es_1", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
@@ -65,7 +74,8 @@ const MACHINES: Array<Machine> = [
         ],
     },
     {
-        "name": "elasticsearch",
+        "name": "es_2",
+        "type": "elasticsearch",
         "ip": process.env.HOST_IP_ES_2,
         "services": [
             {"name": "node_es_2", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
@@ -81,14 +91,15 @@ const MACHINES: Array<Machine> = [
     },
     {
         "name": "monitor",
+        "type": "monitor",
         "ip": process.env.HOST_IP_MONITOR,
         "services": [
             {"name": "node_monitor", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
             {"name": "cadvisor_monitor", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "cassandra", "type": "cassandra", "image": "cassandra:3.11.4"},
-            {"name": "jquery", "type": "jaeger_query", "image": "jaegertracing/jaeger-query:1.11.0"},
             {"name": "jcollector_1", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0"},
             {"name": "jcollector_2", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0"},
+            {"name": "jquery", "type": "jaeger_query", "image": "jaegertracing/jaeger-query:1.11.0"},
             {"name": "prometheus", "type": "prometheus", "image": "prom/prometheus:v2.8.1"},
             {"name": "grafana", "type": "grafana", "image": "grafana/grafana:6.1.2"},
             {"name": "kibana", "type": "kibana", "image": "kibana:7.0.0"},
@@ -96,25 +107,27 @@ const MACHINES: Array<Machine> = [
     },
     {
         "name": "web",
+        "type": "web",
         "ip": process.env.HOST_IP_WEB,
         "services": [
             {"name": "node_web", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
             {"name": "cadvisor_web", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
+            {"name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
             {"name": "dist_app_web", "type": "dist_app_web", "image": "agreatfool/dist_app_web:0.0.1"},
             {"name": "filebeat_web", "type": "filebeat", "image": "elastic/filebeat:7.0.0"},
-            {"name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
         ]
     },
     {
         "name": "service",
+        "type": "service",
         "ip": process.env.HOST_IP_SERVICE,
         "services": [
             {"name": "node_service", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
             {"name": "cadvisor_service", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
+            {"name": "jagent_service", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
             {"name": "dist_app_service", "type": "dist_app_service", "image": "agreatfool/dist_app_service:0.0.1"},
             {"name": "dist_app_consumer", "type": "dist_app_consumer", "image": "agreatfool/dist_app_consumer:0.0.1"},
             {"name": "filebeat_service", "type": "filebeat", "image": "elastic/filebeat:7.0.0"},
-            {"name": "jagent_service", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
         ]
     },
 ];
@@ -124,6 +137,7 @@ const MACHINES: Array<Machine> = [
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 interface Machine {
     name: string;
+    type: string;
     ip: string;
     services: Array<Service>;
 }
@@ -140,11 +154,17 @@ interface Service {
 program.version(pkg.version)
     .description('cluster.sh: dist-system-practice project automation cluster tool')
     .option('-d, --deploy', 'execute deploy command')
+    .option('-u, --shutdown', 'shutdown all deployed services')
+    .option('-r, --restart', 'restart all deployed services')
+    .option('-n, --cleanup', 'remove all deployed services')
     .option('-c, --capture', 'capture stress test data')
     .option('-s, --stress', 'stress test')
     .parse(process.argv);
 
 const ARGS_DEPLOY = (program as any).deploy === undefined ? undefined : true;
+const ARGS_SHUTDOWN = (program as any).shutdown === undefined ? undefined : true;
+const ARGS_RESTART = (program as any).restart === undefined ? undefined : true;
+const ARGS_CLEANUP = (program as any).cleanup === undefined ? undefined : true;
 const ARGS_CAPTURE = (program as any).capture === undefined ? undefined : true;
 const ARGS_STRESS = (program as any).stress === undefined ? undefined : true;
 
@@ -158,6 +178,12 @@ class DistClusterTool {
 
         if (ARGS_DEPLOY) {
             await this.deploy();
+        } else if (ARGS_SHUTDOWN) {
+            await this.shutdown();
+        } else if (ARGS_RESTART) {
+            await this.restart();
+        } else if (ARGS_CLEANUP) {
+            await this.cleanup();
         } else if (ARGS_CAPTURE) {
             await this.capture();
         } else if (ARGS_STRESS) {
@@ -171,6 +197,21 @@ class DistClusterTool {
     private async deploy() {
         console.log('[Cluster Tool] deploy ...');
         await (new DistClusterToolDeploy()).run();
+    }
+
+    private async shutdown() {
+        console.log('[Cluster Tool] shutdown ...');
+        await (new DistClusterToolShutdown()).run();
+    }
+
+    private async restart() {
+        console.log('[Cluster Tool] restart ...');
+        await (new DistClusterToolRestart()).run();
+    }
+
+    private async cleanup() {
+        console.log('[Cluster Tool] cleanup ...');
+        await (new DistClusterToolCleanup()).run();
     }
 
     private async capture() {
@@ -190,19 +231,25 @@ class DistClusterToolDeploy {
     public async run() {
         await this.initMachines();
         await this.prepareImages();
+        await this.deployMachines();
     }
 
     private async initMachines() {
         let tasks = [];
 
         MACHINES.forEach((machine: Machine) => {
+            if (Tools.execSync(`docker-machine ls | grep ${machine.name}`).stdout) {
+                console.log(`Machine ${machine.name} already exists, skip it ...`);
+                return;
+            }
+
             tasks.push(Tools.execAsync(
                 'docker-machine create -d generic' +
-                    ` --generic-ip-address=${machine.ip}` +
-                    ' --generic-ssh-port 22' +
-                    ' --generic-ssh-key ~/.ssh/id_rsa' +
-                    ' --generic-ssh-user root' +
-                    ` ${machine.name}`,
+                ` --generic-ip-address=${machine.ip}` +
+                ' --generic-ssh-port 22' +
+                ' --generic-ssh-key ~/.ssh/id_rsa' +
+                ' --generic-ssh-user root' +
+                ` ${machine.name}`,
                 `machines/${machine.name}`
             ));
         });
@@ -210,7 +257,7 @@ class DistClusterToolDeploy {
         await Promise.all(tasks).catch((err) => {
             console.log(`Error in "initMachines": ${err.toString()}`)
         });
-        await Tools.execAsync('docker-machine ls', 'machines/list.txt');
+        await Tools.execAsync('docker-machine ls', 'machines/list');
     }
 
     private async prepareImages() {
@@ -232,6 +279,11 @@ class DistClusterToolDeploy {
                 pullCommands.push(`docker pull ${image}`);
             });
 
+            // do nothing with 0 pull commands
+            if (pullCommands.length == 0) {
+                return;
+            }
+
             // execution
             tasks.push(Tools.execAsync(
                 `docker-machine ssh \"${pullCommands.join(' && ')}\"`,
@@ -242,6 +294,64 @@ class DistClusterToolDeploy {
         await Promise.all(tasks).catch((err) => {
             console.log(`Error in "prepareImages": ${err.toString()}`)
         });
+    }
+
+    private async deployMachines() {
+        let tasks = [];
+
+        MACHINES.forEach((machine: Machine) => {
+            tasks.push(this.deployMachine(machine));
+        });
+
+        await Promise.all(tasks).catch((err) => {
+            console.log(`Error in "deployMachines": ${err.toString()}`)
+        });
+    }
+
+    private async deployMachine(machine: Machine) {
+        // deploy all services
+        for (let service of machine.services) {
+            await this.deployService(service);
+        }
+
+        // client machine unique logic
+        if (machine.type === MACHINE_TYPE_CLIENT) {
+            await this.deployMachineClient(machine);
+        }
+    }
+
+    private async deployMachineClient(machine: Machine) {
+
+    }
+
+    private async deployService(service: Service) {
+        switch (service.type) {
+
+        }
+    }
+
+}
+
+class DistClusterToolShutdown {
+
+    public async run() {
+
+    }
+
+}
+
+class DistClusterToolRestart {
+
+    public async run() {
+
+    }
+
+}
+
+class DistClusterToolCleanup {
+
+    public async run() {
+
     }
 
 }
@@ -276,43 +386,54 @@ class Tools {
         return LibPath.join(__dirname, '..');
     }
 
-    public static execSync(command: string, output: string, options?: shell.ExecOptions): number {
+    public static execSync(command: string, output?: string, options?: shell.ExecOptions): shell.ExecOutputReturnValue {
         if (!options) {
             options = {};
         }
 
         const result = shell.exec(command, options) as shell.ExecOutputReturnValue;
 
-        if (result.stdout) {
-            console.log(result.stdout);
-        }
-        if (result.stderr) {
-            console.log(result.stderr)
+        if (output) {
+            const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
+            mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
+            LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+
+            if (result.stdout) {
+                LibFs.appendFileSync(targetOutput, result.stdout);
+            }
+            if (result.stderr) {
+                LibFs.appendFileSync(targetOutput, result.stderr);
+            }
         }
 
-        return result.code;
+        return result;
     }
 
-    public static async execAsync(command: string, output: string, options?: shell.ExecOptions): Promise<void> {
+    public static async execAsync(command: string, output?: string, options?: shell.ExecOptions): Promise<void> {
         return new Promise((resolve, reject) => {
             if (!options) {
                 options = {};
             }
 
-            const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
-            mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
-            LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
-
-            const outputStream = LibFs.createWriteStream(targetOutput);
-
             const child = shell.exec(command, Object.assign(options, {async: true})) as LibCp.ChildProcess;
 
-            child.stdout.pipe(outputStream);
-            child.stderr.pipe(outputStream);
+            if (output) {
+                const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
+                mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
+                LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+                const outputStream = LibFs.createWriteStream(targetOutput);
+
+                child.stdout.pipe(outputStream);
+                child.stderr.pipe(outputStream);
+            }
 
             child.on('close', () => resolve());
             child.on('error', (err) => reject(err));
         });
+    }
+
+    public static ucFirst(str: string) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 }
 
