@@ -1,15 +1,25 @@
 import * as LibFs from 'mz/fs';
 import * as LibPath from 'path';
+import * as LibUtil from 'util';
+import * as LibCp from "child_process";
 
 import * as program from 'commander';
 import * as shell from 'shelljs';
+import * as mkdir from 'mkdirp';
 
 const pkg = require('../package.json');
+
+const mkdirp = LibUtil.promisify(mkdir) as (path: string) => void;
 
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* CONSTANTS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-const MACHINES: Machines = [
+const MACHINES: Array<Machine> = [
+    {
+        "name": "client",
+        "ip": process.env.HOST_IP_CLIENT,
+        "services": [],
+    },
     {
         "name": "storage",
         "ip": process.env.HOST_IP_STORAGE,
@@ -112,10 +122,6 @@ const MACHINES: Machines = [
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* STRUCTURE
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-interface Machines {
-    [index: number]: Machine;
-}
-
 interface Machine {
     name: string;
     ip: string;
@@ -132,9 +138,15 @@ interface Service {
 //-* COMMAND LINE
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 program.version(pkg.version)
-    .description('image-merge-dir: merge images provided into one or several ones')
-    .option('-d, --source_dir <string>', 'source image files dir')
+    .description('cluster.sh: dist-system-practice project automation cluster tool')
+    .option('-d, --deploy', 'execute deploy command')
+    .option('-c, --capture', 'capture stress test data')
+    .option('-s, --stress', 'stress test')
     .parse(process.argv);
+
+const ARGS_DEPLOY = (program as any).deploy === undefined ? undefined : true;
+const ARGS_CAPTURE = (program as any).capture === undefined ? undefined : true;
+const ARGS_STRESS = (program as any).stress === undefined ? undefined : true;
 
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* IMPLEMENTATION
@@ -142,20 +154,166 @@ program.version(pkg.version)
 class DistClusterTool {
 
     public async run() {
-        console.log('Merge starting ...');
+        console.log('[Cluster Tool] run ...');
 
-        await this._validate();
-        await this._process();
+        if (ARGS_DEPLOY) {
+            await this.deploy();
+        } else if (ARGS_CAPTURE) {
+            await this.capture();
+        } else if (ARGS_STRESS) {
+            await this.stress();
+        } else {
+            console.log('[Cluster Tool] Invalid option: Action option required');
+            process.exit(1);
+        }
     }
 
-    private async _validate() {
+    private async deploy() {
+        console.log('[Cluster Tool] deploy ...');
+        await (new DistClusterToolDeploy()).run();
+    }
+
+    private async capture() {
+        console.log('[Cluster Tool] capture ...');
+        await (new DistClusterToolCapture()).run();
+    }
+
+    private async stress() {
+        console.log('[Cluster Tool] stress ...');
+        await (new DistClusterToolStress()).run();
+    }
+
+}
+
+class DistClusterToolDeploy {
+
+    public async run() {
+        await this.initMachines();
+        await this.prepareImages();
+    }
+
+    private async initMachines() {
+        let tasks = [];
+
+        MACHINES.forEach((machine: Machine) => {
+            tasks.push(Tools.execAsync(
+                'docker-machine create -d generic' +
+                    ` --generic-ip-address=${machine.ip}` +
+                    ' --generic-ssh-port 22' +
+                    ' --generic-ssh-key ~/.ssh/id_rsa' +
+                    ' --generic-ssh-user root' +
+                    ` ${machine.name}`,
+                `machines/${machine.name}`
+            ));
+        });
+
+        await Promise.all(tasks).catch((err) => {
+            console.log(`Error in "initMachines": ${err.toString()}`)
+        });
+        await Tools.execAsync('docker-machine ls', 'machines/list.txt');
+    }
+
+    private async prepareImages() {
+        let tasks = [];
+
+        MACHINES.forEach((machine: Machine) => {
+            // collect image names
+            let images = [];
+            machine.services.forEach((service: Service) => {
+                if (images.indexOf(service.image) !== -1) {
+                    return;
+                }
+                images.push(service.image);
+            });
+
+            // generate pull image commands
+            let pullCommands = [];
+            images.forEach((image) => {
+                pullCommands.push(`docker pull ${image}`);
+            });
+
+            // execution
+            tasks.push(Tools.execAsync(
+                `docker-machine ssh \"${pullCommands.join(' && ')}\"`,
+                `images/${machine.name}`
+            ));
+        });
+
+        await Promise.all(tasks).catch((err) => {
+            console.log(`Error in "prepareImages": ${err.toString()}`)
+        });
+    }
+
+}
+
+class DistClusterToolCapture {
+
+    public async run() {
 
     }
 
-    private async _process() {
+}
+
+class DistClusterToolStress {
+
+    public async run() {
 
     }
 
+}
+
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//-* TOOLS
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+class Tools {
+    public static getMachineNames() {
+        return MACHINES.map((machine: Machine) => {
+            return machine.name;
+        });
+    }
+
+    public static getBaseDir() {
+        return LibPath.join(__dirname, '..');
+    }
+
+    public static execSync(command: string, output: string, options?: shell.ExecOptions): number {
+        if (!options) {
+            options = {};
+        }
+
+        const result = shell.exec(command, options) as shell.ExecOutputReturnValue;
+
+        if (result.stdout) {
+            console.log(result.stdout);
+        }
+        if (result.stderr) {
+            console.log(result.stderr)
+        }
+
+        return result.code;
+    }
+
+    public static async execAsync(command: string, output: string, options?: shell.ExecOptions): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (!options) {
+                options = {};
+            }
+
+            const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
+            mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
+            LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+
+            const outputStream = LibFs.createWriteStream(targetOutput);
+
+            const child = shell.exec(command, Object.assign(options, {async: true})) as LibCp.ChildProcess;
+
+            child.stdout.pipe(outputStream);
+            child.stderr.pipe(outputStream);
+
+            child.on('close', () => resolve());
+            child.on('error', (err) => reject(err));
+        });
+    }
 }
 
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-

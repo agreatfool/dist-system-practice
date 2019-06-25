@@ -8,32 +8,266 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const LibFs = require("mz/fs");
+const LibPath = require("path");
+const LibUtil = require("util");
 const program = require("commander");
+const shell = require("shelljs");
+const mkdir = require("mkdirp");
 const pkg = require('../package.json');
-const MYSQL = 'mysql';
+const mkdirp = LibUtil.promisify(mkdir);
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//-* CONSTANTS
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+const MACHINES = [
+    {
+        "name": "client",
+        "ip": process.env.HOST_IP_CLIENT,
+        "services": [],
+    },
+    {
+        "name": "storage",
+        "ip": process.env.HOST_IP_STORAGE,
+        "services": [
+            { "name": "node_storage", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_storage", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "mysqld", "type": "mysqld", "image": "mysql:5.7.26" },
+            { "name": "mysqld_exporter", "type": "mysqld_exporter", "image": "prom/mysqld-exporter:v0.11.0" },
+            { "name": "memcached", "type": "memcached", "image": "memcached:1.5.14-alpine" },
+            { "name": "memcached_exporter", "type": "memcached_exporter", "image": "prom/memcached-exporter:v0.5.0" }
+        ],
+    },
+    {
+        "name": "kafka",
+        "ip": process.env.HOST_IP_KAFKA_1,
+        "services": [
+            { "name": "node_kafka_1", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_kafka_1", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "zookeeper", "type": "zookeeper", "image": "wurstmeister/zookeeper:latest" },
+            { "name": "kafka_1", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0" },
+            { "name": "kafka_2", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0" },
+        ],
+    },
+    {
+        "name": "kafka",
+        "ip": process.env.HOST_IP_KAFKA_2,
+        "services": [
+            { "name": "node_kafka_2", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_kafka_2", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "kafka_3", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0" },
+            { "name": "kafka_4", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0" },
+            { "name": "kafka_exporter", "type": "kafka-exporter", "image": "danielqsj/kafka-exporter:v1.2.0" },
+        ],
+    },
+    {
+        "name": "elasticsearch",
+        "ip": process.env.HOST_IP_ES_1,
+        "services": [
+            { "name": "node_es_1", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_es_1", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "es_1", "type": "elasticsearch", "image": "elasticsearch:7.0.0" },
+            { "name": "es_2", "type": "elasticsearch", "image": "elasticsearch:7.0.0" },
+        ],
+    },
+    {
+        "name": "elasticsearch",
+        "ip": process.env.HOST_IP_ES_2,
+        "services": [
+            { "name": "node_es_2", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_es_2", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "es_3", "type": "elasticsearch", "image": "elasticsearch:7.0.0" },
+            { "name": "es_4", "type": "elasticsearch", "image": "elasticsearch:7.0.0" },
+            {
+                "name": "es_exporter",
+                "type": "es_exporter",
+                "image": "justwatch/elasticsearch_exporter:1.1.0rc1"
+            },
+        ],
+    },
+    {
+        "name": "monitor",
+        "ip": process.env.HOST_IP_MONITOR,
+        "services": [
+            { "name": "node_monitor", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_monitor", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "cassandra", "type": "cassandra", "image": "cassandra:3.11.4" },
+            { "name": "jquery", "type": "jaeger_query", "image": "jaegertracing/jaeger-query:1.11.0" },
+            { "name": "jcollector_1", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0" },
+            { "name": "jcollector_2", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0" },
+            { "name": "prometheus", "type": "prometheus", "image": "prom/prometheus:v2.8.1" },
+            { "name": "grafana", "type": "grafana", "image": "grafana/grafana:6.1.2" },
+            { "name": "kibana", "type": "kibana", "image": "kibana:7.0.0" },
+        ]
+    },
+    {
+        "name": "web",
+        "ip": process.env.HOST_IP_WEB,
+        "services": [
+            { "name": "node_web", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_web", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "dist_app_web", "type": "dist_app_web", "image": "agreatfool/dist_app_web:0.0.1" },
+            { "name": "filebeat_web", "type": "filebeat", "image": "elastic/filebeat:7.0.0" },
+            { "name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0" },
+        ]
+    },
+    {
+        "name": "service",
+        "ip": process.env.HOST_IP_SERVICE,
+        "services": [
+            { "name": "node_service", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_service", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "dist_app_service", "type": "dist_app_service", "image": "agreatfool/dist_app_service:0.0.1" },
+            { "name": "dist_app_consumer", "type": "dist_app_consumer", "image": "agreatfool/dist_app_consumer:0.0.1" },
+            { "name": "filebeat_service", "type": "filebeat", "image": "elastic/filebeat:7.0.0" },
+            { "name": "jagent_service", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0" },
+        ]
+    },
+];
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//-* COMMAND LINE
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 program.version(pkg.version)
-    .description('image-merge-dir: merge images provided into one or several ones')
-    .option('-d, --source_dir <string>', 'source image files dir')
+    .description('cluster.sh: dist-system-practice project automation cluster tool')
+    .option('-d, --deploy', 'execute deploy command')
+    .option('-c, --capture', 'capture stress test data')
+    .option('-s, --stress', 'stress test')
     .parse(process.argv);
+const ARGS_DEPLOY = program.deploy === undefined ? undefined : true;
+const ARGS_CAPTURE = program.capture === undefined ? undefined : true;
+const ARGS_STRESS = program.stress === undefined ? undefined : true;
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//-* IMPLEMENTATION
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 class DistClusterTool {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Merge starting ...');
-            yield this._validate();
-            yield this._process();
+            console.log('[Cluster Tool] run ...');
+            if (ARGS_DEPLOY) {
+                yield this.deploy();
+            }
+            else if (ARGS_CAPTURE) {
+                yield this.capture();
+            }
+            else if (ARGS_STRESS) {
+                yield this.stress();
+            }
+            else {
+                console.log('[Cluster Tool] Invalid option: Action option required');
+                process.exit(1);
+            }
         });
     }
-    _validate() {
+    deploy() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('[Cluster Tool] deploy ...');
+            yield (new DistClusterToolDeploy()).run();
         });
     }
-    _process() {
+    capture() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('[Cluster Tool] capture ...');
+            yield (new DistClusterToolCapture()).run();
+        });
+    }
+    stress() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('[Cluster Tool] stress ...');
+            yield (new DistClusterToolStress()).run();
+        });
+    }
+}
+class DistClusterToolDeploy {
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.initMachines();
+        });
+    }
+    initMachines() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let tasks = [];
+            MACHINES.forEach((machine) => {
+                tasks.push(Tools.execAsync('docker-machine create -d generic' +
+                    ` --generic-ip-address=${machine.ip}` +
+                    ' --generic-ssh-port 22' +
+                    ' --generic-ssh-key ~/.ssh/id_rsa' +
+                    ' --generic-ssh-user root' +
+                    ` ${machine.name}`, `machines/${machine.name}`));
+            });
+            yield Promise.all(tasks).catch((err) => {
+                console.log('Error in initMachines: ' + err.toString());
+            });
+            yield Tools.execAsync('docker-machine ls', 'machines/list.txt');
+        });
+    }
+    prepareImages() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let tasks = [];
+            MACHINES.forEach((machine) => {
+                let images = [];
+            });
+        });
+    }
+}
+class DistClusterToolCapture {
+    run() {
         return __awaiter(this, void 0, void 0, function* () {
         });
     }
 }
+class DistClusterToolStress {
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+        });
+    }
+}
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//-* TOOLS
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+class Tools {
+    static getMachineNames() {
+        return MACHINES.map((machine) => {
+            return machine.name;
+        });
+    }
+    static getBaseDir() {
+        return LibPath.join(__dirname, '..');
+    }
+    static execSync(command, output, options) {
+        if (!options) {
+            options = {};
+        }
+        const result = shell.exec(command, options);
+        if (result.stdout) {
+            console.log(result.stdout);
+        }
+        if (result.stderr) {
+            console.log(result.stderr);
+        }
+        return result.code;
+    }
+    static execAsync(command, output, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                if (!options) {
+                    options = {};
+                }
+                const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
+                mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
+                LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+                const outputStream = LibFs.createWriteStream(targetOutput);
+                const child = shell.exec(command, Object.assign(options, { async: true }));
+                child.stdout.pipe(outputStream);
+                child.stderr.pipe(outputStream);
+                child.on('close', () => resolve());
+                child.on('error', (err) => reject(err));
+            });
+        });
+    }
+}
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+//-* EXECUTION
+//-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 new DistClusterTool().run().then(_ => _).catch(_ => console.log(_));
-console.log(process.env);
 process.on('uncaughtException', (error) => {
     console.error(`Process on uncaughtException error = ${error.stack}`);
 });

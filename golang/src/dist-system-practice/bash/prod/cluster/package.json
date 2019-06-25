@@ -10,10 +10,14 @@
   "license": "MIT",
   "dependencies": {
     "commander": "2.20.0",
+    "mkdirp": "0.5.1",
     "mz": "2.7.0",
     "shelljs": "0.8.3"
   },
   "devDependencies": {
-    "@types/node": "10.14.10"
+    "@types/mkdirp": "0.5.1",
+    "@types/mz": "0.0.32",
+    "@types/node": "10.14.10",
+    "@types/shelljs": "0.8.3"
   }
 }
