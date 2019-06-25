@@ -6,6 +6,7 @@ import * as LibCp from "child_process";
 import * as program from 'commander';
 import * as shell from 'shelljs';
 import * as mkdir from 'mkdirp';
+import * as camel from 'camelcase';
 
 const pkg = require('../package.json');
 
@@ -23,6 +24,8 @@ const MACHINES: Array<Machine> = [
         "ip": process.env.HOST_IP_CLIENT,
         "services": [
             {"name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "cadvisor_client", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
+            {"name": "vegeta", "type": "vegeta", "image": "peterevans/vegeta:6.5.0"}
         ],
     },
     {
@@ -309,25 +312,18 @@ class DistClusterToolDeploy {
     }
 
     private async deployMachine(machine: Machine) {
-        // deploy all services
+        // deploy all services one by one
         for (let service of machine.services) {
-            await this.deployService(service);
-        }
+            if (service.type === 'vegeta') {
+                continue; // skip stress tool
+            }
 
-        // client machine unique logic
-        if (machine.type === MACHINE_TYPE_CLIENT) {
-            await this.deployMachineClient(machine);
+            await (this[`deployService${camel(service.type, {pascalCase: true})}`] as Function).apply(this, [service]);
         }
     }
 
-    private async deployMachineClient(machine: Machine) {
-
-    }
-
-    private async deployService(service: Service) {
-        switch (service.type) {
-
-        }
+    private async deployServiceMysqld(service: Service) {
+        // TODO
     }
 
 }

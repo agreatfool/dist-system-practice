@@ -14,6 +14,7 @@ const LibUtil = require("util");
 const program = require("commander");
 const shell = require("shelljs");
 const mkdir = require("mkdirp");
+const camel = require("camelcase");
 const pkg = require('../package.json');
 const mkdirp = LibUtil.promisify(mkdir);
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -27,6 +28,8 @@ const MACHINES = [
         "ip": process.env.HOST_IP_CLIENT,
         "services": [
             { "name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "cadvisor_client", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "vegeta", "type": "vegeta", "image": "peterevans/vegeta:6.5.0" }
         ],
     },
     {
@@ -292,24 +295,18 @@ class DistClusterToolDeploy {
     }
     deployMachine(machine) {
         return __awaiter(this, void 0, void 0, function* () {
-            // deploy all services
+            // deploy all services one by one
             for (let service of machine.services) {
-                yield this.deployService(service);
-            }
-            // client machine unique logic
-            if (machine.type === MACHINE_TYPE_CLIENT) {
-                yield this.deployMachineClient(machine);
+                if (service.type === 'vegeta') {
+                    continue; // skip stress tool
+                }
+                yield this[`deployService${camel(service.type, { pascalCase: true })}`].apply(this, [service]);
             }
         });
     }
-    deployMachineClient(machine) {
+    deployServiceMysqld(service) {
         return __awaiter(this, void 0, void 0, function* () {
-        });
-    }
-    deployService(service) {
-        return __awaiter(this, void 0, void 0, function* () {
-            switch (service.type) {
-            }
+            // TODO
         });
     }
 }
