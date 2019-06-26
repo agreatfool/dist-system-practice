@@ -9,16 +9,19 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "abort-controller": "3.0.0",
     "camelcase": "5.3.1",
     "commander": "2.20.0",
     "mkdirp": "0.5.1",
     "mz": "2.7.0",
+    "node-fetch": "2.6.0",
     "shelljs": "0.8.3"
   },
   "devDependencies": {
     "@types/mkdirp": "0.5.1",
     "@types/mz": "0.0.32",
     "@types/node": "10.14.10",
+    "@types/node-fetch": "2.3.7",
     "@types/shelljs": "0.8.3"
   }
 }

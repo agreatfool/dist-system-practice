@@ -15,18 +15,21 @@ const program = require("commander");
 const shell = require("shelljs");
 const mkdir = require("mkdirp");
 const camel = require("camelcase");
+const fetch = require("node-fetch");
+const AbortController = require("abort-controller");
 const pkg = require('../package.json');
 const mkdirp = LibUtil.promisify(mkdir);
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* CONSTANTS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-const MACHINE_TYPE_CLIENT = 'client';
 const KAFKA_BROKERS_ADDRESS = []; // "ip:port", ...
 const KAFKA_METRICS_ADDRESS = []; // "ip:port", ...
+let ES_CLUSTER_ENTRANCE = '';
+let ES_CLUSTER_NODES = '';
 const MACHINES = [
     {
         "name": "client",
-        "type": MACHINE_TYPE_CLIENT,
+        "type": "client",
         "ip": process.env.HOST_IP_CLIENT,
         "services": [
             { "name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
@@ -306,7 +309,7 @@ class DistClusterToolDeploy {
             }
         });
     }
-    deployNodeExporter(machine, service) {
+    deployServiceNodeExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker network create ${machine.name} &&` +
                 ` docker run -d --name ${service.name}` +
@@ -319,7 +322,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
-    deployCadvisor(machine, service) {
+    deployServiceCadvisor(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
@@ -384,7 +387,7 @@ class DistClusterToolDeploy {
             yield waitMysqldInitialized();
         });
     }
-    deployMysqldExporter(machine, service) {
+    deployServiceMysqldExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
@@ -409,7 +412,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
-    deployMemcached(machine, service) {
+    deployServiceMemcached(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
@@ -422,7 +425,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
-    deployMemcachedExporter(machine, service) {
+    deployServiceMemcachedExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
@@ -433,7 +436,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
-    deployZookeeper(machine, service) {
+    deployServiceZookeeper(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = 'docker volume create zookeeper_data &&' +
                 'docker volume create zookeeper_conf &&' +
@@ -447,7 +450,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
-    deployKafka(machine, service) {
+    deployServiceKafka(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const id = Number.parseInt(service.name.split('_')[1]); // kafka_1 => [kafka, 1] => 1
             const brokerId = id - 1; // 1-1 => 0
@@ -494,7 +497,7 @@ class DistClusterToolDeploy {
             }
         });
     }
-    deployKafkaExporter(machine, service) {
+    deployServiceKafkaExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
@@ -510,6 +513,91 @@ class DistClusterToolDeploy {
                 initCommand += ` --kafka.server=${address}`;
             });
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+        });
+    }
+    deployServiceElasticsearch(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const id = Number.parseInt(service.name.split('_')[1]); // es_1 => [es, 1] => 1
+            const portInternal = `930${id - 1}`; // 9300、9301、9302、...
+            const portExternal = `920${id - 1}`; // 9200、9201、9202、...
+            const machines = Tools.getMachinesByType(machine.type);
+            const services = Tools.getServicesByType(service.type);
+            let nodes = [];
+            let discoverySeedHosts = [];
+            machines.forEach((mch) => {
+                mch.services.forEach((svc) => {
+                    if (svc.type != service.type) {
+                        return;
+                    }
+                    const portId = Number.parseInt(svc.name.split('_')[1]) - 1;
+                    discoverySeedHosts.push(`${mch.ip}:930${portId}`);
+                    nodes.push(`${mch.ip}:920${portId}`);
+                });
+            });
+            let initialMasterNodes = [];
+            services.forEach((svc) => {
+                initialMasterNodes.push(svc.name);
+            });
+            ES_CLUSTER_ENTRANCE = `${machines[0].ip}:9200`;
+            ES_CLUSTER_NODES = nodes.join(',');
+            let initCommand = `docker volume create es_data_${id} &&` +
+                ` docker volume create es_logs_${id} &&` +
+                ` docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ' --ulimit nproc=65535' +
+                ' --ulimit nofile=65535:65535' +
+                ' --ulimit memlock=-1:-1' +
+                ` --network ${machine.name}` +
+                ` -p ${portInternal}:${portInternal}` +
+                ` -p ${portExternal}:${portExternal}` +
+                ` -v es_data_${id}:/usr/share/elasticsearch/data` +
+                ` -v es_logs_${id}:/usr/share/elasticsearch/logs` +
+                ` -v ${Tools.getConfDir()}/elasticsearch/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml` +
+                ` -e node.name="${service.name}"` +
+                ` -e network.host="0.0.0.0"` +
+                ` -e http.port=${portExternal}` +
+                ` -e network.publish_host="${machine.ip}"` +
+                ` -e transport.tcp.port=${portInternal}` +
+                ` -e node.master=true` +
+                ` -e node.data=true` +
+                ` -e ES_JAVA_OPTS="-Xms${process.env.ES_JVM_MEM} -Xmx${process.env.ES_JVM_MEM}"` +
+                ` -e discovery.seed_hosts=${discoverySeedHosts.join(',')}` +
+                ` -e cluster.initial_master_nodes=${initialMasterNodes.join(',')}` +
+                ` ${service.image}`;
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            let failed = 0;
+            function waitElasticsearchCluster() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    // @ts-ignore
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => {
+                        controller.abort();
+                    }, 50000);
+                    try {
+                        // @ts-ignore
+                        let response = yield fetch(`http://${ES_CLUSTER_ENTRANCE}/_cluster/health?wait_for_status=green&timeout=60s`, { signal: controller.signal });
+                        let data = yield response.json();
+                        clearTimeout(timeout);
+                        console.log('Es cluster: ', data);
+                    }
+                    catch (err) {
+                        console.log(`Failed, wait 15s to retry, times: ${failed++}, msg: ${err.message}`);
+                        clearTimeout(timeout);
+                        yield new Promise((resolve) => {
+                            setTimeout(() => resolve(), 15000); // wait 15s before retry
+                        });
+                        return waitElasticsearchCluster(); // again
+                    }
+                });
+            }
+            // check cluster status, init index when ready
+            if (id == services.length) {
+                console.log('Start to wait for es cluster ...');
+                yield waitElasticsearchCluster();
+                yield Tools.execAsync('curl -H "Content-Type: application/json"' +
+                    ` -PUT "${ES_CLUSTER_ENTRANCE}/_template/dist?pretty"` +
+                    ` -d @${Tools.getConfDir()}/elasticsearch/elk-index-template.json`, `services/${machine.name}/es_index`);
+            }
         });
     }
 }
@@ -579,6 +667,7 @@ class Tools {
         if (!options) {
             options = {};
         }
+        console.log(`ExecsSync: ${command}`);
         const result = shell.exec(command, options);
         if (output) {
             const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
@@ -599,6 +688,7 @@ class Tools {
                 if (!options) {
                     options = {};
                 }
+                console.log(`ExecsAsync: ${command}`);
                 const child = shell.exec(command, Object.assign(options, { async: true }));
                 if (output) {
                     const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');

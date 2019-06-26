@@ -7,6 +7,8 @@ import * as program from 'commander';
 import * as shell from 'shelljs';
 import * as mkdir from 'mkdirp';
 import * as camel from 'camelcase';
+import * as fetch from 'node-fetch';
+import * as AbortController from 'abort-controller';
 
 const pkg = require('../package.json');
 
@@ -15,14 +17,15 @@ const mkdirp = LibUtil.promisify(mkdir) as (path: string) => void;
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* CONSTANTS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-const MACHINE_TYPE_CLIENT = 'client';
 const KAFKA_BROKERS_ADDRESS = []; // "ip:port", ...
 const KAFKA_METRICS_ADDRESS = []; // "ip:port", ...
+let ES_CLUSTER_ENTRANCE = '';
+let ES_CLUSTER_NODES = '';
 
 const MACHINES: Array<Machine> = [
     {
         "name": "client",
-        "type": MACHINE_TYPE_CLIENT,
+        "type": "client",
         "ip": process.env.HOST_IP_CLIENT,
         "services": [
             {"name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
@@ -324,7 +327,7 @@ class DistClusterToolDeploy {
         }
     }
 
-    private async deployNodeExporter(machine: Machine, service: Service) {
+    private async deployServiceNodeExporter(machine: Machine, service: Service) {
         const initCommand = `docker network create ${machine.name} &&` +
             ` docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -340,7 +343,7 @@ class DistClusterToolDeploy {
         );
     }
 
-    private async deployCadvisor(machine: Machine, service: Service) {
+    private async deployServiceCadvisor(machine: Machine, service: Service) {
         const initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
@@ -421,7 +424,7 @@ class DistClusterToolDeploy {
         await waitMysqldInitialized();
     }
 
-    private async deployMysqldExporter(machine: Machine, service: Service) {
+    private async deployServiceMysqldExporter(machine: Machine, service: Service) {
         const initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
@@ -449,7 +452,7 @@ class DistClusterToolDeploy {
         );
     }
 
-    private async deployMemcached(machine: Machine, service: Service) {
+    private async deployServiceMemcached(machine: Machine, service: Service) {
         const initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
@@ -465,7 +468,7 @@ class DistClusterToolDeploy {
         );
     }
 
-    private async deployMemcachedExporter(machine: Machine, service: Service) {
+    private async deployServiceMemcachedExporter(machine: Machine, service: Service) {
         const initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
@@ -479,7 +482,7 @@ class DistClusterToolDeploy {
         );
     }
 
-    private async deployZookeeper(machine: Machine, service: Service) {
+    private async deployServiceZookeeper(machine: Machine, service: Service) {
         const initCommand = 'docker volume create zookeeper_data &&' +
             'docker volume create zookeeper_conf &&' +
             `docker run -d --name ${service.name}` +
@@ -496,7 +499,7 @@ class DistClusterToolDeploy {
         );
     }
 
-    private async deployKafka(machine: Machine, service: Service) {
+    private async deployServiceKafka(machine: Machine, service: Service) {
         const id = Number.parseInt(service.name.split('_')[1]); // kafka_1 => [kafka, 1] => 1
         const brokerId = id - 1; // 1-1 => 0
         const portInternal = `9${brokerId}93`; // 9093、9193、9293、...
@@ -550,7 +553,7 @@ class DistClusterToolDeploy {
         }
     }
 
-    private async deployKafkaExporter(machine: Machine, service: Service) {
+    private async deployServiceKafkaExporter(machine: Machine, service: Service) {
         let initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
@@ -570,6 +573,107 @@ class DistClusterToolDeploy {
             `docker-machine ssh ${machine.name} "${initCommand}"`,
             `services/${machine.name}/${service.name}`
         );
+    }
+
+    private async deployServiceElasticsearch(machine: Machine, service: Service) {
+        const id = Number.parseInt(service.name.split('_')[1]); // es_1 => [es, 1] => 1
+        const portInternal = `930${id - 1}`; // 9300、9301、9302、...
+        const portExternal = `920${id - 1}`; // 9200、9201、9202、...
+
+        const machines = Tools.getMachinesByType(machine.type);
+        const services = Tools.getServicesByType(service.type);
+
+        let nodes = [];
+        let discoverySeedHosts = [];
+        machines.forEach((mch: Machine) => {
+            mch.services.forEach((svc: Service) => {
+                if (svc.type != service.type) {
+                    return;
+                }
+                const portId = Number.parseInt(svc.name.split('_')[1]) - 1;
+                discoverySeedHosts.push(`${mch.ip}:930${portId}`);
+                nodes.push(`${mch.ip}:920${portId}`);
+            });
+        });
+        let initialMasterNodes = [];
+        services.forEach((svc: Service) => {
+            initialMasterNodes.push(svc.name);
+        });
+
+        ES_CLUSTER_ENTRANCE = `${machines[0].ip}:9200`;
+        ES_CLUSTER_NODES = nodes.join(',');
+
+        let initCommand = `docker volume create es_data_${id} &&` +
+            ` docker volume create es_logs_${id} &&` +
+            ` docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ' --ulimit nproc=65535' +
+            ' --ulimit nofile=65535:65535' +
+            ' --ulimit memlock=-1:-1' +
+            ` --network ${machine.name}` +
+            ` -p ${portInternal}:${portInternal}` +
+            ` -p ${portExternal}:${portExternal}` +
+            ` -v es_data_${id}:/usr/share/elasticsearch/data` +
+            ` -v es_logs_${id}:/usr/share/elasticsearch/logs` +
+            ` -v ${Tools.getConfDir()}/elasticsearch/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml` +
+            ` -e node.name="${service.name}"` +
+            ` -e network.host="0.0.0.0"` +
+            ` -e http.port=${portExternal}` +
+            ` -e network.publish_host="${machine.ip}"` +
+            ` -e transport.tcp.port=${portInternal}` +
+            ` -e node.master=true` +
+            ` -e node.data=true` +
+            ` -e ES_JAVA_OPTS="-Xms${process.env.ES_JVM_MEM} -Xmx${process.env.ES_JVM_MEM}"` +
+            ` -e discovery.seed_hosts=${discoverySeedHosts.join(',')}` +
+            ` -e cluster.initial_master_nodes=${initialMasterNodes.join(',')}` +
+            ` ${service.image}`;
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+
+        let failed = 0;
+        async function waitElasticsearchCluster() {
+            // @ts-ignore
+            const controller = new AbortController();
+            const timeout = setTimeout(
+                () => {
+                    controller.abort();
+                },
+                50000, // 50s
+            );
+
+            try {
+                // @ts-ignore
+                let response = await fetch(
+                    `http://${ES_CLUSTER_ENTRANCE}/_cluster/health?wait_for_status=green&timeout=60s`,
+                    {signal: controller.signal}
+                );
+                let data = await response.json();
+                clearTimeout(timeout);
+                console.log('Es cluster: ', data);
+            } catch (err) {
+                console.log(`Failed, wait 15s to retry, times: ${failed++}, msg: ${err.message}`);
+                clearTimeout(timeout);
+                await new Promise((resolve) => {
+                    setTimeout(() => resolve(), 15000); // wait 15s before retry
+                });
+                return waitElasticsearchCluster(); // again
+            }
+        }
+
+        // check cluster status, init index when ready
+        if (id == services.length) {
+            console.log('Start to wait for es cluster ...');
+            await waitElasticsearchCluster();
+            await Tools.execAsync(
+                'curl -H "Content-Type: application/json"' +
+                    ` -PUT "${ES_CLUSTER_ENTRANCE}/_template/dist?pretty"` +
+                    ` -d @${Tools.getConfDir()}/elasticsearch/elk-index-template.json`,
+                `services/${machine.name}/es_index`
+            );
+        }
     }
 
 }
@@ -658,6 +762,8 @@ class Tools {
             options = {};
         }
 
+        console.log(`ExecsSync: ${command}`);
+
         const result = shell.exec(command, options) as shell.ExecOutputReturnValue;
 
         if (output) {
@@ -681,6 +787,8 @@ class Tools {
             if (!options) {
                 options = {};
             }
+
+            console.log(`ExecsAsync: ${command}`);
 
             const child = shell.exec(command, Object.assign(options, {async: true})) as LibCp.ChildProcess;
 
