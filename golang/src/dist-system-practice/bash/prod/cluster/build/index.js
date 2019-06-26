@@ -21,6 +21,8 @@ const mkdirp = LibUtil.promisify(mkdir);
 //-* CONSTANTS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 const MACHINE_TYPE_CLIENT = 'client';
+const KAFKA_BROKERS_ADDRESS = []; // "ip:port", ...
+const KAFKA_METRICS_ADDRESS = []; // "ip:port", ...
 const MACHINES = [
     {
         "name": "client",
@@ -373,8 +375,8 @@ class DistClusterToolDeploy {
                 ` -v ${Tools.getProjectDir()}/schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql` +
                 ` -v ${insertSqlPath}:/docker-entrypoint-initdb.d/${machine.name}_${service.name}_init.sql` +
                 ' -v mysqld_data:/var/lib/mysql' +
-                ` -e MYSQL_DATABASE=${process.env.MYSQL_DB}` +
-                ` -e MYSQL_ROOT_PASSWORD=${process.env.MYSQL_PWD}` +
+                ` -e MYSQL_DATABASE="${process.env.MYSQL_DB}"` +
+                ` -e MYSQL_ROOT_PASSWORD="${process.env.MYSQL_PWD}"` +
                 ` ${service.image}` +
                 ` --max-allowed-packet=33554432`; // 32M
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
@@ -388,7 +390,7 @@ class DistClusterToolDeploy {
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
                 ' -p 9104:9104' +
-                ` -e DATA_SOURCE_NAME=${process.env.MYSQL_USER}:${process.env.MYSQL_PWD}@tcp(mysqld:3306)/${process.env.MYSQL_DB}?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true&loc=Local` +
+                ` -e DATA_SOURCE_NAME="${process.env.MYSQL_USER}:${process.env.MYSQL_PWD}@tcp(mysqld:3306)/${process.env.MYSQL_DB}?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true&loc=Local"` +
                 ` ${service.image}` +
                 ' --collect.binlog_size' +
                 ' --collect.info_schema.processlist' +
@@ -431,6 +433,85 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    deployZookeeper(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const initCommand = 'docker volume create zookeeper_data &&' +
+                'docker volume create zookeeper_conf &&' +
+                `docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ' -p 2181:2181' +
+                ' -v zookeeper_data:/opt/zookeeper-3.4.13/data' +
+                ' -v zookeeper_conf:/opt/zookeeper-3.4.13/conf' +
+                ` ${service.image}`;
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+        });
+    }
+    deployKafka(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const id = Number.parseInt(service.name.split('_')[1]); // kafka_1 => [kafka, 1] => 1
+            const brokerId = id - 1; // 1-1 => 0
+            const portInternal = `9${brokerId}93`; // 9093、9193、9293、...
+            const portExternal = `9${brokerId}92`; // 9092、9192、9292、...
+            const portMetrics = `7${brokerId}71`; // 7071、7172、7173、...
+            KAFKA_BROKERS_ADDRESS.push(`${machine.ip}:${portExternal}`);
+            KAFKA_METRICS_ADDRESS.push(`${machine.ip}:${portMetrics}`);
+            const machines = Tools.getMachinesByType(machine.type);
+            const services = Tools.getServicesByType(service.type);
+            const initCommand = `docker volume create kafka_data_${id} &&` +
+                `docker volume create kafka_home_${id} &&` +
+                `docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ` -p ${portInternal}:${portInternal}` +
+                ` -p ${portExternal}:${portExternal}` +
+                ` -p ${portMetrics}:${portMetrics}` +
+                ` -v ${Tools.getProjectDir()}/vendors/kafka/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar` +
+                ` -v ${Tools.getProjectDir()}/vendors/kafka/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml` +
+                ` -v kafka_data_${id}:/tmp/kafka/data` +
+                ` -v kafka_home_${id}:/tmp/kafka/data` +
+                ` -e KAFKA_LISTENERS="INSIDE://0.0.0.0:${portInternal},OUTSIDE://0.0.0.0:${portExternal}"` +
+                ` -e KAFKA_ADVERTISED_LISTENERS="INSIDE://${machine.ip}:${portInternal},OUTSIDE://${machine.ip}:${portExternal}"` +
+                ` -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP="INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"` +
+                ` -e KAFKA_INTER_BROKER_LISTENER_NAME="INSIDE"` +
+                ` -e KAFKA_BROKER_ID=${brokerId}` +
+                ` -e KAFKA_ZOOKEEPER_CONNECT="${machines[0].ip}:2181"` +
+                ` -e JMX_PORT=9991` +
+                ` -e KAFKA_OPTS="-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar=7071:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml"` +
+                ` -e KAFKA_HEAP_OPTS="-Xms${process.env.KAFKA_JVM_MEM} -Xmx${process.env.KAFKA_JVM_MEM}"` +
+                ` -e KAFKA_LOG_DIRS="/tmp/kafka/data"` +
+                ` -e KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1` +
+                ` -e KAFKA_MIN_INSYNC_REPLICAS=1` +
+                ` ${service.image}`;
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            // wait several seconds here, wait for kafka initialization done
+            if (id === services.length) { // only the last node need to do this
+                yield new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve();
+                    }, 5000); // 5s
+                });
+            }
+        });
+    }
+    deployKafkaExporter(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let initCommand = `docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ' -p 9308:9308' +
+                ` ${service.image}` +
+                ' --web.listen-address=0.0.0.0:9308' +
+                ' --web.telemetry-path=/metrics' +
+                ' --log.level=info' +
+                ' --topic.filter=.*' +
+                ' --group.filter=.*';
+            KAFKA_BROKERS_ADDRESS.forEach((address) => {
+                initCommand += ` --kafka.server=${address}`;
+            });
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+        });
+    }
 }
 class DistClusterToolShutdown {
     run() {
@@ -469,6 +550,20 @@ class Tools {
     static getMachineNames() {
         return MACHINES.map((machine) => {
             return machine.name;
+        });
+    }
+    static getMachinesByType(type) {
+        return MACHINES.filter((machine) => {
+            return machine.type == type;
+        });
+    }
+    static getServicesByType(type) {
+        let services = [];
+        MACHINES.forEach((machine) => {
+            services = services.concat(machine.services);
+        });
+        return services.filter((service) => {
+            return service.type == type;
         });
     }
     static getBaseDir() {
