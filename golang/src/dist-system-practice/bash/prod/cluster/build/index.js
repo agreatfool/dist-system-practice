@@ -304,6 +304,35 @@ class DistClusterToolDeploy {
             }
         });
     }
+    deployNodeExporter(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const initCommand = `docker network create ${machine.name} &&` +
+                ` docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ' -p 9100:9100' +
+                ' -v /:/host:ro,rslave' +
+                ` ${service.image}` +
+                ` --path.rootfs /host`;
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+        });
+    }
+    deployCadvisor(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const initCommand = `docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ' -p 8080:8080' +
+                ' -v /:/rootfs:ro' +
+                ' -v /var/run:/var/run:rw' +
+                ' -v /sys:/sys:ro' +
+                ' -v /var/lib/docker/:/var/lib/docker:ro' +
+                ` ${service.image}` +
+                ` --listen_ip=0.0.0.0` +
+                ` --port=8080`;
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+        });
+    }
     deployServiceMysqld(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             // tool
@@ -338,6 +367,7 @@ class DistClusterToolDeploy {
             // init mysqld container
             const initCommand = 'docker volume create mysqld_data &&' +
                 ` docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
                 ' -p 3306:3306' +
                 ` -v ${Tools.getProjectDir()}/schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql` +
@@ -350,6 +380,55 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
             // waiting for mysql initialized
             yield waitMysqldInitialized();
+        });
+    }
+    deployMysqldExporter(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const initCommand = `docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ' -p 9104:9104' +
+                ` -e DATA_SOURCE_NAME=${process.env.MYSQL_USER}:${process.env.MYSQL_PWD}@tcp(mysqld:3306)/${process.env.MYSQL_DB}?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true&loc=Local` +
+                ` ${service.image}` +
+                ' --collect.binlog_size' +
+                ' --collect.info_schema.processlist' +
+                ' --collect.info_schema.innodb_cmp' +
+                ' --collect.info_schema.innodb_cmpmem' +
+                ' --collect.engine_innodb_status' +
+                ' --collect.info_schema.innodb_metrics' +
+                ' --collect.info_schema.innodb_tablespaces' +
+                ' --collect.perf_schema.eventsstatements' +
+                ' --collect.perf_schema.eventswaits' +
+                ' --collect.perf_schema.file_events' +
+                ' --collect.perf_schema.file_instances' +
+                ' --collect.perf_schema.indexiowaits' +
+                ' --collect.perf_schema.tablelocks' +
+                ' --collect.perf_schema.tableiowaits';
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+        });
+    }
+    deployMemcached(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const initCommand = `docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ' -p 11211:11211' +
+                ` ${service.image}` +
+                ' -l 0.0.0.0' +
+                ' -p 11211' +
+                ` -m ${process.env.MEMCACHED_MEM}`;
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+        });
+    }
+    deployMemcachedExporter(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const initCommand = `docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ' -p 9150:9150' +
+                ` ${service.image}` +
+                ' --memcached.address=memcached:11211';
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
 }
