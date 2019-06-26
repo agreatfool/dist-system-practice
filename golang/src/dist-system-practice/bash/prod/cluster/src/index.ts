@@ -318,13 +318,74 @@ class DistClusterToolDeploy {
                 continue; // skip stress tool
             }
 
-            await (this[`deployService${camel(service.type, {pascalCase: true})}`] as Function).apply(this, [service]);
+            await (this[`deployService${camel(service.type, {pascalCase: true})}`] as Function).apply(this, [machine, service]);
         }
     }
 
-    private async deployServiceMysqld(service: Service) {
-        // TODO
+    private async deployServiceMysqld(machine: Machine, service: Service) {
+        // tool
+        function waitMysqldInitialized() {
+            return new Promise((resolve, reject) => {
+                const msgDone = "Version: '5.7.26'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server (GPL)";
+
+                const child = shell.exec(
+                    `docker-machine ssh ${machine.name} "docker logs -f ${service.name}"`,
+                    {async: true}
+                ) as LibCp.ChildProcess;
+
+                function detectEnd(chunk: any, proc: LibCp.ChildProcess) {
+                    const msg = chunk.toString();
+                    if (msg.indexOf(msgDone) != -1) {
+                        proc.kill('SIGINT');
+                    }
+                }
+
+                child.stdout.on('data', (chunk) => {
+                    detectEnd(chunk, child);
+                });
+                child.stderr.on('data', (chunk) => {
+                    detectEnd(chunk, child);
+                });
+
+                child.on('close', () => resolve());
+                child.on('error', (err) => reject(err));
+            });
+        }
+
+        // prepare init sql file
+        let inserts = [];
+        for (let i = 0; i < Number.parseInt(process.env.MAX_WORK_ID); i++) {
+            inserts.push('()');
+        }
+        const insertSqlFile = `${machine.name}_${service.name}_init.sql`;
+        const insertSqlPath = `/tmp/${insertSqlFile}`;
+        LibFs.writeFileSync(insertSqlPath, `INSERT INTO ${process.env.MYSQL_DB}.work VALUES ${inserts.join(',')};`);
+
+        // init mysqld container
+        const initCommand = 'docker volume create mysqld_data &&' +
+            ` docker run -d --name ${service.name}` +
+            ` --network ${machine.name}` +
+            ' -p 3306:3306' +
+            ` -v ${Tools.getProjectDir()}/schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql` +
+            ` -v ${insertSqlPath}:/docker-entrypoint-initdb.d/${machine.name}_${service.name}_init.sql` +
+            ' -v mysqld_data:/var/lib/mysql' +
+            ` -e MYSQL_DATABASE=${process.env.MYSQL_DB}` +
+            ` -e MYSQL_ROOT_PASSWORD=${process.env.MYSQL_PWD}` +
+            ` ${service.image}` +
+            ` --max-allowed-packet=33554432`; // 32M
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+
+        // waiting for mysql initialized
+        await waitMysqldInitialized();
     }
+
+
+
+
 
 }
 
@@ -379,7 +440,15 @@ class Tools {
     }
 
     public static getBaseDir() {
-        return LibPath.join(__dirname, '..');
+        return LibPath.join(__dirname, '..'); // dist-system-practice/bash/prod/cluster
+    }
+
+    public static getConfDir() {
+        return LibPath.join(__dirname, '..', '..', '..', '..', 'conf', 'prod'); // dist-system-practice/conf/prod/cluster
+    }
+
+    public static getProjectDir() {
+        return LibPath.join(__dirname, '..', '..', '..', '..'); // dist-system-practice
     }
 
     public static execSync(command: string, output?: string, options?: shell.ExecOptions): shell.ExecOutputReturnValue {
