@@ -484,8 +484,8 @@ class DistClusterToolDeploy {
 
     private async deployServiceZookeeper(machine: Machine, service: Service) {
         const initCommand = 'docker volume create zookeeper_data &&' +
-            'docker volume create zookeeper_conf &&' +
-            `docker run -d --name ${service.name}` +
+            ' docker volume create zookeeper_conf &&' +
+            ` docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
             ' -p 2181:2181' +
@@ -513,8 +513,8 @@ class DistClusterToolDeploy {
         const services = Tools.getServicesByType(service.type);
 
         const initCommand = `docker volume create kafka_data_${id} &&` +
-            `docker volume create kafka_home_${id} &&` +
-            `docker run -d --name ${service.name}` +
+            ` docker volume create kafka_home_${id} &&` +
+            ` docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
             ` -p ${portInternal}:${portInternal}` +
@@ -523,7 +523,7 @@ class DistClusterToolDeploy {
             ` -v ${Tools.getProjectDir()}/vendors/kafka/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar` +
             ` -v ${Tools.getProjectDir()}/vendors/kafka/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml` +
             ` -v kafka_data_${id}:/tmp/kafka/data` +
-            ` -v kafka_home_${id}:/tmp/kafka/data` +
+            ` -v kafka_home_${id}:/kafka` +
             ` -e KAFKA_LISTENERS="INSIDE://0.0.0.0:${portInternal},OUTSIDE://0.0.0.0:${portExternal}"` +
             ` -e KAFKA_ADVERTISED_LISTENERS="INSIDE://${machine.ip}:${portInternal},OUTSIDE://${machine.ip}:${portExternal}"` +
             ` -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP="INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"` +
@@ -545,11 +545,28 @@ class DistClusterToolDeploy {
 
         // wait several seconds here, wait for kafka initialization done
         if (id === services.length) { // only the last node need to do this
+            console.log('Wait 30s, then create topic data');
             await new Promise((resolve) => {
                 setTimeout(() => {
                     resolve();
-                }, 5000); // 5s
+                }, 30000); // 30s
             });
+
+            // create topic
+            const topicCommand = `${Tools.getProjectDir()}/vendors/kafka/kafka/bin/kafka-topics.sh` +
+                ' --create' +
+                ` --bootstrap-server ${machines[0].ip}:9092` +
+                ` --replication-factor ${services.length}` +
+                ` --partitions ${services.length}` +
+                ` --topic ${process.env.KAFKA_TOPIC} &&` +
+                ` ${Tools.getProjectDir()}/vendors/kafka/kafka/bin/kafka-topics.sh` +
+                ' --describe' +
+                ` --zookeeper ${machines[0].ip}:2181` +
+                ` --topic ${process.env.KAFKA_TOPIC}`;
+            await Tools.execAsync(
+                `docker-machine ssh ${machine.name} "${topicCommand}"`,
+                `services/${machine.name}/kafka_topic`
+            );
         }
     }
 
@@ -728,13 +745,13 @@ class Tools {
         });
     }
 
-    public static getMachinesByType(type: string) {
+    public static getMachinesByType(type: string): Array<Machine> {
         return MACHINES.filter((machine: Machine) => {
             return machine.type == type;
         });
     }
 
-    public static getServicesByType(type: string) {
+    public static getServicesByType(type: string): Array<Service> {
         let services = [];
         MACHINES.forEach((machine: Machine) => {
             services = services.concat(machine.services as Array<any>);

@@ -46,3 +46,4 @@ experiment/prometheus/federation/log
 # dist-system-practice
 golang/src/dist-system-practice/mysql/data
 golang/src/dist-system-practice/mysql/log
+golang/src/dist-system-practice/vendors/kafka/kafka
