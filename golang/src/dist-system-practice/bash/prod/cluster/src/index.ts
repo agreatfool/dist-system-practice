@@ -330,6 +330,7 @@ class DistClusterToolDeploy {
         }
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceNodeExporter(machine: Machine, service: Service) {
         const initCommand = `docker network create ${machine.name} &&` +
             ` docker run -d --name ${service.name}` +
@@ -346,6 +347,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceCadvisor(machine: Machine, service: Service) {
         const initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -365,6 +367,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceMysqld(machine: Machine, service: Service) {
         // tool
         function waitMysqldInitialized() {
@@ -431,6 +434,7 @@ class DistClusterToolDeploy {
         await waitMysqldInitialized();
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceMysqldExporter(machine: Machine, service: Service) {
         const initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -459,6 +463,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceMemcached(machine: Machine, service: Service) {
         const initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -475,6 +480,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceMemcachedExporter(machine: Machine, service: Service) {
         const initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -489,6 +495,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceZookeeper(machine: Machine, service: Service) {
         const initCommand = 'docker volume create zookeeper_data &&' +
             ' docker volume create zookeeper_conf &&' +
@@ -506,6 +513,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceKafka(machine: Machine, service: Service) {
         const id = Number.parseInt(service.name.split('_')[1]); // kafka_1 => [kafka, 1] => 1
         const brokerId = id - 1; // 1-1 => 0
@@ -580,6 +588,7 @@ class DistClusterToolDeploy {
         }
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceKafkaExporter(machine: Machine, service: Service) {
         let initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -602,6 +611,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceElasticsearch(machine: Machine, service: Service) {
         const id = Number.parseInt(service.name.split('_')[1]); // es_1 => [es, 1] => 1
         const portInternal = `930${id - 1}`; // 9300、9301、9302、...
@@ -701,6 +711,7 @@ class DistClusterToolDeploy {
         }
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceEsExporter(machine: Machine, service: Service) {
         let initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -726,6 +737,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceCassandra(machine: Machine, service: Service) {
         CAS_CLUSTER_ENTRANCE = machine.ip;
 
@@ -773,6 +785,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceJaegerCollector(machine: Machine, service: Service) {
         const id = Number.parseInt(service.name.split('_')[1]); // jcollector_1 => [jcollector, 1] => 1
         const portGrpc = 14250 + (id - 1); // 14250、14251、14252、...
@@ -801,6 +814,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceJaegerQuery(machine: Machine, service: Service) {
         let initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -821,6 +835,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServicePrometheus(machine: Machine, service: Service) {
         const replacedConfPath = '/tmp/prom-master.yaml';
         let promConf = (await LibFs.readFile(`${Tools.getConfDir()}/prometheus/prom-master.yaml`)).toString();
@@ -854,6 +869,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceGrafana(machine: Machine, service: Service) {
         let initCommand = 'docker volume create grafana_data' +
             ` docker run -d --name ${service.name}` +
@@ -886,6 +902,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceKibana(machine: Machine, service: Service) {
         let initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -908,6 +925,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceJaegerAgent(machine: Machine, service: Service) {
         let initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -931,6 +949,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceFilebeat(machine: Machine, service: Service) {
         let initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -948,6 +967,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceAppWeb(machine: Machine, service: Service) {
         let initCommand = `docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -976,6 +996,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceAppService(machine: Machine, service: Service) {
         const storageIp = Tools.getMachinesByType('storage')[0].ip;
 
@@ -1019,6 +1040,7 @@ class DistClusterToolDeploy {
         );
     }
 
+    //noinspection JSUnusedLocalSymbols
     private async deployServiceAppConsumer(machine: Machine, service: Service) {
         const storageIp = Tools.getMachinesByType('storage')[0].ip;
 
@@ -1107,11 +1129,6 @@ class DistClusterToolStress {
 //-* TOOLS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 class Tools {
-    public static getMachineNames() {
-        return MACHINES.map((machine: Machine) => {
-            return machine.name;
-        });
-    }
 
     public static getMachinesByType(type: string): Array<Machine> {
         return MACHINES.filter((machine: Machine) => {
@@ -1199,6 +1216,7 @@ class Tools {
     public static replaceStrAll(str: string, search: string, replacement: string) {
         return str.replace(new RegExp(search, 'g'), replacement);
     }
+
 }
 
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-

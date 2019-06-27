@@ -312,6 +312,7 @@ class DistClusterToolDeploy {
             }
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceNodeExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker network create ${machine.name} &&` +
@@ -325,6 +326,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceCadvisor(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker run -d --name ${service.name}` +
@@ -341,6 +343,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceMysqld(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             // tool
@@ -394,6 +397,7 @@ class DistClusterToolDeploy {
             yield waitMysqldInitialized();
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceMysqldExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker run -d --name ${service.name}` +
@@ -419,6 +423,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceMemcached(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker run -d --name ${service.name}` +
@@ -432,6 +437,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceMemcachedExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = `docker run -d --name ${service.name}` +
@@ -443,6 +449,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceZookeeper(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const initCommand = 'docker volume create zookeeper_data &&' +
@@ -457,6 +464,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceKafka(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const id = Number.parseInt(service.name.split('_')[1]); // kafka_1 => [kafka, 1] => 1
@@ -520,6 +528,7 @@ class DistClusterToolDeploy {
             }
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceKafkaExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = `docker run -d --name ${service.name}` +
@@ -538,6 +547,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceElasticsearch(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const id = Number.parseInt(service.name.split('_')[1]); // es_1 => [es, 1] => 1
@@ -621,6 +631,7 @@ class DistClusterToolDeploy {
             }
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceEsExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = `docker run -d --name ${service.name}` +
@@ -643,6 +654,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceCassandra(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             CAS_CLUSTER_ENTRANCE = machine.ip;
@@ -682,6 +694,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${sqlCommand}"`, `services/${machine.name}/cassandra_init`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceJaegerCollector(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const id = Number.parseInt(service.name.split('_')[1]); // jcollector_1 => [jcollector, 1] => 1
@@ -705,6 +718,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceJaegerQuery(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = `docker run -d --name ${service.name}` +
@@ -722,6 +736,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServicePrometheus(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const replacedConfPath = '/tmp/prom-master.yaml';
@@ -751,6 +766,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceGrafana(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = 'docker volume create grafana_data' +
@@ -780,6 +796,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceKibana(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = `docker run -d --name ${service.name}` +
@@ -799,6 +816,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceJaegerAgent(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = `docker run -d --name ${service.name}` +
@@ -819,6 +837,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceFilebeat(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = `docker run -d --name ${service.name}` +
@@ -833,6 +852,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceAppWeb(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             let initCommand = `docker run -d --name ${service.name}` +
@@ -858,6 +878,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceAppService(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const storageIp = Tools.getMachinesByType('storage')[0].ip;
@@ -897,6 +918,7 @@ class DistClusterToolDeploy {
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
+    //noinspection JSUnusedLocalSymbols
     deployServiceAppConsumer(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             const storageIp = Tools.getMachinesByType('storage')[0].ip;
@@ -970,11 +992,6 @@ class DistClusterToolStress {
 //-* TOOLS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 class Tools {
-    static getMachineNames() {
-        return MACHINES.map((machine) => {
-            return machine.name;
-        });
-    }
     static getMachinesByType(type) {
         return MACHINES.filter((machine) => {
             return machine.type == type;
