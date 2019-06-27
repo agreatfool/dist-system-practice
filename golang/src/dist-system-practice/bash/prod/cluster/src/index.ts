@@ -107,7 +107,11 @@ const MACHINES: Array<Machine> = [
             {"name": "node_monitor", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
             {"name": "cadvisor_monitor", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "cassandra", "type": "cassandra", "image": "cassandra:3.11.4"},
-            {"name": "cassandra_init", "type": "cassandra_init", "image": "jaegertracing/jaeger-cassandra-schema:1.11.0"},
+            {
+                "name": "cassandra_init",
+                "type": "cassandra_init",
+                "image": "jaegertracing/jaeger-cassandra-schema:1.11.0"
+            },
             {"name": "jcollector_1", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0"},
             {"name": "jcollector_2", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0"},
             {"name": "jquery", "type": "jaeger_query", "image": "jaegertracing/jaeger-query:1.11.0"},
@@ -669,6 +673,7 @@ class DistClusterToolDeploy {
         );
 
         let failed = 0;
+
         async function waitElasticsearchCluster() {
             // @ts-ignore
             const controller = new AbortController();
@@ -704,8 +709,8 @@ class DistClusterToolDeploy {
             await waitElasticsearchCluster();
             await Tools.execAsync(
                 'curl -H "Content-Type: application/json"' +
-                    ` -PUT "${ES_CLUSTER_ENTRANCE}/_template/dist?pretty"` +
-                    ` -d @${Tools.getConfDir()}/elasticsearch/elk-index-template.json`,
+                ` -PUT "${ES_CLUSTER_ENTRANCE}/_template/dist?pretty"` +
+                ` -d @${Tools.getConfDir()}/elasticsearch/elk-index-template.json`,
                 `services/${machine.name}/es_index`
             );
         }
@@ -1088,7 +1093,21 @@ class DistClusterToolDeploy {
 class DistClusterToolStop {
 
     public async run() {
+        MACHINES.forEach((machine: Machine) => {
+            let command = '';
 
+            machine.services.forEach((service: Service) => {
+                if (service.type === 'vegeta' || service.type === 'cassandra_init') {
+                    return;
+                }
+                if (command !== '') {
+                    command += ' && ';
+                }
+                command += `docker stop ${service.name}`;
+            });
+
+            Tools.execSync(`docker-machine ssh ${machine.name} "${command}"`);
+        });
     }
 
 }
@@ -1096,7 +1115,21 @@ class DistClusterToolStop {
 class DistClusterToolStart {
 
     public async run() {
+        MACHINES.forEach((machine: Machine) => {
+            let command = '';
 
+            machine.services.forEach((service: Service) => {
+                if (service.type === 'vegeta' || service.type === 'cassandra_init') {
+                    return;
+                }
+                if (command !== '') {
+                    command += ' && ';
+                }
+                command += `docker start ${service.name}`;
+            });
+
+            Tools.execSync(`docker-machine ssh ${machine.name} "${command}"`);
+        });
     }
 
 }
@@ -1104,7 +1137,24 @@ class DistClusterToolStart {
 class DistClusterToolCleanup {
 
     public async run() {
+        MACHINES.forEach((machine: Machine) => {
+            let command = '';
 
+            machine.services.forEach((service: Service) => {
+                if (service.type === 'vegeta' || service.type === 'cassandra_init') {
+                    return;
+                }
+                if (command !== '') {
+                    command += ' && ';
+                }
+                command += `docker stop ${service.name} && docker rm ${service.name}`;
+            });
+
+            command += ' && docker volume rm $(docker volume ls -f "dangling=true" -q)';
+            command += ` && docker network rm ${machine.name}`;
+
+            Tools.execSync(`docker-machine ssh ${machine.name} "${command}"`);
+        });
     }
 
 }
