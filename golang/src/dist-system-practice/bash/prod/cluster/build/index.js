@@ -152,15 +152,15 @@ const MACHINES = [
 program.version(pkg.version)
     .description('cluster.sh: dist-system-practice project automation cluster tool')
     .option('-d, --deploy', 'execute deploy command')
-    .option('-u, --shutdown', 'shutdown all deployed services')
-    .option('-r, --restart', 'restart all deployed services')
+    .option('-t, --stop', 'stop all deployed services')
+    .option('-r, --start', 'start all deployed services')
     .option('-n, --cleanup', 'remove all deployed services')
     .option('-c, --capture', 'capture stress test data')
     .option('-s, --stress', 'stress test')
     .parse(process.argv);
 const ARGS_DEPLOY = program.deploy === undefined ? undefined : true;
-const ARGS_SHUTDOWN = program.shutdown === undefined ? undefined : true;
-const ARGS_RESTART = program.restart === undefined ? undefined : true;
+const ARGS_STOP = program.stop === undefined ? undefined : true;
+const ARGS_START = program.start === undefined ? undefined : true;
 const ARGS_CLEANUP = program.cleanup === undefined ? undefined : true;
 const ARGS_CAPTURE = program.capture === undefined ? undefined : true;
 const ARGS_STRESS = program.stress === undefined ? undefined : true;
@@ -174,11 +174,11 @@ class DistClusterTool {
             if (ARGS_DEPLOY) {
                 yield this.deploy();
             }
-            else if (ARGS_SHUTDOWN) {
-                yield this.shutdown();
+            else if (ARGS_STOP) {
+                yield this.stop();
             }
-            else if (ARGS_RESTART) {
-                yield this.restart();
+            else if (ARGS_START) {
+                yield this.start();
             }
             else if (ARGS_CLEANUP) {
                 yield this.cleanup();
@@ -201,16 +201,16 @@ class DistClusterTool {
             yield (new DistClusterToolDeploy()).run();
         });
     }
-    shutdown() {
+    stop() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('[Cluster Tool] shutdown ...');
-            yield (new DistClusterToolShutdown()).run();
+            console.log('[Cluster Tool] stop ...');
+            yield (new DistClusterToolStop()).run();
         });
     }
-    restart() {
+    start() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('[Cluster Tool] restart ...');
-            yield (new DistClusterToolRestart()).run();
+            console.log('[Cluster Tool] start ...');
+            yield (new DistClusterToolStart()).run();
         });
     }
     cleanup() {
@@ -936,13 +936,13 @@ class DistClusterToolDeploy {
         });
     }
 }
-class DistClusterToolShutdown {
+class DistClusterToolStop {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
         });
     }
 }
-class DistClusterToolRestart {
+class DistClusterToolStart {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
         });

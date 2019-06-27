@@ -165,16 +165,16 @@ interface Service {
 program.version(pkg.version)
     .description('cluster.sh: dist-system-practice project automation cluster tool')
     .option('-d, --deploy', 'execute deploy command')
-    .option('-u, --shutdown', 'shutdown all deployed services')
-    .option('-r, --restart', 'restart all deployed services')
+    .option('-t, --stop', 'stop all deployed services')
+    .option('-r, --start', 'start all deployed services')
     .option('-n, --cleanup', 'remove all deployed services')
     .option('-c, --capture', 'capture stress test data')
     .option('-s, --stress', 'stress test')
     .parse(process.argv);
 
 const ARGS_DEPLOY = (program as any).deploy === undefined ? undefined : true;
-const ARGS_SHUTDOWN = (program as any).shutdown === undefined ? undefined : true;
-const ARGS_RESTART = (program as any).restart === undefined ? undefined : true;
+const ARGS_STOP = (program as any).stop === undefined ? undefined : true;
+const ARGS_START = (program as any).start === undefined ? undefined : true;
 const ARGS_CLEANUP = (program as any).cleanup === undefined ? undefined : true;
 const ARGS_CAPTURE = (program as any).capture === undefined ? undefined : true;
 const ARGS_STRESS = (program as any).stress === undefined ? undefined : true;
@@ -189,10 +189,10 @@ class DistClusterTool {
 
         if (ARGS_DEPLOY) {
             await this.deploy();
-        } else if (ARGS_SHUTDOWN) {
-            await this.shutdown();
-        } else if (ARGS_RESTART) {
-            await this.restart();
+        } else if (ARGS_STOP) {
+            await this.stop();
+        } else if (ARGS_START) {
+            await this.start();
         } else if (ARGS_CLEANUP) {
             await this.cleanup();
         } else if (ARGS_CAPTURE) {
@@ -210,14 +210,14 @@ class DistClusterTool {
         await (new DistClusterToolDeploy()).run();
     }
 
-    private async shutdown() {
-        console.log('[Cluster Tool] shutdown ...');
-        await (new DistClusterToolShutdown()).run();
+    private async stop() {
+        console.log('[Cluster Tool] stop ...');
+        await (new DistClusterToolStop()).run();
     }
 
-    private async restart() {
-        console.log('[Cluster Tool] restart ...');
-        await (new DistClusterToolRestart()).run();
+    private async start() {
+        console.log('[Cluster Tool] start ...');
+        await (new DistClusterToolStart()).run();
     }
 
     private async cleanup() {
@@ -1063,7 +1063,7 @@ class DistClusterToolDeploy {
 
 }
 
-class DistClusterToolShutdown {
+class DistClusterToolStop {
 
     public async run() {
 
@@ -1071,7 +1071,7 @@ class DistClusterToolShutdown {
 
 }
 
-class DistClusterToolRestart {
+class DistClusterToolStart {
 
     public async run() {
 
