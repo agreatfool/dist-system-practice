@@ -286,8 +286,10 @@ class DistClusterToolDeploy {
                 if (pullCommands.length == 0) {
                     return;
                 }
+                // display command
+                pullCommands.push('docker images');
                 // execution
-                tasks.push(Tools.execAsync(`docker-machine ssh \"${pullCommands.join(' && ')}\"`, `images/${machine.name}`));
+                tasks.push(Tools.execAsync(`docker-machine ssh "${pullCommands.join(' && ')}"`, `images/${machine.name}`));
             });
             yield Promise.all(tasks).catch((err) => {
                 console.log(`Error in "prepareImages": ${err.toString()}`);
@@ -683,6 +685,7 @@ class DistClusterToolDeploy {
                 ` ${service.image}`;
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
             // wait seconds for cassandra initialized
+            console.log('Start to wait for cassandra cluster ...');
             yield new Promise((resolve) => {
                 setTimeout(() => resolve(), 30000); // 30s
             });

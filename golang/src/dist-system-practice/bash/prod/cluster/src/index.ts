@@ -299,9 +299,12 @@ class DistClusterToolDeploy {
                 return;
             }
 
+            // display command
+            pullCommands.push('docker images');
+
             // execution
             tasks.push(Tools.execAsync(
-                `docker-machine ssh \"${pullCommands.join(' && ')}\"`,
+                `docker-machine ssh "${pullCommands.join(' && ')}"`,
                 `images/${machine.name}`
             ));
         });
@@ -777,6 +780,7 @@ class DistClusterToolDeploy {
         );
 
         // wait seconds for cassandra initialized
+        console.log('Start to wait for cassandra cluster ...');
         await new Promise((resolve) => {
             setTimeout(() => resolve(), 30000); // 30s
         });
