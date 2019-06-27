@@ -30,7 +30,7 @@ const MACHINES: Array<Machine> = [
         "type": "client",
         "ip": process.env.HOST_IP_CLIENT,
         "services": [
-            {"name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_client", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "vegeta", "type": "vegeta", "image": "peterevans/vegeta:6.5.0"}
         ],
@@ -336,18 +336,20 @@ class DistClusterToolDeploy {
 
     //noinspection JSUnusedLocalSymbols
     private async deployServiceNodeExporter(machine: Machine, service: Service) {
-        const initCommand = `docker network create ${machine.name} &&` +
-            ` docker run -d --name ${service.name}` +
-            ' --log-driver json-file --log-opt max-size=1G' +
-            ` --network ${machine.name}` +
-            ' -p 9100:9100' +
-            ' -v /:/host:ro,rslave' +
-            ` ${service.image}` +
-            ` --path.rootfs /host`;
+        const initCommand = 'wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz &&' +
+            ' mkdir -p node_exporter &&' +
+            ' tar xvfz node_exporter-0.18.1.linux-amd64.tar.gz -C node_exporter --strip-components=1';
 
         await Tools.execAsync(
             `docker-machine ssh ${machine.name} "${initCommand}"`,
-            `services/${machine.name}/${service.name}`
+            `services/${machine.name}/${service.name}_init`
+        );
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "nohup ./node_exporter/node_exporter > /tmp/node_exporter.log&"`
+        );
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "ps aux|grep node_exporter"`,
+            `services/${machine.name}/${service.name}_ps`
         );
     }
 
@@ -1094,7 +1096,7 @@ class DistClusterToolStop {
 
     public async run() {
         MACHINES.forEach((machine: Machine) => {
-            let commands = [];
+            const commands = [];
 
             machine.services.forEach((service: Service) => {
                 if (service.type === 'vegeta' || service.type === 'cassandra_init') {
@@ -1113,7 +1115,7 @@ class DistClusterToolStart {
 
     public async run() {
         MACHINES.forEach((machine: Machine) => {
-            let commands = [];
+            const commands = [];
 
             machine.services.forEach((service: Service) => {
                 if (service.type === 'vegeta' || service.type === 'cassandra_init') {
@@ -1132,7 +1134,7 @@ class DistClusterToolCleanup {
 
     public async run() {
         MACHINES.forEach((machine: Machine) => {
-            let commands = [];
+            const commands = [];
 
             machine.services.forEach((service: Service) => {
                 if (service.type === 'vegeta' || service.type === 'cassandra_init') {

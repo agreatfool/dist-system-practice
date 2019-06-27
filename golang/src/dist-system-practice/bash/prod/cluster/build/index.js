@@ -34,7 +34,7 @@ const MACHINES = [
         "type": "client",
         "ip": process.env.HOST_IP_CLIENT,
         "services": [
-            { "name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
+            { "name": "node_client", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1" },
             { "name": "cadvisor_client", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
             { "name": "vegeta", "type": "vegeta", "image": "peterevans/vegeta:6.5.0" }
         ],
@@ -111,7 +111,11 @@ const MACHINES = [
             { "name": "node_monitor", "type": "node_exporter", "image": "prom/node-exporter:0.18.1" },
             { "name": "cadvisor_monitor", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
             { "name": "cassandra", "type": "cassandra", "image": "cassandra:3.11.4" },
-            { "name": "cassandra_init", "type": "cassandra_init", "image": "jaegertracing/jaeger-cassandra-schema:1.11.0" },
+            {
+                "name": "cassandra_init",
+                "type": "cassandra_init",
+                "image": "jaegertracing/jaeger-cassandra-schema:1.11.0"
+            },
             { "name": "jcollector_1", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0" },
             { "name": "jcollector_2", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0" },
             { "name": "jquery", "type": "jaeger_query", "image": "jaegertracing/jaeger-query:1.11.0" },
@@ -315,15 +319,12 @@ class DistClusterToolDeploy {
     //noinspection JSUnusedLocalSymbols
     deployServiceNodeExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
-            const initCommand = `docker network create ${machine.name} &&` +
-                ` docker run -d --name ${service.name}` +
-                ' --log-driver json-file --log-opt max-size=1G' +
-                ` --network ${machine.name}` +
-                ' -p 9100:9100' +
-                ' -v /:/host:ro,rslave' +
-                ` ${service.image}` +
-                ` --path.rootfs /host`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            const initCommand = 'wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz &&' +
+                ' mkdir -p node_exporter &&' +
+                ' tar xvfz node_exporter-0.18.1.linux-amd64.tar.gz -C node_exporter --strip-components=1';
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}_init`);
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "nohup ./node_exporter/node_exporter > /tmp/node_exporter.log&"`);
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "ps aux|grep node_exporter"`, `services/${machine.name}/${service.name}_ps`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -961,18 +962,51 @@ class DistClusterToolDeploy {
 class DistClusterToolStop {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
+            MACHINES.forEach((machine) => {
+                const commands = [];
+                machine.services.forEach((service) => {
+                    if (service.type === 'vegeta' || service.type === 'cassandra_init') {
+                        return;
+                    }
+                    commands.push(`docker stop ${service.name}`);
+                });
+                Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
+            });
         });
     }
 }
 class DistClusterToolStart {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
+            MACHINES.forEach((machine) => {
+                const commands = [];
+                machine.services.forEach((service) => {
+                    if (service.type === 'vegeta' || service.type === 'cassandra_init') {
+                        return;
+                    }
+                    commands.push(`docker start ${service.name}`);
+                });
+                Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
+            });
         });
     }
 }
 class DistClusterToolCleanup {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
+            MACHINES.forEach((machine) => {
+                const commands = [];
+                machine.services.forEach((service) => {
+                    if (service.type === 'vegeta' || service.type === 'cassandra_init') {
+                        return;
+                    }
+                    commands.push(`docker stop ${service.name}`);
+                    commands.push(`docker rm ${service.name}`);
+                });
+                commands.push('docker volume rm $(docker volume ls -f "dangling=true" -q)');
+                commands.push(`docker network rm ${machine.name}`);
+                Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
+            });
         });
     }
 }
