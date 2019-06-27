@@ -879,7 +879,7 @@ class DistClusterToolDeploy {
 
     //noinspection JSUnusedLocalSymbols
     private async deployServiceGrafana(machine: Machine, service: Service) {
-        let initCommand = 'docker volume create grafana_data' +
+        let initCommand = 'docker volume create grafana_data &&' +
             ` docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +

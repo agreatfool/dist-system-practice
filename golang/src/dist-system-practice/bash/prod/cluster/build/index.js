@@ -660,7 +660,7 @@ class DistClusterToolDeploy {
     deployServiceCassandra(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
             CAS_CLUSTER_ENTRANCE = machine.ip;
-            let initCommand = 'docker volume create cas_data' +
+            let initCommand = 'docker volume create cas_data &&' +
                 ` docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ' --ulimit nproc=65535' +
@@ -672,10 +672,10 @@ class DistClusterToolDeploy {
                 ' -p 9160:9160' + // Cassandra client port (Thrift).
                 ' -p 7000:7000' + // Cassandra inter-node cluster communication.
                 ` -e CASSANDRA_BROADCAST_ADDRESS=${machine.ip}` +
-                ` -e CASSANDRA_LISTEN_ADDRESS=${machine.ip}` +
+                ` -e CASSANDRA_LISTEN_ADDRESS=${service.name}` +
                 ` -e MAX_HEAP_SIZE=${process.env.CAS_HEAP_SIZE}` +
                 ` -e HEAP_NEWSIZE=${process.env.CAS_HEAP_NEWSIZE}` +
-                ` -e CASSANDRA_RPC_ADDRESS=${machine.ip}` +
+                ` -e CASSANDRA_RPC_ADDRESS=0.0.0.0` +
                 ' -e CASSANDRA_START_RPC=true' +
                 ' -e CASSANDRA_CLUSTER_NAME=cassandra_cluster' +
                 ` -e CASSANDRA_SEEDS=${machine.ip}` +
@@ -706,12 +706,12 @@ class DistClusterToolDeploy {
             let initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
-                ` -p ${portGrpc}:${portGrpc}` + // grpc
-                ` -p ${portHttp}:${portHttp}` + // http (prometheus)
+                ` -p ${portGrpc}:14250` + // grpc
+                ` -p ${portHttp}:14268` + // http (prometheus)
                 ' -e SPAN_STORAGE_TYPE=cassandra' +
                 ` ${service.image}` +
-                ` --collector.grpc-port=${portGrpc}` +
-                ` --collector.http-port=${portHttp}` +
+                ` --collector.grpc-port=14250` +
+                ` --collector.http-port=14268` +
                 ` --cassandra.servers=${CAS_CLUSTER_ENTRANCE}` +
                 ' --cassandra.keyspace=jaeger_keyspace' +
                 ' --metrics-backend=prometheus' +
@@ -771,7 +771,7 @@ class DistClusterToolDeploy {
     //noinspection JSUnusedLocalSymbols
     deployServiceGrafana(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
-            let initCommand = 'docker volume create grafana_data' +
+            let initCommand = 'docker volume create grafana_data &&' +
                 ` docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
