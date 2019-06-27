@@ -428,7 +428,8 @@ class DistClusterToolDeploy {
             ` -e MYSQL_DATABASE="${process.env.MYSQL_DB}"` +
             ` -e MYSQL_ROOT_PASSWORD="${process.env.MYSQL_PWD}"` +
             ` ${service.image}` +
-            ` --max-connections=${process.env.MYSQL_CONN_NUM}` +
+            ` --bind-address=0.0.0.0` +
+            ` --max-connections=${Number.parseInt(process.env.MYSQL_CONN_NUM) + 100}` +
             ' --max-allowed-packet=33554432'; // 32M
 
         await Tools.execAsync(
