@@ -1094,19 +1094,16 @@ class DistClusterToolStop {
 
     public async run() {
         MACHINES.forEach((machine: Machine) => {
-            let command = '';
+            let commands = [];
 
             machine.services.forEach((service: Service) => {
                 if (service.type === 'vegeta' || service.type === 'cassandra_init') {
                     return;
                 }
-                if (command !== '') {
-                    command += ' && ';
-                }
-                command += `docker stop ${service.name}`;
+                commands.push(`docker stop ${service.name}`);
             });
 
-            Tools.execSync(`docker-machine ssh ${machine.name} "${command}"`);
+            Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
         });
     }
 
@@ -1116,19 +1113,16 @@ class DistClusterToolStart {
 
     public async run() {
         MACHINES.forEach((machine: Machine) => {
-            let command = '';
+            let commands = [];
 
             machine.services.forEach((service: Service) => {
                 if (service.type === 'vegeta' || service.type === 'cassandra_init') {
                     return;
                 }
-                if (command !== '') {
-                    command += ' && ';
-                }
-                command += `docker start ${service.name}`;
+                commands.push(`docker start ${service.name}`);
             });
 
-            Tools.execSync(`docker-machine ssh ${machine.name} "${command}"`);
+            Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
         });
     }
 
@@ -1138,22 +1132,20 @@ class DistClusterToolCleanup {
 
     public async run() {
         MACHINES.forEach((machine: Machine) => {
-            let command = '';
+            let commands = [];
 
             machine.services.forEach((service: Service) => {
                 if (service.type === 'vegeta' || service.type === 'cassandra_init') {
                     return;
                 }
-                if (command !== '') {
-                    command += ' && ';
-                }
-                command += `docker stop ${service.name} && docker rm ${service.name}`;
+                commands.push(`docker stop ${service.name}`);
+                commands.push(`docker rm ${service.name}`);
             });
 
-            command += ' && docker volume rm $(docker volume ls -f "dangling=true" -q)';
-            command += ` && docker network rm ${machine.name}`;
+            commands.push('docker volume rm $(docker volume ls -f "dangling=true" -q)');
+            commands.push(`docker network rm ${machine.name}`);
 
-            Tools.execSync(`docker-machine ssh ${machine.name} "${command}"`);
+            Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
         });
     }
 
