@@ -17,10 +17,12 @@ const mkdirp = LibUtil.promisify(mkdir) as (path: string) => void;
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* CONSTANTS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-const KAFKA_BROKERS_ADDRESS = []; // "ip:port", ...
-const KAFKA_METRICS_ADDRESS = []; // "ip:port", ...
-let ES_CLUSTER_ENTRANCE = '';
-let ES_CLUSTER_NODES = '';
+const KAFKA_BROKERS_ADDRESS = []; // ["ip:port", ...]
+const KAFKA_METRICS_ADDRESS = []; // ["ip:port", ...]
+let ES_CLUSTER_ENTRANCE = ''; // ip:port
+let ES_CLUSTER_NODES = []; // ["ip:port", ...]
+let CAS_CLUSTER_ENTRANCE = ''; // ip
+const JCOLLECTOR_ADDRESS = []; // ["ip:port", ...]
 
 const MACHINES: Array<Machine> = [
     {
@@ -105,6 +107,7 @@ const MACHINES: Array<Machine> = [
             {"name": "node_monitor", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
             {"name": "cadvisor_monitor", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "cassandra", "type": "cassandra", "image": "cassandra:3.11.4"},
+            {"name": "cassandra_init", "type": "cassandra_init", "image": "jaegertracing/jaeger-cassandra-schema:1.11.0"},
             {"name": "jcollector_1", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0"},
             {"name": "jcollector_2", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0"},
             {"name": "jquery", "type": "jaeger_query", "image": "jaegertracing/jaeger-query:1.11.0"},
@@ -121,7 +124,7 @@ const MACHINES: Array<Machine> = [
             {"name": "node_web", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
             {"name": "cadvisor_web", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
-            {"name": "dist_app_web", "type": "dist_app_web", "image": "agreatfool/dist_app_web:0.0.1"},
+            {"name": "app_web", "type": "app_web", "image": "agreatfool/dist_app_web:0.0.1"},
             {"name": "filebeat_web", "type": "filebeat", "image": "elastic/filebeat:7.0.0"},
         ]
     },
@@ -133,8 +136,8 @@ const MACHINES: Array<Machine> = [
             {"name": "node_service", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
             {"name": "cadvisor_service", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "jagent_service", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
-            {"name": "dist_app_service", "type": "dist_app_service", "image": "agreatfool/dist_app_service:0.0.1"},
-            {"name": "dist_app_consumer", "type": "dist_app_consumer", "image": "agreatfool/dist_app_consumer:0.0.1"},
+            {"name": "app_service", "type": "app_service", "image": "agreatfool/dist_app_service:0.0.1"},
+            {"name": "app_consumer", "type": "app_consumer", "image": "agreatfool/dist_app_consumer:0.0.1"},
             {"name": "filebeat_service", "type": "filebeat", "image": "elastic/filebeat:7.0.0"},
         ]
     },
@@ -319,8 +322,8 @@ class DistClusterToolDeploy {
     private async deployMachine(machine: Machine) {
         // deploy all services one by one
         for (let service of machine.services) {
-            if (service.type === 'vegeta') {
-                continue; // skip stress tool
+            if (service.type === 'vegeta' || service.type === 'cassandra_init') {
+                continue;
             }
 
             await (this[`deployService${camel(service.type, {pascalCase: true})}`] as Function).apply(this, [machine, service]);
@@ -405,6 +408,9 @@ class DistClusterToolDeploy {
         const initCommand = 'docker volume create mysqld_data &&' +
             ` docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
+            ' --ulimit nproc=65535' +
+            ' --ulimit nofile=65535:65535' +
+            ' --ulimit memlock=-1:-1' +
             ` --network ${machine.name}` +
             ' -p 3306:3306' +
             ` -v ${Tools.getProjectDir()}/schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql` +
@@ -413,7 +419,8 @@ class DistClusterToolDeploy {
             ` -e MYSQL_DATABASE="${process.env.MYSQL_DB}"` +
             ` -e MYSQL_ROOT_PASSWORD="${process.env.MYSQL_PWD}"` +
             ` ${service.image}` +
-            ` --max-allowed-packet=33554432`; // 32M
+            ` --max-connections=${process.env.MYSQL_CONN_NUM}` +
+            ' --max-allowed-packet=33554432'; // 32M
 
         await Tools.execAsync(
             `docker-machine ssh ${machine.name} "${initCommand}"`,
@@ -504,7 +511,7 @@ class DistClusterToolDeploy {
         const brokerId = id - 1; // 1-1 => 0
         const portInternal = `9${brokerId}93`; // 9093、9193、9293、...
         const portExternal = `9${brokerId}92`; // 9092、9192、9292、...
-        const portMetrics = `7${brokerId}71`; // 7071、7172、7173、...
+        const portMetrics = `7${brokerId}71`; // 7071、7171、7271、...
 
         KAFKA_BROKERS_ADDRESS.push(`${machine.ip}:${portExternal}`);
         KAFKA_METRICS_ADDRESS.push(`${machine.ip}:${portMetrics}`);
@@ -516,6 +523,9 @@ class DistClusterToolDeploy {
             ` docker volume create kafka_home_${id} &&` +
             ` docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
+            ' --ulimit nproc=65535' +
+            ' --ulimit nofile=65535:65535' +
+            ' --ulimit memlock=-1:-1' +
             ` --network ${machine.name}` +
             ` -p ${portInternal}:${portInternal}` +
             ` -p ${portExternal}:${portExternal}` +
@@ -556,8 +566,8 @@ class DistClusterToolDeploy {
             const topicCommand = `${Tools.getProjectDir()}/vendors/kafka/kafka/bin/kafka-topics.sh` +
                 ' --create' +
                 ` --bootstrap-server ${machines[0].ip}:9092` +
-                ` --replication-factor ${services.length}` +
-                ` --partitions ${services.length}` +
+                ` --replication-factor 1` +
+                ` --partitions ${process.env.KAFKA_PARTITIONS}` +
                 ` --topic ${process.env.KAFKA_TOPIC} &&` +
                 ` ${Tools.getProjectDir()}/vendors/kafka/kafka/bin/kafka-topics.sh` +
                 ' --describe' +
@@ -600,7 +610,6 @@ class DistClusterToolDeploy {
         const machines = Tools.getMachinesByType(machine.type);
         const services = Tools.getServicesByType(service.type);
 
-        let nodes = [];
         let discoverySeedHosts = [];
         machines.forEach((mch: Machine) => {
             mch.services.forEach((svc: Service) => {
@@ -609,7 +618,7 @@ class DistClusterToolDeploy {
                 }
                 const portId = Number.parseInt(svc.name.split('_')[1]) - 1;
                 discoverySeedHosts.push(`${mch.ip}:930${portId}`);
-                nodes.push(`${mch.ip}:920${portId}`);
+                ES_CLUSTER_NODES.push(`${mch.ip}:920${portId}`);
             });
         });
         let initialMasterNodes = [];
@@ -618,7 +627,6 @@ class DistClusterToolDeploy {
         });
 
         ES_CLUSTER_ENTRANCE = `${machines[0].ip}:9200`;
-        ES_CLUSTER_NODES = nodes.join(',');
 
         let initCommand = `docker volume create es_data_${id} &&` +
             ` docker volume create es_logs_${id} &&` +
@@ -691,6 +699,366 @@ class DistClusterToolDeploy {
                 `services/${machine.name}/es_index`
             );
         }
+    }
+
+    private async deployServiceEsExporter(machine: Machine, service: Service) {
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ' -p 9114:9114' +
+            ` ${service.image}` +
+            ' --web.listen-address=0.0.0.0:9114' +
+            ' --web.telemetry-path=/metrics' +
+            ` --es.uri=http://${ES_CLUSTER_ENTRANCE}` +
+            ' --es.all' +
+            ' --es.cluster_settings' +
+            ' --es.shards' +
+            ' --es.indices' +
+            ' --es.indices_settings' +
+            ' --es.snapshots' +
+            ' --log.level=info' +
+            ' --log.format=json' +
+            ' --log.output=stdout';
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceCassandra(machine: Machine, service: Service) {
+        CAS_CLUSTER_ENTRANCE = machine.ip;
+
+        let initCommand = 'docker volume create cas_data' +
+            ` docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ' --ulimit nproc=65535' +
+            ' --ulimit nofile=65535:65535' +
+            ' --ulimit memlock=-1:-1' +
+            ` --network ${machine.name}` +
+            ' -p 7199:7199' + // JMX
+            ' -p 9042:9042' + // Cassandra client port.
+            ' -p 9160:9160' + // Cassandra client port (Thrift).
+            ' -p 7000:7000' + // Cassandra inter-node cluster communication.
+            ` -e CASSANDRA_BROADCAST_ADDRESS=${machine.ip}` +
+            ` -e CASSANDRA_LISTEN_ADDRESS=${machine.ip}` +
+            ` -e MAX_HEAP_SIZE=${process.env.CAS_HEAP_SIZE}` +
+            ` -e HEAP_NEWSIZE=${process.env.CAS_HEAP_NEWSIZE}` +
+            ` -e CASSANDRA_RPC_ADDRESS=${machine.ip}` +
+            ' -e CASSANDRA_START_RPC=true' +
+            ' -e CASSANDRA_CLUSTER_NAME=cassandra_cluster' +
+            ` -e CASSANDRA_SEEDS=${machine.ip}` +
+            ` -e JAVA_OPTS="-Dfile.encoding=UTF-8 -Xms${process.env.CAS_JVM_MEM} -Xmx${process.env.CAS_JVM_MEM}"` +
+            ` ${service.image}`;
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+
+        // wait seconds for cassandra initialized
+        await new Promise((resolve) => {
+            setTimeout(() => resolve(), 30000); // 30s
+        });
+        const sqlCommand = 'docker run --rm --name jaeger-cassandra-schema' +
+            ` --network ${machine.name}` +
+            ' -e MODE=test' +
+            ` -e CQLSH_HOST=${CAS_CLUSTER_ENTRANCE}` +
+            ' -e DATACENTER=jaeger_dc' +
+            ' -e KEYSPACE=jaeger_keyspace' +
+            ` ${Tools.getServicesByType('cassandra_init')[0].image}`;
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${sqlCommand}"`,
+            `services/${machine.name}/cassandra_init`
+        );
+    }
+
+    private async deployServiceJaegerCollector(machine: Machine, service: Service) {
+        const id = Number.parseInt(service.name.split('_')[1]); // jcollector_1 => [jcollector, 1] => 1
+        const portGrpc = 14250 + (id - 1); // 14250、14251、14252、...
+        const portHttp = 14268 + (id - 1); // 14268、14269、14270、...
+
+        JCOLLECTOR_ADDRESS.push(`${machine.ip}:${portGrpc}`);
+
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ` -p ${portGrpc}:${portGrpc}` + // grpc
+            ` -p ${portHttp}:${portHttp}` + // http (prometheus)
+            ' -e SPAN_STORAGE_TYPE=cassandra' +
+            ` ${service.image}` +
+            ` --collector.grpc-port=${portGrpc}` +
+            ` --collector.http-port=${portHttp}` +
+            ` --cassandra.servers=${CAS_CLUSTER_ENTRANCE}` +
+            ' --cassandra.keyspace=jaeger_keyspace' +
+            ' --metrics-backend=prometheus' +
+            ' --metrics-http-route=/metrics' +
+            ' --log-level=info';
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceJaegerQuery(machine: Machine, service: Service) {
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ` -p 16686:16686` +
+            ' -e SPAN_STORAGE_TYPE=cassandra' +
+            ` ${service.image}` +
+            ' --query.port=16686' +
+            ` --cassandra.servers=${CAS_CLUSTER_ENTRANCE}` +
+            ' --cassandra.keyspace=jaeger_keyspace' +
+            ' --metrics-backend=prometheus' +
+            ' --metrics-http-route=/metrics' +
+            ' --log-level=info';
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServicePrometheus(machine: Machine, service: Service) {
+        const replacedConfPath = '/tmp/prom-master.yaml';
+        let promConf = (await LibFs.readFile(`${Tools.getConfDir()}/prometheus/prom-master.yaml`)).toString();
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_CLIENT', process.env.HOST_IP_CLIENT);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_STORAGE', process.env.HOST_IP_STORAGE);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_KAFKA_1', process.env.HOST_IP_KAFKA_1);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_KAFKA_2', process.env.HOST_IP_KAFKA_2);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_ES_1', process.env.HOST_IP_ES_1);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_ES_2', process.env.HOST_IP_ES_2);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_MONITOR', process.env.HOST_IP_MONITOR);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_WEB', process.env.HOST_IP_WEB);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_SERVICE', process.env.HOST_IP_SERVICE);
+        await LibFs.writeFile(replacedConfPath, promConf);
+
+        let initCommand = 'docker volume create prometheus_vol &&' +
+            ` docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ` -p 9090:9090` +
+            ' -v /tmp/prom-master.yaml:/etc/prometheus/prometheus.yml' +
+            ' -v prometheus_vol:/prometheus' +
+            ` ${service.image}` +
+            ' --web.listen-address=0.0.0.0:9090' +
+            ' --config.file=/etc/prometheus/prometheus.yml' +
+            ' --log.format=json' +
+            ' --log.level=info';
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceGrafana(machine: Machine, service: Service) {
+        let initCommand = 'docker volume create grafana_data' +
+            ` docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ` -p 3000:3000` +
+            ` -v ${Tools.getConfDir()}/grafana/grafana.ini:/etc/grafana/grafana.ini` +
+            ` -v ${Tools.getProjectDir()}/vendors/prometheus/grafana/provisioning:/etc/grafana/provisioning` +
+            ` -v ${Tools.getProjectDir()}/vendors/prometheus/grafana/dashboards:/etc/grafana/dashboards` +
+            ' -v grafana_data:/var/lib/grafana' +
+            ' -e GF_SERVER_HTTP_ADDR=0.0.0.0' +
+            ' -e GF_SERVER_HTTP_PORT=3000' +
+            ` -e GF_SECURITY_ADMIN_USER=${process.env.GRAFANA_USER}` +
+            ` -e GF_SECURITY_ADMIN_PASSWORD=${process.env.GRAFANA_PWD}` +
+            ' -e GF_DEFAULT_APP_MODE=production' +
+            ' -e GF_LOGGING_MODE="console file"' +
+            ' -e GF_LOGGING_LEVEL=info' +
+            ' -e GF_PATHS_CONFIG=/etc/grafana/grafana.ini' +
+            ' -e GF_PATHS_DATA=/var/lib/grafana' +
+            ' -e GF_PATHS_HOME=/usr/share/grafana' +
+            ' -e GF_PATHS_LOGS=/var/log/grafana' +
+            ' -e GF_PATHS_PLUGINS=/var/lib/grafana/plugins' +
+            ' -e GF_PATHS_PROVISIONING=/etc/grafana/provisioning' +
+            ' -e GF_INSTALL_PLUGINS=grafana-piechart-panel' +
+            ` ${service.image}`;
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceKibana(machine: Machine, service: Service) {
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ` -p 5601:5601` +
+            ' -e SERVER_PORT=5601' +
+            ' -e SERVER_HOST=0.0.0.0' +
+            ' -e SERVER_NAME=es_cluster' +
+            ` -e ELASTICSEARCH_HOSTS=["http://${ES_CLUSTER_ENTRANCE}"]` +
+            ' -e KIBANA_INDEX=.kibana' +
+            ' -e DIBANA_DEFAULTAPPID=home' +
+            ' -e ELASTICSEARCH_PINGTIMEOUT=1500' +
+            ' -e ELASTICSEARCH_REQUESTTIMEOUT=10000' +
+            ' -e ELASTICSEARCH_LOGQUERIES=false' +
+            ` ${service.image}`;
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceJaegerAgent(machine: Machine, service: Service) {
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ` -p 6832:6832` + // binary
+            ` -p 6831:6831` + // compact
+            ` -p 5778:5778` + // http (prometheus)
+            ` ${service.image}` +
+            ` --reporter.grpc.host-port=${JCOLLECTOR_ADDRESS.join(',')}` +
+            ' --reporter.type=grpc' +
+            ' --processor.jaeger-binary.server-host-port=0.0.0.0:6832' +
+            ' --processor.jaeger-compact.server-host-port=0.0.0.0:6831' +
+            ' --http-server.host-port=0.0.0.0:5778' +
+            ' --metrics-backend=prometheus' +
+            ' --metrics-http-route=/metrics' +
+            ' --log-level=info';
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceFilebeat(machine: Machine, service: Service) {
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ` -v ${Tools.getConfDir()}/elasticsearch/filebeat.yaml:/usr/share/filebeat/filebeat.yml` +
+            ' -v /tmp/logs/app:/tmp/logs/app' +
+            ` -e ES_HOSTS=${ES_CLUSTER_NODES.join(',')}` +
+            ' -e LOGGING_LEVEL=info' +
+            ' -e NUM_OF_OUTPUT_WORKERS=12' +
+            ` ${service.image}`;
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceAppWeb(machine: Machine, service: Service) {
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ' -p 8000:8000' +
+            ` -v ${Tools.getConfDir()}/app/logger.yaml:/app/logger.yaml` +
+            ' -v -v /tmp/logs:/app/logs' +
+            ' -e APP_NAME="app.web"' +
+            ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
+            ' -e WEB_HOST="0.0.0.0"' +
+            ' -e WEB_PORT="8000"' +
+            ` -e MAX_WORK_ID="${process.env.MAX_WORK_ID}"` +
+            ` -e RPC_SERVERS="[\"${Tools.getMachinesByType('service')[0].ip}:16241\"]"` +
+            ' -e JAEGER_SERVICE_NAME="app.web"' +
+            ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
+            ' -e JAEGER_AGENT_PORT="6831"' +
+            ' -e JAEGER_REPORTER_LOG_SPANS="true"' +
+            ' -e JAEGER_REPORTER_FLUSH_INTERVAL="1s"' +
+            ' -e JAEGER_SAMPLER_TYPE="probabilistic"' +
+            ' -e JAEGER_SAMPLER_PARAM="0.01"' + // 1%
+            ` ${service.image}`;
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceAppService(machine: Machine, service: Service) {
+        const storageIp = Tools.getMachinesByType('storage')[0].ip;
+
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ' -p 8001:8001' +
+            ` -v ${Tools.getConfDir()}/app/logger.yaml:/app/logger.yaml` +
+            ' -v -v /tmp/logs:/app/logs' +
+            ' -e APP_NAME="app.service"' +
+            ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
+            ` -e CACHE_SERVERS="[\"${storageIp}:11211\"]"` +
+            ` -e DB_HOST="${storageIp}"` +
+            ' -e DB_PORT="3306"' +
+            ` -e DB_USER="${process.env.MYSQL_USER}"` +
+            ` -e DB_PWD="${process.env.MYSQL_PWD}"` +
+            ` -e DB_NAME="${process.env.MYSQL_DB}"` +
+            ' -e DB_CHARSET="utf8mb4"' +
+            ' -e DB_COLLATION="utf8mb4_general_ci"' +
+            ` -e DB_MAX_OPEN_CONN="${process.env.MYSQL_CONN_NUM}"` +
+            ` -e DB_MAX_IDLE_CONN="${process.env.MYSQL_CONN_NUM}"` +
+            ' -e DB_CONN_MAX_LIFE_TIME="300"' +
+            ' -e SERVICE_HOST="0.0.0.0"' +
+            ' -e SERVICE_PORT="16241' +
+            ' -e WEB_HOST="0.0.0.0"' +
+            ' -e WEB_PORT="8001"' +
+            ` -e KAFKA_BROKERS="[\"${KAFKA_BROKERS_ADDRESS.join('","')}\"]"` +
+            ' -e KAFKA_WRITE_ASYNC="false"' +
+            ' -e JAEGER_SERVICE_NAME="app.service"' +
+            ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
+            ' -e JAEGER_AGENT_PORT="6831"' +
+            ' -e JAEGER_REPORTER_LOG_SPANS="true"' +
+            ' -e JAEGER_REPORTER_FLUSH_INTERVAL="1s"' +
+            ' -e JAEGER_SAMPLER_TYPE="probabilistic"' +
+            ' -e JAEGER_SAMPLER_PARAM="0.01"' + // 1%
+            ` ${service.image}`;
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
+    }
+
+    private async deployServiceAppConsumer(machine: Machine, service: Service) {
+        const storageIp = Tools.getMachinesByType('storage')[0].ip;
+
+        let initCommand = `docker run -d --name ${service.name}` +
+            ' --log-driver json-file --log-opt max-size=1G' +
+            ` --network ${machine.name}` +
+            ' -p 8002:8002' +
+            ` -v ${Tools.getConfDir()}/app/logger.yaml:/app/logger.yaml` +
+            ' -v -v /tmp/logs:/app/logs' +
+            ' -e APP_NAME="app.consumer"' +
+            ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
+            ` -e CACHE_SERVERS="[\"${storageIp}:11211\"]"` +
+            ` -e DB_HOST="${storageIp}"` +
+            ' -e DB_PORT="3306"' +
+            ` -e DB_USER="${process.env.MYSQL_USER}"` +
+            ` -e DB_PWD="${process.env.MYSQL_PWD}"` +
+            ` -e DB_NAME="${process.env.MYSQL_DB}"` +
+            ' -e DB_CHARSET="utf8mb4"' +
+            ' -e DB_COLLATION="utf8mb4_general_ci"' +
+            ` -e DB_MAX_OPEN_CONN="${process.env.MYSQL_CONN_NUM}"` +
+            ` -e DB_MAX_IDLE_CONN="${process.env.MYSQL_CONN_NUM}"` +
+            ' -e DB_CONN_MAX_LIFE_TIME="300"' +
+            ' -e WEB_HOST="0.0.0.0"' +
+            ' -e WEB_PORT="8002"' +
+            ` -e CONSUMER_ROUTINES="${process.env.KAFKA_PARTITIONS}"` +
+            ` -e CONSUMER_FACTOR="${process.env.CONSUMER_FACTOR}"` +
+            ` -e KAFKA_BROKERS="[\"${KAFKA_BROKERS_ADDRESS.join('","')}\"]"` +
+            ' -e JAEGER_SERVICE_NAME="app.consumer"' +
+            ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
+            ' -e JAEGER_AGENT_PORT="6831"' +
+            ' -e JAEGER_REPORTER_LOG_SPANS="true"' +
+            ' -e JAEGER_REPORTER_FLUSH_INTERVAL="1s"' +
+            ' -e JAEGER_SAMPLER_TYPE="probabilistic"' +
+            ' -e JAEGER_SAMPLER_PARAM="0.01"' + // 1%
+            ` ${service.image}`;
+
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "${initCommand}"`,
+            `services/${machine.name}/${service.name}`
+        );
     }
 
 }
@@ -767,7 +1135,7 @@ class Tools {
     }
 
     public static getConfDir() {
-        return LibPath.join(__dirname, '..', '..', '..', '..', 'conf', 'prod'); // dist-system-practice/conf/prod/cluster
+        return LibPath.join(__dirname, '..', '..', '..', '..', 'conf', 'prod'); // dist-system-practice/conf/prod
     }
 
     public static getProjectDir() {
@@ -826,6 +1194,10 @@ class Tools {
 
     public static ucFirst(str: string) {
         return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    public static replaceStrAll(str: string, search: string, replacement: string) {
+        return str.replace(new RegExp(search, 'g'), replacement);
     }
 }
 
