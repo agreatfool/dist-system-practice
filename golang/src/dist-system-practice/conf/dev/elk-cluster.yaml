@@ -75,6 +75,8 @@ services:
 #      - "es_3"
     networks:
       - "net"
+    ports:
+      - "5066:5066"
     volumes:
       - /private/tmp/filebeat.yaml:/usr/share/filebeat/filebeat.yml
       - /private/tmp/logs/app:/tmp/logs/app
@@ -88,6 +90,25 @@ services:
       - NUM_OF_OUTPUT_WORKERS=9 # node count * 3, 3 workers per node
       - NUM_OF_SHARDS=3
       - NUM_OF_REPLICAS=1 # replicas count per shard, total count is num_of_shards * (1 + num_of_replicas)
+  filebeat_exporter:
+    image: "agreatfool/beat-exporter:v0.1.2"
+    container_name: "filebeat_exporter"
+    hostname: "filebeat_exporter"
+    depends_on:
+      - "filebeat"
+    networks:
+      - "net"
+    ports:
+      - "9479:9479"
+    restart: "always"
+    logging:
+      <<: *ES_LOGGING_DEFAULTS
+    command: [
+      "-beat.timeout=10s",
+      "-beat.uri=http://filebeat:5066",
+      "-web.listen-address=0.0.0.0:9479",
+      "-web.telemetry-path=/metrics"
+    ]
   es_1:
     image: "elasticsearch:7.1.1"
     container_name: "es_1"

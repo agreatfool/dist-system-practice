@@ -38,7 +38,7 @@ function web() {
 
     elif [[ $1 == "container" ]]; then
 
-        docker run --rm -d \
+        docker run --rm \
             --name app_web \
             --network=dist_net \
             -p 8000:8000 \
@@ -104,7 +104,7 @@ function service() {
 
     elif [[ $1 == "container" ]]; then
 
-        docker run --rm -d \
+        docker run --rm \
             --name app_service \
             --network=dist_net \
             -p 8001:8001 \
@@ -182,7 +182,7 @@ function consumer() {
 
     elif [[ $1 == "container" ]]; then
 
-        docker run --rm -d \
+        docker run --rm \
             --name app_consumer \
             --network=dist_net \
             -p 8002:8002 \

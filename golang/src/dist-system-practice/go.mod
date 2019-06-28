@@ -49,6 +49,7 @@ require (
 	github.com/segmentio/kafka-go v0.2.4
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
+	github.com/trustpilot/beat-exporter v0.1.2 // indirect
 	github.com/uber/jaeger-client-go v2.16.0+incompatible
 	github.com/uber/jaeger-lib v2.0.0+incompatible
 	github.com/ugorji/go v1.1.5-pre // indirect

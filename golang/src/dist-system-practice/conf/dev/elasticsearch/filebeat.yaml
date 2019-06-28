@@ -300,3 +300,9 @@ logging.selectors: ["*"]
 
 # This allows to enable 6.7 migration aliases
 #migration.6_to_7.enabled: true
+
+#================================ Http Endpoint ===============================
+http:
+  enabled: true
+  host: 0.0.0.0
+  port: 5066
