@@ -42,7 +42,7 @@ function web() {
             --name app_web \
             --network=dist_net \
             -p 8000:8000 \
-            -v ${BASEPATH}/conf/dev/app/logger.yaml:/app/logger.yaml \
+            -v ${BASEPATH}/conf/prod/app/logger.yaml:/app/logger.yaml \
             -v /tmp/logs:/app/logs \
             -e APP_NAME="app.web" \
             -e LOGGER_CONF_PATH="/app/logger.yaml" \
@@ -57,7 +57,7 @@ function web() {
             -e JAEGER_REPORTER_FLUSH_INTERVAL="1s" \
             -e JAEGER_SAMPLER_TYPE="probabilistic" \
             -e JAEGER_SAMPLER_PARAM="1" \
-            agreatfool/dist_app_web:0.0.1
+            agreatfool/dist_app_web:0.0.2
 
         docker logs -f app_web
 
@@ -108,7 +108,7 @@ function service() {
             --name app_service \
             --network=dist_net \
             -p 8001:8001 \
-            -v ${BASEPATH}/conf/dev/app/logger.yaml:/app/logger.yaml \
+            -v ${BASEPATH}/conf/prod/app/logger.yaml:/app/logger.yaml \
             -v /tmp/logs:/app/logs \
             -e APP_NAME="app.service" \
             -e LOGGER_CONF_PATH="/app/logger.yaml" \
@@ -136,7 +136,7 @@ function service() {
             -e JAEGER_REPORTER_FLUSH_INTERVAL="1s" \
             -e JAEGER_SAMPLER_TYPE="probabilistic" \
             -e JAEGER_SAMPLER_PARAM="1" \
-            agreatfool/dist_app_service:0.0.1
+            agreatfool/dist_app_service:0.0.2
 
         docker logs -f app_service
 
@@ -186,7 +186,7 @@ function consumer() {
             --name app_consumer \
             --network=dist_net \
             -p 8002:8002 \
-            -v ${BASEPATH}/conf/dev/app/logger.yaml:/app/logger.yaml \
+            -v ${BASEPATH}/conf/prod/app/logger.yaml:/app/logger.yaml \
             -v /tmp/logs:/app/logs \
             -e APP_NAME="app.consumer" \
             -e LOGGER_CONF_PATH="/app/logger.yaml" \
@@ -213,7 +213,7 @@ function consumer() {
             -e JAEGER_REPORTER_FLUSH_INTERVAL="1s" \
             -e JAEGER_SAMPLER_TYPE="probabilistic" \
             -e JAEGER_SAMPLER_PARAM="1" \
-            agreatfool/dist_app_consumer:0.0.1
+            agreatfool/dist_app_consumer:0.0.2
 
         docker logs -f app_consumer
 

@@ -1,8 +1,8 @@
 level: "debug"
 encoding: "json"
 development: true
-outputPaths: ["stdout", "/app/logs/default.log"]
-errorOutputPaths: ["stderr", "/app/logs/error.log"]
+outputPaths: ["stdout", "/tmp/logs/default.log"]
+errorOutputPaths: ["stderr", "/tmp/logs/error.log"]
 sampling: null
 encoderConfig:
   messageKey: "message"

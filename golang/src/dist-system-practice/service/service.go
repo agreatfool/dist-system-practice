@@ -11,11 +11,13 @@ import (
 	pb "dist-system-practice/message"
 	"dist-system-practice/service/rpc"
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 )
 
@@ -40,7 +42,7 @@ func main() {
 	host := common.GetEnv("SERVICE_HOST", "0.0.0.0")
 	port := common.GetEnv("SERVICE_PORT", "16241")
 
-	go prometheus()
+	go httpEntrance()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", host, port))
 	if err != nil {
@@ -54,11 +56,16 @@ func main() {
 	}
 }
 
-func prometheus() {
+func httpEntrance() {
 	host := common.GetEnv("WEB_HOST", "0.0.0.0")
 	port := common.GetEnv("WEB_PORT", "8001")
 
-	http.Handle("/metrics", promhttp.Handler())
+	router := mux.NewRouter()
+	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
+	router.Handle("/metrics", promhttp.Handler())
+
+	http.Handle("/", router)
+
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), nil); err != nil {
 		fmt.Println(err)
 	}

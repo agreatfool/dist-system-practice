@@ -35,7 +35,7 @@ function build() {
     elif [[ $2 == "container" ]]; then
         docker build \
             --no-cache \
-            --tag agreatfool/dist_app_$1:0.0.1 \
+            --tag agreatfool/dist_app_$1:0.0.2 \
             --build-arg http_proxy=http://192.168.3.111:6152 \
             --build-arg https_proxy=http://192.168.3.111:6152 \
             --file ${BASEPATH}/bash/build/Dockerfile_$1 \

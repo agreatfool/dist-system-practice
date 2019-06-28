@@ -8,6 +8,7 @@ import (
 	"dist-system-practice/web/rpc"
 	"fmt"
 	"github.com/gin-contrib/location"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -48,13 +49,16 @@ func main() {
 	//   - stack means whether output the stack info.
 	router.Use(ginzap.RecoveryWithZap(logger.Get(), true))
 
+	// pprof
+	pprof.Register(router)
+
 	router.GET("/", handler.HandleIndex)
 	router.GET("/api", handler.HandleApi)
 	router.GET("/work", handler.HandleGetWork)
 	router.GET("/viewed", handler.HandleUpdateViewed)
 	router.GET("/achievement", handler.HandleGetAchievement)
 	router.GET("/plan", handler.HandlePlanWork)
-	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	router.GET("/metrics", gin.WrapH(promhttp.Handler())) // prometheus metrics
 
 	host := common.GetEnv("WEB_HOST", "0.0.0.0")
 	port := common.GetEnv("WEB_PORT", "8000")

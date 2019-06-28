@@ -11,6 +11,7 @@ import (
 	"dist-system-practice/lib/timerecorder"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/gorilla/mux"
 	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/satori/go.uuid"
@@ -18,10 +19,9 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 )
-
-const timeout = 15
 
 var factor = 37
 var readers []*kafka.Reader
@@ -70,17 +70,22 @@ func main() {
 		}(i)
 	}
 
-	go prometheus()
+	go httpEntrance()
 
 	// wait
 	select {}
 }
 
-func prometheus() {
+func httpEntrance() {
 	host := common.GetEnv("WEB_HOST", "0.0.0.0")
 	port := common.GetEnv("WEB_PORT", "8002")
 
-	http.Handle("/metrics", promhttp.Handler())
+	router := mux.NewRouter()
+	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
+	router.Handle("/metrics", promhttp.Handler())
+
+	http.Handle("/", router)
+
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), nil); err != nil {
 		fmt.Println(err)
 	}
