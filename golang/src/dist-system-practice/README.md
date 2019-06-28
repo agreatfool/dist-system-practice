@@ -129,6 +129,8 @@ dist-system-practice
         * 127.0.0.1:9300 # cluster
     * Exporter:
         * 127.0.0.1:9114
+    * Filebeat: 127.0.0.1:5066
+    * Filebeat Exporter: 127.0.0.1:9479
 
 ## Deployment
 ### Dev
