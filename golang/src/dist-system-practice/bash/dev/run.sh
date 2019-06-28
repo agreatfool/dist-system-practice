@@ -59,8 +59,6 @@ function web() {
             -e JAEGER_SAMPLER_PARAM="1" \
             agreatfool/dist_app_web:0.0.2
 
-        docker logs -f app_web
-
     fi
 }
 
@@ -138,8 +136,6 @@ function service() {
             -e JAEGER_SAMPLER_PARAM="1" \
             agreatfool/dist_app_service:0.0.2
 
-        docker logs -f app_service
-
     fi
 }
 
@@ -214,8 +210,6 @@ function consumer() {
             -e JAEGER_SAMPLER_TYPE="probabilistic" \
             -e JAEGER_SAMPLER_PARAM="1" \
             agreatfool/dist_app_consumer:0.0.2
-
-        docker logs -f app_consumer
 
     fi
 }
