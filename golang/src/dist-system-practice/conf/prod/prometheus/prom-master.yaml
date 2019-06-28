@@ -381,6 +381,16 @@ scrape_configs:
         )"
         action: drop
 
+  - job_name: 'filebeat-exporter'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    scheme: 'http'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+          - "HOST_IP_WEB:9479"
+          - "HOST_IP_SERVICE:9479"
+
   - job_name: 'elasticsearch-exporter'
     scrape_interval: 60s
     scrape_timeout: 30s

@@ -134,6 +134,7 @@ const MACHINES = [
             { "name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0" },
             { "name": "app_web", "type": "app_web", "image": "agreatfool/dist_app_web:0.0.1" },
             { "name": "filebeat_web", "type": "filebeat", "image": "elastic/filebeat:7.0.0" },
+            { "name": "fb_exporter_web", "type": "filebeat_exporter", "image": "agreatfool/beat-exporter:v0.1.2" },
         ]
     },
     {
@@ -147,6 +148,7 @@ const MACHINES = [
             { "name": "app_service", "type": "app_service", "image": "agreatfool/dist_app_service:0.0.1" },
             { "name": "app_consumer", "type": "app_consumer", "image": "agreatfool/dist_app_consumer:0.0.1" },
             { "name": "filebeat_service", "type": "filebeat", "image": "elastic/filebeat:7.0.0" },
+            { "name": "fb_exporter_service", "type": "filebeat_exporter", "image": "agreatfool/beat-exporter:v0.1.2" },
         ]
     },
 ];
@@ -848,12 +850,28 @@ class DistClusterToolDeploy {
             let initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
+                ' -p 5066:5066' +
                 ` -v ${Tools.getConfDir()}/elasticsearch/filebeat.yaml:/usr/share/filebeat/filebeat.yml` +
                 ' -v /tmp/logs/app:/tmp/logs/app' +
                 ` -e ES_HOSTS=${ES_CLUSTER_NODES.join(',')}` +
                 ' -e LOGGING_LEVEL=info' +
                 ' -e NUM_OF_OUTPUT_WORKERS=12' +
                 ` ${service.image}`;
+            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    deployServiceFilebeatExporter(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let initCommand = `docker run -d --name ${service.name}` +
+                ' --log-driver json-file --log-opt max-size=1G' +
+                ` --network ${machine.name}` +
+                ' -p 9479:9479' +
+                ` ${service.image}` +
+                ' -beat.timeout=10s' +
+                ` -beat.uri=http://${machine.ip}:5066` +
+                ' -web.listen-address=0.0.0.0:9479' +
+                ' -web.telemetry-path=/metrics';
             yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
         });
     }
