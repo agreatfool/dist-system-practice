@@ -157,6 +157,8 @@ const MACHINES = [
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 program.version(pkg.version)
     .description('cluster.sh: dist-system-practice project automation cluster tool')
+    .option('-m, --machine', 'init docker env')
+    .option('-w, --hardware', 'test host machine hardware')
     .option('-d, --deploy', 'execute deploy command')
     .option('-t, --stop', 'stop all deployed services')
     .option('-r, --start', 'start all deployed services')
@@ -164,6 +166,8 @@ program.version(pkg.version)
     .option('-c, --capture', 'capture stress test data')
     .option('-s, --stress', 'stress test')
     .parse(process.argv);
+const ARGS_MACHINE = program.machine === undefined ? undefined : true;
+const ARGS_HARDWARE = program.hardware === undefined ? undefined : true;
 const ARGS_DEPLOY = program.deploy === undefined ? undefined : true;
 const ARGS_STOP = program.stop === undefined ? undefined : true;
 const ARGS_START = program.start === undefined ? undefined : true;
@@ -177,7 +181,13 @@ class DistClusterTool {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log('[Cluster Tool] run ...');
-            if (ARGS_DEPLOY) {
+            if (ARGS_MACHINE) {
+                yield this.machine();
+            }
+            else if (ARGS_HARDWARE) {
+                yield this.hardware();
+            }
+            else if (ARGS_DEPLOY) {
                 yield this.deploy();
             }
             else if (ARGS_STOP) {
@@ -199,6 +209,18 @@ class DistClusterTool {
                 console.log('[Cluster Tool] Invalid option: Action option required');
                 process.exit(1);
             }
+        });
+    }
+    machine() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('[Cluster Tool] machine ...');
+            yield (new DistClusterToolMachine()).run();
+        });
+    }
+    hardware() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('[Cluster Tool] hardware ...');
+            yield (new DistClusterToolHardware()).run();
         });
     }
     deploy() {
@@ -238,14 +260,7 @@ class DistClusterTool {
         });
     }
 }
-class DistClusterToolDeploy {
-    run() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.initMachines();
-            yield this.prepareImages();
-            yield this.deployMachines();
-        });
-    }
+class DistClusterToolBase {
     initMachines() {
         return __awaiter(this, void 0, void 0, function* () {
             let tasks = [];
@@ -265,6 +280,39 @@ class DistClusterToolDeploy {
                 console.log(`Error in "initMachines": ${err.toString()}`);
             });
             yield Tools.execAsync('docker-machine ls', 'machines/list');
+        });
+    }
+}
+class DistClusterToolMachine extends DistClusterToolBase {
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.initMachines();
+        });
+    }
+}
+class DistClusterToolHardware {
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let tasks = [];
+            MACHINES.forEach((machine) => {
+                tasks.push(new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                    yield Tools.execAsync(`docker-machine ssh ${machine.name} "wget -qO- bench.sh | bash"`, `hardwares/${machine.name}/bench`);
+                    yield Tools.execAsync(`docker-machine ssh ${machine.name} "(curl -s wget.racing/nench.sh | bash; curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log"`, `hardwares/${machine.name}/nench`);
+                    resolve();
+                })));
+            });
+            yield Promise.all(tasks).catch((err) => {
+                console.log(`Error in "testHardwares": ${err.toString()}`);
+            });
+        });
+    }
+}
+class DistClusterToolDeploy extends DistClusterToolBase {
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.initMachines();
+            yield this.prepareImages();
+            yield this.deployMachines();
         });
     }
     prepareImages() {

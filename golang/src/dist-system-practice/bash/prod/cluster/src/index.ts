@@ -170,6 +170,8 @@ interface Service {
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 program.version(pkg.version)
     .description('cluster.sh: dist-system-practice project automation cluster tool')
+    .option('-m, --machine', 'init docker env')
+    .option('-w, --hardware', 'test host machine hardware')
     .option('-d, --deploy', 'execute deploy command')
     .option('-t, --stop', 'stop all deployed services')
     .option('-r, --start', 'start all deployed services')
@@ -178,6 +180,8 @@ program.version(pkg.version)
     .option('-s, --stress', 'stress test')
     .parse(process.argv);
 
+const ARGS_MACHINE = (program as any).machine === undefined ? undefined : true;
+const ARGS_HARDWARE = (program as any).hardware === undefined ? undefined : true;
 const ARGS_DEPLOY = (program as any).deploy === undefined ? undefined : true;
 const ARGS_STOP = (program as any).stop === undefined ? undefined : true;
 const ARGS_START = (program as any).start === undefined ? undefined : true;
@@ -193,7 +197,11 @@ class DistClusterTool {
     public async run() {
         console.log('[Cluster Tool] run ...');
 
-        if (ARGS_DEPLOY) {
+        if (ARGS_MACHINE ) {
+            await this.machine();
+        } else if (ARGS_HARDWARE) {
+            await this.hardware();
+        } else if (ARGS_DEPLOY) {
             await this.deploy();
         } else if (ARGS_STOP) {
             await this.stop();
@@ -209,6 +217,16 @@ class DistClusterTool {
             console.log('[Cluster Tool] Invalid option: Action option required');
             process.exit(1);
         }
+    }
+
+    private async machine() {
+        console.log('[Cluster Tool] machine ...');
+        await (new DistClusterToolMachine()).run();
+    }
+
+    private async hardware() {
+        console.log('[Cluster Tool] hardware ...');
+        await (new DistClusterToolHardware()).run();
     }
 
     private async deploy() {
@@ -243,15 +261,9 @@ class DistClusterTool {
 
 }
 
-class DistClusterToolDeploy {
+class DistClusterToolBase {
 
-    public async run() {
-        await this.initMachines();
-        await this.prepareImages();
-        await this.deployMachines();
-    }
-
-    private async initMachines() {
+    protected async initMachines() {
         let tasks = [];
 
         MACHINES.forEach((machine: Machine) => {
@@ -275,6 +287,50 @@ class DistClusterToolDeploy {
             console.log(`Error in "initMachines": ${err.toString()}`)
         });
         await Tools.execAsync('docker-machine ls', 'machines/list');
+    }
+
+}
+
+class DistClusterToolMachine extends DistClusterToolBase {
+
+    public async run() {
+        await this.initMachines();
+    }
+
+}
+
+class DistClusterToolHardware {
+
+    public async run() {
+        let tasks = [];
+
+        MACHINES.forEach((machine: Machine) => {
+            tasks.push(new Promise(async (resolve) => {
+                await Tools.execAsync(
+                    `docker-machine ssh ${machine.name} "wget -qO- bench.sh | bash"`,
+                    `hardwares/${machine.name}/bench`
+                );
+                await Tools.execAsync(
+                    `docker-machine ssh ${machine.name} "(curl -s wget.racing/nench.sh | bash; curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log"`,
+                    `hardwares/${machine.name}/nench`
+                );
+                resolve();
+            }));
+        });
+
+        await Promise.all(tasks).catch((err) => {
+            console.log(`Error in "testHardwares": ${err.toString()}`)
+        });
+    }
+
+}
+
+class DistClusterToolDeploy extends DistClusterToolBase {
+
+    public async run() {
+        await this.initMachines();
+        await this.prepareImages();
+        await this.deployMachines();
     }
 
     private async prepareImages() {
