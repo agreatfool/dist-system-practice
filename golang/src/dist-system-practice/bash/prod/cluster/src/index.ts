@@ -49,7 +49,7 @@ const MACHINES: Array<Machine> = [
         ],
     },
     {
-        "name": "kafka_1",
+        "name": "kafka1",
         "type": "kafka",
         "ip": process.env.HOST_IP_KAFKA_1,
         "services": [
@@ -61,7 +61,7 @@ const MACHINES: Array<Machine> = [
         ],
     },
     {
-        "name": "kafka_2",
+        "name": "kafka2",
         "type": "kafka",
         "ip": process.env.HOST_IP_KAFKA_2,
         "services": [
@@ -73,7 +73,7 @@ const MACHINES: Array<Machine> = [
         ],
     },
     {
-        "name": "es_1",
+        "name": "es1",
         "type": "elasticsearch",
         "ip": process.env.HOST_IP_ES_1,
         "services": [
@@ -84,7 +84,7 @@ const MACHINES: Array<Machine> = [
         ],
     },
     {
-        "name": "es_2",
+        "name": "es2",
         "type": "elasticsearch",
         "ip": process.env.HOST_IP_ES_2,
         "services": [
