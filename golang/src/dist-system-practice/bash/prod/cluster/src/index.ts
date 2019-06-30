@@ -9,6 +9,7 @@ import * as mkdir from 'mkdirp';
 import * as camel from 'camelcase';
 import * as fetch from 'node-fetch';
 import * as AbortController from 'abort-controller';
+import * as ssh2 from 'ssh2';
 
 const pkg = require('../package.json');
 
@@ -528,10 +529,8 @@ class DistClusterToolDeploy {
             ' --collect.perf_schema.tablelocks' +
             ' --collect.perf_schema.tableiowaits';
 
-        await Tools.execAsync(
-            `docker-machine ssh ${machine.name} "${initCommand}"`,
-            `services/${machine.name}/${service.name}`
-        );
+
+        await Tools.execSSH(machine.ip, initCommand);
     }
 
     //noinspection JSUnusedLocalSymbols
@@ -1286,6 +1285,36 @@ class Tools {
 
     public static getProjectDir() {
         return LibPath.join(__dirname, '..', '..', '..', '..'); // dist-system-practice
+    }
+
+    public static async execSSH(ip: string, command: string) {
+        console.log(`ExecSSH: ${command}`);
+
+        return new Promise((resolve, reject) => {
+            let conn = new ssh2.Client();
+            conn.on('ready', function() {
+                conn.exec(command, function(err, stream) {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    stream.on('close', function(code, signal) {
+                        console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
+                        conn.end();
+                        resolve();
+                    }).on('data', function(data) {
+                        console.log('STDOUT: ' + data);
+                    }).stderr.on('data', function(data) {
+                        console.log('STDERR: ' + data);
+                    });
+                });
+            }).connect({
+                host: ip,
+                port: 22,
+                username: 'root',
+                privateKey: LibFs.readFileSync('/home/ubuntu/.ssh/id_rsa')
+            });
+        });
     }
 
     public static execSync(command: string, output?: string, options?: shell.ExecOptions): shell.ExecOutputReturnValue {
