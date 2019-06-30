@@ -40,7 +40,7 @@ const MACHINES: Array<Machine> = [
         "type": "storage",
         "ip": process.env.HOST_IP_STORAGE,
         "services": [
-            {"name": "node_storage", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_storage", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_storage", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "mysqld", "type": "mysqld", "image": "mysql:5.7.26"},
             {"name": "mysqld_exporter", "type": "mysqld_exporter", "image": "prom/mysqld-exporter:v0.11.0"},
@@ -53,7 +53,7 @@ const MACHINES: Array<Machine> = [
         "type": "kafka",
         "ip": process.env.HOST_IP_KAFKA_1,
         "services": [
-            {"name": "node_kafka_1", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_kafka_1", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_kafka_1", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "zookeeper", "type": "zookeeper", "image": "wurstmeister/zookeeper:latest"},
             {"name": "kafka_1", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0"},
@@ -65,7 +65,7 @@ const MACHINES: Array<Machine> = [
         "type": "kafka",
         "ip": process.env.HOST_IP_KAFKA_2,
         "services": [
-            {"name": "node_kafka_2", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_kafka_2", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_kafka_2", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "kafka_3", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0"},
             {"name": "kafka_4", "type": "kafka", "image": "wurstmeister/kafka:2.12-2.2.0"},
@@ -77,7 +77,7 @@ const MACHINES: Array<Machine> = [
         "type": "elasticsearch",
         "ip": process.env.HOST_IP_ES_1,
         "services": [
-            {"name": "node_es_1", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_es_1", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_es_1", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "es_1", "type": "elasticsearch", "image": "elasticsearch:7.0.0"},
             {"name": "es_2", "type": "elasticsearch", "image": "elasticsearch:7.0.0"},
@@ -88,7 +88,7 @@ const MACHINES: Array<Machine> = [
         "type": "elasticsearch",
         "ip": process.env.HOST_IP_ES_2,
         "services": [
-            {"name": "node_es_2", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_es_2", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_es_2", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "es_3", "type": "elasticsearch", "image": "elasticsearch:7.0.0"},
             {"name": "es_4", "type": "elasticsearch", "image": "elasticsearch:7.0.0"},
@@ -104,7 +104,7 @@ const MACHINES: Array<Machine> = [
         "type": "monitor",
         "ip": process.env.HOST_IP_MONITOR,
         "services": [
-            {"name": "node_monitor", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_monitor", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_monitor", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "cassandra", "type": "cassandra", "image": "cassandra:3.11.4"},
             {
@@ -125,7 +125,7 @@ const MACHINES: Array<Machine> = [
         "type": "web",
         "ip": process.env.HOST_IP_WEB,
         "services": [
-            {"name": "node_web", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_web", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_web", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
             {"name": "app_web", "type": "app_web", "image": "agreatfool/dist_app_web:0.0.1"},
@@ -138,7 +138,7 @@ const MACHINES: Array<Machine> = [
         "type": "service",
         "ip": process.env.HOST_IP_SERVICE,
         "services": [
-            {"name": "node_service", "type": "node_exporter", "image": "prom/node-exporter:0.18.1"},
+            {"name": "node_service", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_service", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "jagent_service", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
             {"name": "app_service", "type": "app_service", "image": "agreatfool/dist_app_service:0.0.1"},
