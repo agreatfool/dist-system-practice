@@ -385,20 +385,23 @@ class DistClusterToolDeploy {
 
     //noinspection JSUnusedLocalSymbols
     private async deployServiceNodeExporter(machine: Machine, service: Service) {
-        const initCommand = 'wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz &&' +
-            ' mkdir -p node_exporter &&' +
-            ' tar xvfz node_exporter-0.18.1.linux-amd64.tar.gz -C node_exporter --strip-components=1';
+        const prepareCommand = 'killall node_exporter;' +
+            ' rm -rf ./node_exporter*;' +
+            ' wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz;' +
+            ' mkdir -p ./node_exporter;' +
+            ' tar xvfz node_exporter-0.18.1.linux-amd64.tar.gz -C ./node_exporter --strip-components=1';
+        await Tools.execAsync(`docker-machine ssh ${machine.name} "${prepareCommand}"`);
 
         await Tools.execAsync(
-            `docker-machine ssh ${machine.name} "${initCommand}"`,
-            `services/${machine.name}/${service.name}_init`
-        );
-        await Tools.execAsync(
-            `docker-machine ssh ${machine.name} "nohup ./node_exporter/node_exporter > /tmp/node_exporter.log&"`
+            `docker-machine ssh ${machine.name} "nohup ./node_exporter/node_exporter &> /tmp/node_exporter.log&"`
         );
         await Tools.execAsync(
             `docker-machine ssh ${machine.name} "ps aux|grep node_exporter"`,
             `services/${machine.name}/${service.name}_ps`
+        );
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "cat /tmp/node_exporter.log"`,
+            `services/${machine.name}/${service.name}_cat`
         );
     }
 
