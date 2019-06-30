@@ -407,7 +407,8 @@ class DistClusterToolDeploy {
 
     //noinspection JSUnusedLocalSymbols
     private async deployServiceCadvisor(machine: Machine, service: Service) {
-        const initCommand = `docker run -d --name ${service.name}` +
+        const initCommand = `docker network create ${machine.name} &&` +
+            ` docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
             ' -p 8080:8080' +
@@ -419,6 +420,9 @@ class DistClusterToolDeploy {
             ` --listen_ip=0.0.0.0` +
             ` --port=8080`;
 
+        await Tools.execAsync(
+            `docker-machine ssh ${machine.name} "docker network rm ${machine.name}"`
+        );
         await Tools.execAsync(
             `docker-machine ssh ${machine.name} "${initCommand}"`,
             `services/${machine.name}/${service.name}`
