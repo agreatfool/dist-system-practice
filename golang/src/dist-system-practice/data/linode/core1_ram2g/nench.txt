@@ -1,0 +1,51 @@
+-------------------------------------------------
+ nench.sh v2019.06.29 -- https://git.io/nench.sh
+ benchmark timestamp:    2019-06-30 02:35:02 UTC
+-------------------------------------------------
+
+Processor:    AMD EPYC 7501 32-Core Processor
+CPU cores:    1
+Frequency:    1999.999 MHz
+RAM:          1.9G
+Swap:         511M
+Kernel:       Linux 4.15.0-50-generic x86_64
+
+Disks:
+sda   49.5G  HDD
+sdb    512M  HDD
+
+CPU: SHA256-hashing 500 MB
+    3.274 seconds
+CPU: bzip2-compressing 500 MB
+    7.771 seconds
+CPU: AES-encrypting 500 MB
+    1.448 seconds
+
+ioping: seek rate
+    min/avg/max/mdev = 75.2 us / 555.8 us / 12.1 ms / 484.6 us
+ioping: sequential read speed
+    generated 14.8 k requests in 5.00 s, 3.62 GiB, 2.96 k iops, 741.4 MiB/s
+
+dd: sequential write speed
+    1st run:    410.08 MiB/s
+    2nd run:    953.67 MiB/s
+    3rd run:    953.67 MiB/s
+    average:    772.48 MiB/s
+
+IPv4 speedtests
+    your IPv4:    45.33.37.xxxx
+
+    Cachefly CDN:         172.12 MiB/s
+    Leaseweb (NL):        14.84 MiB/s
+    Softlayer DAL (US):   43.71 MiB/s
+    Online.net (FR):      11.46 MiB/s
+    OVH BHS (CA):         18.62 MiB/s
+
+IPv6 speedtests
+    your IPv6:    2600:3c01::xxxx
+
+    Leaseweb (NL):        8.20 MiB/s
+    Softlayer DAL (US):   0.00 MiB/s
+    Online.net (FR):      9.99 MiB/s
+    OVH BHS (CA):         18.50 MiB/s
+-------------------------------------------------

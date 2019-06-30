@@ -1,0 +1,40 @@
+----------------------------------------------------------------------
+CPU model            : AMD EPYC 7501 32-Core Processor
+Number of cores      : 1
+CPU frequency        : 1999.999 MHz
+Total size of Disk   : 49.0 GB (2.2 GB Used)
+Total amount of Mem  : 1993 MB (81 MB Used)
+Total amount of Swap : 511 MB (0 MB Used)
+System uptime        : 0 days, 0 hour 33 min
+Load average         : 0.00, 0.00, 0.00
+OS                   : Ubuntu 18.04.2 LTS
+Arch                 : x86_64 (64 Bit)
+Kernel               : 4.15.0-50-generic
+----------------------------------------------------------------------
+I/O speed(1st run)   : 853 MB/s
+I/O speed(2nd run)   : 1.1 GB/s
+I/O speed(3rd run)   : 1.2 GB/s
+Average I/O speed    : 1069.4 MB/s
+----------------------------------------------------------------------
+Node Name                       IPv4 address            Download Speed
+CacheFly                        205.234.175.175         107MB/s
+Linode, Tokyo, JP               106.187.96.148          21.2MB/s
+Linode, Singapore, SG           139.162.23.4            8.38MB/s
+Linode, London, UK              176.58.107.39           10.3MB/s
+Linode, Frankfurt, DE           139.162.130.8           15.1MB/s
+Linode, Fremont, CA             50.116.14.9             117MB/s
+Softlayer, Dallas, TX           173.192.68.18           41.5MB/s
+Softlayer, Seattle, WA          67.228.112.250          41.2MB/s
+Softlayer, Frankfurt, DE        159.122.69.4            7.52MB/s
+Softlayer, Singapore, SG        119.81.28.170           8.46MB/s
+Softlayer, HongKong, CN         119.81.130.170          10.6MB/s
+----------------------------------------------------------------------
+Node Name                       IPv6 address            Download Speed
+Linode, Atlanta, GA             2600:3c02::4b           37.1MB/s
+Linode, Dallas, TX              2600:3c00::4b           36.7MB/s
+Linode, Newark, NJ              2600:3c03::4b           17.1MB/s
+Linode, Singapore, SG           2400:8901::4b           8.23MB/s
+Linode, Tokyo, JP               2400:8900::4b           19.0MB/s
+Softlayer, San Jose, CA         2607:f0d0:2601:2a::4    66.5MB/s
+...
+----------------------------------------------------------------------
