@@ -438,24 +438,27 @@ class DistClusterToolDeploy {
 
                 const child = shell.exec(
                     `docker-machine ssh ${machine.name} "docker logs -f ${service.name}"`,
-                    {async: true}
+                    {async: true, timeout: 30000}
                 ) as LibCp.ChildProcess;
 
-                function detectEnd(chunk: any, proc: LibCp.ChildProcess) {
+                function detectEnd(chunk: any) {
                     const msg = chunk.toString();
                     if (msg.indexOf(msgDone) != -1) {
-                        proc.kill('SIGINT');
+                        child.kill();
+                        resolve();
+                    } else {
                     }
                 }
 
                 child.stdout.on('data', (chunk) => {
-                    detectEnd(chunk, child);
+                    detectEnd(chunk);
                 });
                 child.stderr.on('data', (chunk) => {
-                    detectEnd(chunk, child);
+                    detectEnd(chunk);
                 });
 
                 child.on('close', () => resolve());
+                child.on('exit', () => resolve());
                 child.on('error', (err) => reject(err));
             });
         }
@@ -469,6 +472,10 @@ class DistClusterToolDeploy {
         const insertSqlPath = `/tmp/${insertSqlFile}`;
         LibFs.writeFileSync(insertSqlPath, `INSERT INTO ${process.env.MYSQL_DB}.work VALUES ${inserts.join(',')};`);
 
+        // transfer resources
+        const transferCommand = `scp -r ${Tools.getProjectDir()}/schema root@${machine.ip}:/tmp/ &&` +
+            ` scp ${insertSqlPath} root@${machine.ip}:/tmp/${insertSqlFile}`;
+
         // init mysqld container
         const initCommand = 'docker volume create mysqld_data &&' +
             ` docker run -d --name ${service.name}` +
@@ -478,8 +485,8 @@ class DistClusterToolDeploy {
             ' --ulimit memlock=-1:-1' +
             ` --network ${machine.name}` +
             ' -p 3306:3306' +
-            ` -v ${Tools.getProjectDir()}/schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql` +
-            ` -v ${insertSqlPath}:/docker-entrypoint-initdb.d/${machine.name}_${service.name}_init.sql` +
+            ` -v /tmp/schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql` +
+            ` -v /tmp/${insertSqlFile}:/docker-entrypoint-initdb.d/${machine.name}_${service.name}_init.sql` +
             ' -v mysqld_data:/var/lib/mysql' +
             ` -e MYSQL_DATABASE="${process.env.MYSQL_DB}"` +
             ` -e MYSQL_ROOT_PASSWORD="${process.env.MYSQL_PWD}"` +
@@ -488,6 +495,7 @@ class DistClusterToolDeploy {
             ` --max-connections=${Number.parseInt(process.env.MYSQL_CONN_NUM) + 100}` +
             ' --max-allowed-packet=33554432'; // 32M
 
+        await Tools.execAsync(transferCommand);
         await Tools.execAsync(
             `docker-machine ssh ${machine.name} "${initCommand}"`,
             `services/${machine.name}/${service.name}`
