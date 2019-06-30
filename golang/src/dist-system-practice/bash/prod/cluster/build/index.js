@@ -297,7 +297,7 @@ class DistClusterToolHardware {
             MACHINES.forEach((machine) => {
                 tasks.push(new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
                     yield Tools.execAsync(`docker-machine ssh ${machine.name} "wget -qO- bench.sh | bash"`, `hardwares/${machine.name}/bench`);
-                    yield Tools.execAsync(`docker-machine ssh ${machine.name} "(curl -s wget.racing/nench.sh | bash; curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log"`, `hardwares/${machine.name}/nench`);
+                    yield Tools.execAsync(`docker-machine ssh ${machine.name} "(curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log"`, `hardwares/${machine.name}/nench`);
                     resolve();
                 })));
             });

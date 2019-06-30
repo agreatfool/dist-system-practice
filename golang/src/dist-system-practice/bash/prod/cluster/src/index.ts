@@ -311,7 +311,7 @@ class DistClusterToolHardware {
                     `hardwares/${machine.name}/bench`
                 );
                 await Tools.execAsync(
-                    `docker-machine ssh ${machine.name} "(curl -s wget.racing/nench.sh | bash; curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log"`,
+                    `docker-machine ssh ${machine.name} "(curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log"`,
                     `hardwares/${machine.name}/nench`
                 );
                 resolve();
