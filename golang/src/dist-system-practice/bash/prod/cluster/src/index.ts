@@ -172,6 +172,7 @@ program.version(pkg.version)
     .description('cluster.sh: dist-system-practice project automation cluster tool')
     .option('-m, --machine', 'init docker env')
     .option('-w, --hardware', 'test host machine hardware')
+    .option('-i, --image', 'download docker hub images')
     .option('-d, --deploy', 'execute deploy command')
     .option('-t, --stop', 'stop all deployed services')
     .option('-r, --start', 'start all deployed services')
@@ -182,6 +183,7 @@ program.version(pkg.version)
 
 const ARGS_MACHINE = (program as any).machine === undefined ? undefined : true;
 const ARGS_HARDWARE = (program as any).hardware === undefined ? undefined : true;
+const ARGS_IMAGE = (program as any).image === undefined ? undefined : true;
 const ARGS_DEPLOY = (program as any).deploy === undefined ? undefined : true;
 const ARGS_STOP = (program as any).stop === undefined ? undefined : true;
 const ARGS_START = (program as any).start === undefined ? undefined : true;
@@ -201,6 +203,8 @@ class DistClusterTool {
             await this.machine();
         } else if (ARGS_HARDWARE) {
             await this.hardware();
+        } else if (ARGS_IMAGE) {
+            await this.image();
         } else if (ARGS_DEPLOY) {
             await this.deploy();
         } else if (ARGS_STOP) {
@@ -227,6 +231,11 @@ class DistClusterTool {
     private async hardware() {
         console.log('[Cluster Tool] hardware ...');
         await (new DistClusterToolHardware()).run();
+    }
+
+    private async image() {
+        console.log('[Cluster Tool] image ...');
+        await (new DistClusterToolImage()).run();
     }
 
     private async deploy() {
