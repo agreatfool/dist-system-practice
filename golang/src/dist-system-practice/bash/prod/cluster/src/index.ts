@@ -270,18 +270,11 @@ class DistClusterTool {
 
 }
 
-class DistClusterToolBase {
+class DistClusterToolMachine {
 
-    protected async initMachines() {
-        let tasks = [];
-
-        MACHINES.forEach((machine: Machine) => {
-            if (Tools.execSync(`docker-machine ls | grep ${machine.name}`).stdout) {
-                console.log(`Machine ${machine.name} already exists, skip it ...`);
-                return;
-            }
-
-            tasks.push(Tools.execAsync(
+    public async run() {
+        for (let machine of MACHINES) {
+            await Tools.execAsync(
                 'docker-machine create -d generic' +
                 ` --generic-ip-address=${machine.ip}` +
                 ' --generic-ssh-port 22' +
@@ -289,21 +282,10 @@ class DistClusterToolBase {
                 ' --generic-ssh-user root' +
                 ` ${machine.name}`,
                 `machines/${machine.name}`
-            ));
-        });
+            );
+        }
 
-        await Promise.all(tasks).catch((err) => {
-            console.log(`Error in "initMachines": ${err.toString()}`)
-        });
         await Tools.execAsync('docker-machine ls', 'machines/list');
-    }
-
-}
-
-class DistClusterToolMachine extends DistClusterToolBase {
-
-    public async run() {
-        await this.initMachines();
     }
 
 }
@@ -334,18 +316,10 @@ class DistClusterToolHardware {
 
 }
 
-class DistClusterToolDeploy extends DistClusterToolBase {
+class DistClusterToolImage {
 
     public async run() {
-        await this.initMachines();
-        await this.prepareImages();
-        await this.deployMachines();
-    }
-
-    private async prepareImages() {
-        let tasks = [];
-
-        MACHINES.forEach((machine: Machine) => {
+        for (let machine of MACHINES) {
             // collect image names
             let images = [];
             machine.services.forEach((service: Service) => {
@@ -370,27 +344,32 @@ class DistClusterToolDeploy extends DistClusterToolBase {
             pullCommands.push('docker images');
 
             // execution
-            tasks.push(Tools.execAsync(
-                `docker-machine ssh "${pullCommands.join(' && ')}"`,
+            await Tools.execAsync(
+                `docker-machine ssh ${machine.name} "${pullCommands.join(' && ')}"`,
                 `images/${machine.name}`
-            ));
-        });
+            );
+        }
+    }
 
-        await Promise.all(tasks).catch((err) => {
-            console.log(`Error in "prepareImages": ${err.toString()}`)
-        });
+}
+
+class DistClusterToolDeploy {
+
+    public async run() {
+        await this.deployMachines();
     }
 
     private async deployMachines() {
-        let tasks = [];
+        for (let machine of MACHINES) {
 
-        MACHINES.forEach((machine: Machine) => {
-            tasks.push(this.deployMachine(machine));
-        });
+            //FIXME **********
+            if (machine.type !== 'storage') {
+                continue;
+            }
+            //FIXME **********
 
-        await Promise.all(tasks).catch((err) => {
-            console.log(`Error in "deployMachines": ${err.toString()}`)
-        });
+            await this.deployMachine(machine);
+        }
     }
 
     private async deployMachine(machine: Machine) {
