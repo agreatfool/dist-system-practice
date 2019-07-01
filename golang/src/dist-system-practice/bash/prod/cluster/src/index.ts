@@ -327,6 +327,17 @@ class DistClusterToolHardware {
 class DistClusterToolImage {
 
     public async run() {
+        await this.prepareImages();
+        await this.prepareMysqlData();
+        await this.prepareKafkaData();
+        await this.prepareElasticserachData();
+        await this.preparePrometheusData();
+        await this.prepareGrafanaData();
+        await this.prepareFilebeatData();
+        await this.prepareAppData();
+    }
+
+    private async prepareImages() {
         for (let machine of MACHINES) {
             // collect image names
             let images = [];
@@ -359,11 +370,127 @@ class DistClusterToolImage {
         }
     }
 
+    private async prepareMysqlData() {
+        const machine = Tools.getMachinesByType('storage')[0];
+        const service = Tools.getServicesByType('mysqld')[0];
+
+        // prepare init sql file
+        let inserts = [];
+        for (let i = 0; i < Number.parseInt(process.env.MAX_WORK_ID); i++) {
+            inserts.push('()');
+        }
+        const insertSqlFile = `${machine.name}_${service.name}_init.sql`;
+        const insertSqlPath = `/tmp/${insertSqlFile}`;
+        LibFs.writeFileSync(insertSqlPath, `INSERT INTO ${process.env.MYSQL_DB}.work VALUES ${inserts.join(',')};`);
+
+        await Tools.execAsync([
+            `scp -r ${Tools.getProjectDir()}/schema root@${machine.ip}:/tmp/`,
+            `scp ${insertSqlPath} root@${machine.ip}:/tmp/`,
+        ].join(' && '));
+    }
+
+    private async prepareKafkaData() {
+        for (let machine of Tools.getMachinesByType('kafka')) {
+            await Tools.execAsync([
+                `scp ${Tools.getProjectDir()}/vendors/kafka/jmx_prometheus_javaagent-0.9.jar root@${machine.ip}:/tmp/`,
+                `scp ${Tools.getProjectDir()}/vendors/kafka/jmx-kafka-2_0_0.yaml root@${machine.ip}:/tmp/`,
+            ].join(' && '));
+        }
+    }
+
+    private async prepareElasticserachData() {
+        for (let machine of Tools.getMachinesByType('elasticsearch')) {
+            await Tools.execAsync(`scp ${Tools.getConfDir()}/elasticsearch/elasticsearch.yaml root@${machine.ip}:/tmp/`)
+        }
+    }
+
+    private async preparePrometheusData() {
+        const replacedConfPath = '/tmp/prom-master.yaml';
+        let promConf = (await LibFs.readFile(`${Tools.getConfDir()}/prometheus/prom-master.yaml`)).toString();
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_CLIENT', process.env.HOST_IP_CLIENT);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_STORAGE', process.env.HOST_IP_STORAGE);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_KAFKA_1', process.env.HOST_IP_KAFKA_1);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_KAFKA_2', process.env.HOST_IP_KAFKA_2);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_ES_1', process.env.HOST_IP_ES_1);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_ES_2', process.env.HOST_IP_ES_2);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_MONITOR', process.env.HOST_IP_MONITOR);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_WEB', process.env.HOST_IP_WEB);
+        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_SERVICE', process.env.HOST_IP_SERVICE);
+        await LibFs.writeFile(replacedConfPath, promConf);
+
+        const machine = Tools.getMachinesByType('monitor')[0];
+
+        await Tools.execAsync(`scp ${replacedConfPath} root@${machine.ip}:/tmp/`);
+    }
+
+    private async prepareGrafanaData() {
+        const machine = Tools.getMachinesByType('monitor')[0];
+
+        await Tools.execAsync([
+            `scp ${Tools.getConfDir()}/grafana/grafana.ini root@${machine.ip}:/tmp/`,
+            `scp -r ${Tools.getProjectDir()}/vendors/prometheus/grafana/provisioning root@${machine.ip}:/tmp/`,
+            `scp -r ${Tools.getProjectDir()}/vendors/prometheus/grafana/dashboards root@${machine.ip}:/tmp/`,
+        ].join(' && '));
+    }
+
+    private async prepareFilebeatData() {
+        const machines: Array<Machine> = [];
+
+        machines.push(Tools.getMachinesByType('web')[0]);
+        machines.push(Tools.getMachinesByType('service')[0]);
+
+        for (let machine of machines) {
+            await Tools.execAsync(`scp ${Tools.getConfDir()}/elasticsearch/filebeat.yaml root@${machine.ip}:/tmp/`);
+        }
+    }
+
+    private async prepareAppData() {
+        const machines: Array<Machine> = [];
+
+        machines.push(Tools.getMachinesByType('web')[0]);
+        machines.push(Tools.getMachinesByType('service')[0]);
+
+        for (let machine of machines) {
+            await Tools.execAsync(`scp ${Tools.getConfDir()}/app/logger.yaml root@${machine.ip}:/tmp/`);
+        }
+    }
+
 }
 
 class DistClusterToolDeploy {
 
     public async run() {
+        // validate "--machine-type"
+        if (!ARGS_MACHINE_TYPE) {
+            console.log('[DistClusterToolDeploy] Machine type have to be specified: --machine-type');
+            process.exit(1);
+        }
+        const machineFiltered = MACHINES.filter((machine: Machine) => {
+            if (machine.type === ARGS_MACHINE_TYPE) {
+                return true;
+            }
+        });
+        if (machineFiltered.length === 0) {
+            console.log(`[DistClusterToolDeploy] Invalid machine type: ${ARGS_MACHINE_TYPE}`);
+            process.exit(1);
+        }
+
+        // validate "--exclude-service-types"
+        ARGS_EXCLUDE_SERVICE_TYPES.forEach((type: string) => {
+            let found = false;
+            MACHINES.forEach((machine: Machine) => {
+                machine.services.forEach((service: Service) => {
+                    if (service.type === type) {
+                        found = true;
+                    }
+                });
+            });
+            if (!found) {
+                console.log(`[DistClusterToolDeploy] Invalid exclude service type: ${type}`);
+                process.exit(1);
+            }
+        });
+
         await this.deployMachines();
     }
 
@@ -473,17 +600,7 @@ class DistClusterToolDeploy {
         }
 
         // prepare init sql file
-        let inserts = [];
-        for (let i = 0; i < Number.parseInt(process.env.MAX_WORK_ID); i++) {
-            inserts.push('()');
-        }
         const insertSqlFile = `${machine.name}_${service.name}_init.sql`;
-        const insertSqlPath = `/tmp/${insertSqlFile}`;
-        LibFs.writeFileSync(insertSqlPath, `INSERT INTO ${process.env.MYSQL_DB}.work VALUES ${inserts.join(',')};`);
-
-        // transfer resources
-        const transferCommand = `scp -r ${Tools.getProjectDir()}/schema root@${machine.ip}:/tmp/ &&` +
-            ` scp ${insertSqlPath} root@${machine.ip}:/tmp/${insertSqlFile}`;
 
         // init mysqld container
         const initCommand = 'docker volume create mysqld_data &&' +
@@ -504,7 +621,6 @@ class DistClusterToolDeploy {
             ` --max-connections=${Number.parseInt(process.env.MYSQL_CONN_NUM) + 100}` +
             ' --max-allowed-packet=33554432'; // 32M
 
-        await Tools.execAsync(transferCommand);
         await Tools.execAsync(
             `docker-machine ssh ${machine.name} "${initCommand}"`,
             `services/${machine.name}/${service.name}`
@@ -616,8 +732,8 @@ class DistClusterToolDeploy {
             ` -p ${portInternal}:${portInternal}` +
             ` -p ${portExternal}:${portExternal}` +
             ` -p ${portMetrics}:${portMetrics}` +
-            ` -v ${Tools.getProjectDir()}/vendors/kafka/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar` +
-            ` -v ${Tools.getProjectDir()}/vendors/kafka/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml` +
+            ` -v /tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar` +
+            ` -v /tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml` +
             ` -v kafka_data_${id}:/tmp/kafka/data` +
             ` -v kafka_home_${id}:/kafka` +
             ` -e KAFKA_LISTENERS="INSIDE://0.0.0.0:${portInternal},OUTSIDE://0.0.0.0:${portExternal}"` +
@@ -660,7 +776,7 @@ class DistClusterToolDeploy {
                 ` --zookeeper ${machines[0].ip}:2181` +
                 ` --topic ${process.env.KAFKA_TOPIC}`;
             await Tools.execAsync(
-                `docker-machine ssh ${machine.name} "${topicCommand}"`,
+                topicCommand,
                 `services/${machine.name}/kafka_topic`
             );
         }
@@ -728,7 +844,7 @@ class DistClusterToolDeploy {
             ` -p ${portExternal}:${portExternal}` +
             ` -v es_data_${id}:/usr/share/elasticsearch/data` +
             ` -v es_logs_${id}:/usr/share/elasticsearch/logs` +
-            ` -v ${Tools.getConfDir()}/elasticsearch/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml` +
+            ` -v /tmp/elasticsearch/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml` +
             ` -e node.name="${service.name}"` +
             ` -e network.host="0.0.0.0"` +
             ` -e http.port=${portExternal}` +
@@ -917,19 +1033,6 @@ class DistClusterToolDeploy {
 
     //noinspection JSUnusedLocalSymbols
     private async deployServicePrometheus(machine: Machine, service: Service) {
-        const replacedConfPath = '/tmp/prom-master.yaml';
-        let promConf = (await LibFs.readFile(`${Tools.getConfDir()}/prometheus/prom-master.yaml`)).toString();
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_CLIENT', process.env.HOST_IP_CLIENT);
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_STORAGE', process.env.HOST_IP_STORAGE);
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_KAFKA_1', process.env.HOST_IP_KAFKA_1);
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_KAFKA_2', process.env.HOST_IP_KAFKA_2);
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_ES_1', process.env.HOST_IP_ES_1);
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_ES_2', process.env.HOST_IP_ES_2);
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_MONITOR', process.env.HOST_IP_MONITOR);
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_WEB', process.env.HOST_IP_WEB);
-        promConf = Tools.replaceStrAll(promConf, 'HOST_IP_SERVICE', process.env.HOST_IP_SERVICE);
-        await LibFs.writeFile(replacedConfPath, promConf);
-
         let initCommand = 'docker volume create prometheus_vol &&' +
             ` docker run -d --name ${service.name}` +
             ' --log-driver json-file --log-opt max-size=1G' +
@@ -956,9 +1059,9 @@ class DistClusterToolDeploy {
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
             ` -p 3000:3000` +
-            ` -v ${Tools.getConfDir()}/grafana/grafana.ini:/etc/grafana/grafana.ini` +
-            ` -v ${Tools.getProjectDir()}/vendors/prometheus/grafana/provisioning:/etc/grafana/provisioning` +
-            ` -v ${Tools.getProjectDir()}/vendors/prometheus/grafana/dashboards:/etc/grafana/dashboards` +
+            ` -v /tmp/grafana.ini:/etc/grafana/grafana.ini` +
+            ` -v /tmp/provisioning:/etc/grafana/provisioning` +
+            ` -v /tmp/dashboards:/etc/grafana/dashboards` +
             ' -v grafana_data:/var/lib/grafana' +
             ' -e GF_SERVER_HTTP_ADDR=0.0.0.0' +
             ' -e GF_SERVER_HTTP_PORT=3000' +
@@ -1035,7 +1138,7 @@ class DistClusterToolDeploy {
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
             ' -p 5066:5066' +
-            ` -v ${Tools.getConfDir()}/elasticsearch/filebeat.yaml:/usr/share/filebeat/filebeat.yml` +
+            ` -v /tmp/filebeat.yaml:/usr/share/filebeat/filebeat.yml` +
             ' -v /tmp/logs/app:/tmp/logs/app' +
             ` -e ES_HOSTS=${ES_CLUSTER_NODES.join(',')}` +
             ' -e LOGGING_LEVEL=info' +
@@ -1072,7 +1175,7 @@ class DistClusterToolDeploy {
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
             ' -p 8000:8000' +
-            ` -v ${Tools.getConfDir()}/app/logger.yaml:/app/logger.yaml` +
+            ` -v /tmp/logger.yaml:/app/logger.yaml` +
             ' -v -v /tmp/logs:/app/logs' +
             ' -e APP_NAME="app.web"' +
             ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
@@ -1103,7 +1206,7 @@ class DistClusterToolDeploy {
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
             ' -p 8001:8001' +
-            ` -v ${Tools.getConfDir()}/app/logger.yaml:/app/logger.yaml` +
+            ` -v /tmp/app/logger.yaml:/app/logger.yaml` +
             ' -v -v /tmp/logs:/app/logs' +
             ' -e APP_NAME="app.service"' +
             ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
@@ -1147,7 +1250,7 @@ class DistClusterToolDeploy {
             ' --log-driver json-file --log-opt max-size=1G' +
             ` --network ${machine.name}` +
             ' -p 8002:8002' +
-            ` -v ${Tools.getConfDir()}/app/logger.yaml:/app/logger.yaml` +
+            ` -v /tmp/app/logger.yaml:/app/logger.yaml` +
             ' -v -v /tmp/logs:/app/logs' +
             ' -e APP_NAME="app.consumer"' +
             ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
