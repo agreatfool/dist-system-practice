@@ -129,7 +129,7 @@ const MACHINES: Array<Machine> = [
             {"name": "node_web", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_web", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
-            {"name": "app_web", "type": "app_web", "image": "agreatfool/dist_app_web:0.0.1"},
+            {"name": "app_web", "type": "app_web", "image": "agreatfool/dist_app_web:0.0.2"},
             {"name": "filebeat_web", "type": "filebeat", "image": "elastic/filebeat:7.0.0"},
             {"name": "fb_exporter_web", "type": "filebeat_exporter", "image": "agreatfool/beat-exporter:v0.1.2"},
         ]
@@ -142,8 +142,8 @@ const MACHINES: Array<Machine> = [
             {"name": "node_service", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1"},
             {"name": "cadvisor_service", "type": "cadvisor", "image": "google/cadvisor:v0.33.0"},
             {"name": "jagent_service", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0"},
-            {"name": "app_service", "type": "app_service", "image": "agreatfool/dist_app_service:0.0.1"},
-            {"name": "app_consumer", "type": "app_consumer", "image": "agreatfool/dist_app_consumer:0.0.1"},
+            {"name": "app_service", "type": "app_service", "image": "agreatfool/dist_app_service:0.0.2"},
+            {"name": "app_consumer", "type": "app_consumer", "image": "agreatfool/dist_app_consumer:0.0.2"},
             {"name": "filebeat_service", "type": "filebeat", "image": "elastic/filebeat:7.0.0"},
             {"name": "fb_exporter_service", "type": "filebeat_exporter", "image": "agreatfool/beat-exporter:v0.1.2"},
         ]
