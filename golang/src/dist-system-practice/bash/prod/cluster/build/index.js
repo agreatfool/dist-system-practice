@@ -23,12 +23,6 @@ const mkdirp = LibUtil.promisify(mkdir);
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* CONSTANTS
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-const KAFKA_BROKERS_ADDRESS = []; // ["ip:port", ...]
-const KAFKA_METRICS_ADDRESS = []; // ["ip:port", ...]
-let ES_CLUSTER_ENTRANCE = ''; // ip:port
-let ES_CLUSTER_NODES = []; // ["ip:port", ...]
-let CAS_CLUSTER_ENTRANCE = ''; // ip
-const JCOLLECTOR_ADDRESS = []; // ["ip:port", ...]
 const MACHINES = [
     {
         "name": "client",
@@ -126,19 +120,6 @@ const MACHINES = [
         ]
     },
     {
-        "name": "web",
-        "type": "web",
-        "ip": process.env.HOST_IP_WEB,
-        "services": [
-            { "name": "node_web", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1" },
-            { "name": "cadvisor_web", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
-            { "name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0" },
-            { "name": "app_web", "type": "app_web", "image": "agreatfool/dist_app_web:0.0.2" },
-            { "name": "filebeat_web", "type": "filebeat", "image": "elastic/filebeat:7.0.0" },
-            { "name": "fb_exporter_web", "type": "filebeat_exporter", "image": "agreatfool/beat-exporter:v0.1.2" },
-        ]
-    },
-    {
         "name": "service",
         "type": "service",
         "ip": process.env.HOST_IP_SERVICE,
@@ -150,6 +131,19 @@ const MACHINES = [
             { "name": "app_consumer", "type": "app_consumer", "image": "agreatfool/dist_app_consumer:0.0.2" },
             { "name": "filebeat_service", "type": "filebeat", "image": "elastic/filebeat:7.0.0" },
             { "name": "fb_exporter_service", "type": "filebeat_exporter", "image": "agreatfool/beat-exporter:v0.1.2" },
+        ]
+    },
+    {
+        "name": "web",
+        "type": "web",
+        "ip": process.env.HOST_IP_WEB,
+        "services": [
+            { "name": "node_web", "type": "node_exporter", "image": "prom/node-exporter:v0.18.1" },
+            { "name": "cadvisor_web", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
+            { "name": "jagent_web", "type": "jaeger_agent", "image": "jaegertracing/jaeger-agent:1.11.0" },
+            { "name": "app_web", "type": "app_web", "image": "agreatfool/dist_app_web:0.0.2" },
+            { "name": "filebeat_web", "type": "filebeat", "image": "elastic/filebeat:7.0.0" },
+            { "name": "fb_exporter_web", "type": "filebeat_exporter", "image": "agreatfool/beat-exporter:v0.1.2" },
         ]
     },
 ];
@@ -167,8 +161,9 @@ program.version(pkg.version)
     .option('--cleanup', 'remove all deployed services')
     .option('--capture', 'capture stress test data')
     .option('--stress', 'stress test')
-    .option('--machine-type <string>', '--deploy sub param, specify target machine type of deployment')
-    .option('--exclude-service-types <types>', '--deploy sub param, specify exclude service types of deployment, e.g node_exporter,cadvisor,...', (types) => {
+    .option('--docker-ps', 'docker ps -a, remotely')
+    .option('--machine-type <string>', '--sub param, specify target machine type of action, using "all" to specify all machines')
+    .option('--exclude-service-types <types>', '--sub param, specify exclude service types of action, e.g node_exporter,cadvisor,...', (types) => {
     return types.split(',');
 })
     .parse(process.argv);
@@ -181,6 +176,7 @@ const ARGS_ACTION_START = program.start === undefined ? undefined : true;
 const ARGS_ACTION_CLEANUP = program.cleanup === undefined ? undefined : true;
 const ARGS_ACTION_CAPTURE = program.capture === undefined ? undefined : true;
 const ARGS_ACTION_STRESS = program.stress === undefined ? undefined : true;
+const ARGS_ACTION_DOCKER_PS = program.dockerPs === undefined ? undefined : true;
 const ARGS_MACHINE_TYPE = program.machineType === undefined ? undefined : program.machineType;
 const ARGS_EXCLUDE_SERVICE_TYPES = program.excludeServiceTypes === undefined ? [] : program.excludeServiceTypes;
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -190,6 +186,35 @@ class DistClusterTool {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log('[Cluster Tool] run ...');
+            // validate "--machine-type"
+            if (!ARGS_MACHINE_TYPE) {
+                console.log('[Cluster Tool] Machine type have to be specified: --machine-type');
+                process.exit(1);
+            }
+            const machineFiltered = MACHINES.filter((machine) => {
+                if (machine.type === ARGS_MACHINE_TYPE) {
+                    return true;
+                }
+            });
+            if (ARGS_MACHINE_TYPE !== 'all' && machineFiltered.length === 0) {
+                console.log(`[Cluster Tool] Invalid machine type: ${ARGS_MACHINE_TYPE}`);
+                process.exit(1);
+            }
+            // validate "--exclude-service-types"
+            ARGS_EXCLUDE_SERVICE_TYPES.forEach((type) => {
+                let found = false;
+                MACHINES.forEach((machine) => {
+                    machine.services.forEach((service) => {
+                        if (service.type === type) {
+                            found = true;
+                        }
+                    });
+                });
+                if (!found) {
+                    console.log(`[Cluster Tool] Invalid exclude service type: ${type}`);
+                    process.exit(1);
+                }
+            });
             if (ARGS_ACTION_MACHINE) {
                 yield this.machine();
             }
@@ -216,6 +241,9 @@ class DistClusterTool {
             }
             else if (ARGS_ACTION_STRESS) {
                 yield this.stress();
+            }
+            else if (ARGS_ACTION_DOCKER_PS) {
+                yield this.dockerPs();
             }
             else {
                 console.log('[Cluster Tool] Invalid option: Action option required');
@@ -277,6 +305,12 @@ class DistClusterTool {
             yield (new DistClusterToolStress()).run();
         });
     }
+    dockerPs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('[Cluster Tool] dockerPs ...');
+            yield (new DistClusterToolDockerPs()).run();
+        });
+    }
 }
 class DistClusterToolMachine {
     run() {
@@ -299,8 +333,8 @@ class DistClusterToolHardware {
             let tasks = [];
             MACHINES.forEach((machine) => {
                 tasks.push(new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-                    yield Tools.execAsync(`docker-machine ssh ${machine.name} "wget -qO- bench.sh | bash"`, `hardwares/${machine.name}/bench`);
-                    yield Tools.execAsync(`docker-machine ssh ${machine.name} "(curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log"`, `hardwares/${machine.name}/nench`);
+                    yield Tools.execSSH(machine.ip, 'wget -qO- bench.sh | bash', `hardwares/${machine.name}/bench`);
+                    yield Tools.execSSH(machine.ip, '(curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log', `hardwares/${machine.name}/nench`);
                     resolve();
                 })));
             });
@@ -335,18 +369,20 @@ class DistClusterToolImage {
                     images.push(service.image);
                 });
                 // generate pull image commands
-                let pullCommands = [];
+                let commands = [];
                 images.forEach((image) => {
-                    pullCommands.push(`docker pull ${image}`);
+                    commands.push(`docker pull ${image}`);
                 });
                 // do nothing with 0 pull commands
-                if (pullCommands.length == 0) {
+                if (commands.length == 0) {
                     return;
                 }
                 // display command
-                pullCommands.push('docker images');
+                commands.push('docker images');
+                // setup env
+                commands.push('sudo sysctl -w vm.max_map_count=262144');
                 // execution
-                yield Tools.execAsync(`docker-machine ssh ${machine.name} "${pullCommands.join(' && ')}"`, `images/${machine.name}`);
+                yield Tools.execSSH(machine.ip, commands.join(' && '), `images/${machine.name}`);
             }
         });
     }
@@ -437,42 +473,13 @@ class DistClusterToolImage {
 class DistClusterToolDeploy {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            // validate "--machine-type"
-            if (!ARGS_MACHINE_TYPE) {
-                console.log('[DistClusterToolDeploy] Machine type have to be specified: --machine-type');
-                process.exit(1);
-            }
-            const machineFiltered = MACHINES.filter((machine) => {
-                if (machine.type === ARGS_MACHINE_TYPE) {
-                    return true;
-                }
-            });
-            if (machineFiltered.length === 0) {
-                console.log(`[DistClusterToolDeploy] Invalid machine type: ${ARGS_MACHINE_TYPE}`);
-                process.exit(1);
-            }
-            // validate "--exclude-service-types"
-            ARGS_EXCLUDE_SERVICE_TYPES.forEach((type) => {
-                let found = false;
-                MACHINES.forEach((machine) => {
-                    machine.services.forEach((service) => {
-                        if (service.type === type) {
-                            found = true;
-                        }
-                    });
-                });
-                if (!found) {
-                    console.log(`[DistClusterToolDeploy] Invalid exclude service type: ${type}`);
-                    process.exit(1);
-                }
-            });
             yield this.deployMachines();
         });
     }
     deployMachines() {
         return __awaiter(this, void 0, void 0, function* () {
             for (let machine of MACHINES) {
-                if (machine.type !== ARGS_MACHINE_TYPE) {
+                if (ARGS_MACHINE_TYPE !== 'all' && machine.type !== ARGS_MACHINE_TYPE) {
                     continue;
                 }
                 yield this.deployMachine(machine);
@@ -500,10 +507,10 @@ class DistClusterToolDeploy {
                 ' wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz;' +
                 ' mkdir -p ./node_exporter;' +
                 ' tar xvfz node_exporter-0.18.1.linux-amd64.tar.gz -C ./node_exporter --strip-components=1';
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${prepareCommand}"`);
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "nohup ./node_exporter/node_exporter &> /tmp/node_exporter.log&"`);
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "ps aux|grep node_exporter"`, `services/${machine.name}/${service.name}_ps`);
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "cat /tmp/node_exporter.log"`, `services/${machine.name}/${service.name}_cat`);
+            yield Tools.execSSH(machine.ip, prepareCommand, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, 'nohup ./node_exporter/node_exporter &> /tmp/node_exporter.log&');
+            yield Tools.execSSH(machine.ip, 'ps aux|grep node_exporter', `services/${machine.name}/${service.name}_ps`);
+            yield Tools.execSSH(machine.ip, 'cat /tmp/node_exporter.log', `services/${machine.name}/${service.name}_cat`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -521,8 +528,8 @@ class DistClusterToolDeploy {
                 ` ${service.image}` +
                 ` --listen_ip=0.0.0.0` +
                 ` --port=8080`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "docker network rm ${machine.name}"`);
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, `docker network rm ${machine.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -573,7 +580,7 @@ class DistClusterToolDeploy {
                 ` --bind-address=0.0.0.0` +
                 ` --max-connections=${Number.parseInt(process.env.MYSQL_CONN_NUM) + 100}` +
                 ' --max-allowed-packet=33554432'; // 32M
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
             // waiting for mysql initialized
             yield waitMysqldInitialized();
         });
@@ -601,7 +608,7 @@ class DistClusterToolDeploy {
                 ' --collect.perf_schema.indexiowaits' +
                 ' --collect.perf_schema.tablelocks' +
                 ' --collect.perf_schema.tableiowaits';
-            yield Tools.execSSH(machine.ip, initCommand);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -615,7 +622,7 @@ class DistClusterToolDeploy {
                 ' -l 0.0.0.0' +
                 ' -p 11211' +
                 ` -m ${process.env.MEMCACHED_MEM}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -627,7 +634,7 @@ class DistClusterToolDeploy {
                 ' -p 9150:9150' +
                 ` ${service.image}` +
                 ' --memcached.address=memcached:11211';
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -642,7 +649,7 @@ class DistClusterToolDeploy {
                 ' -v zookeeper_data:/opt/zookeeper-3.4.13/data' +
                 ' -v zookeeper_conf:/opt/zookeeper-3.4.13/conf' +
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -653,8 +660,6 @@ class DistClusterToolDeploy {
             const portInternal = `9${brokerId}93`; // 9093、9193、9293、...
             const portExternal = `9${brokerId}92`; // 9092、9192、9292、...
             const portMetrics = `7${brokerId}71`; // 7071、7171、7271、...
-            KAFKA_BROKERS_ADDRESS.push(`${machine.ip}:${portExternal}`);
-            KAFKA_METRICS_ADDRESS.push(`${machine.ip}:${portMetrics}`);
             const machines = Tools.getMachinesByType(machine.type);
             const services = Tools.getServicesByType(service.type);
             const initCommand = `docker volume create kafka_data_${id} &&` +
@@ -667,7 +672,7 @@ class DistClusterToolDeploy {
                 ` --network ${machine.name}` +
                 ` -p ${portInternal}:${portInternal}` +
                 ` -p ${portExternal}:${portExternal}` +
-                ` -p ${portMetrics}:${portMetrics}` +
+                ` -p ${portMetrics}:7071` +
                 ` -v /tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar` +
                 ` -v /tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml` +
                 ` -v kafka_data_${id}:/tmp/kafka/data` +
@@ -685,7 +690,7 @@ class DistClusterToolDeploy {
                 ` -e KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1` +
                 ` -e KAFKA_MIN_INSYNC_REPLICAS=1` +
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
             // wait several seconds here, wait for kafka initialization done
             if (id === services.length) { // only the last node need to do this
                 console.log('Wait 30s, then create topic data');
@@ -722,10 +727,10 @@ class DistClusterToolDeploy {
                 ' --log.level=info' +
                 ' --topic.filter=.*' +
                 ' --group.filter=.*';
-            KAFKA_BROKERS_ADDRESS.forEach((address) => {
+            Tools.getKafkaBrokersAddresses().forEach((address) => {
                 initCommand += ` --kafka.server=${address}`;
             });
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -744,14 +749,12 @@ class DistClusterToolDeploy {
                     }
                     const portId = Number.parseInt(svc.name.split('_')[1]) - 1;
                     discoverySeedHosts.push(`${mch.ip}:930${portId}`);
-                    ES_CLUSTER_NODES.push(`${mch.ip}:920${portId}`);
                 });
             });
             let initialMasterNodes = [];
             services.forEach((svc) => {
                 initialMasterNodes.push(svc.name);
             });
-            ES_CLUSTER_ENTRANCE = `${machines[0].ip}:9200`;
             let initCommand = `docker volume create es_data_${id} &&` +
                 ` docker volume create es_logs_${id} &&` +
                 ` docker run -d --name ${service.name}` +
@@ -764,7 +767,7 @@ class DistClusterToolDeploy {
                 ` -p ${portExternal}:${portExternal}` +
                 ` -v es_data_${id}:/usr/share/elasticsearch/data` +
                 ` -v es_logs_${id}:/usr/share/elasticsearch/logs` +
-                ` -v /tmp/elasticsearch/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml` +
+                ` -v /tmp/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml` +
                 ` -e node.name="${service.name}"` +
                 ` -e network.host="0.0.0.0"` +
                 ` -e http.port=${portExternal}` +
@@ -776,7 +779,7 @@ class DistClusterToolDeploy {
                 ` -e discovery.seed_hosts=${discoverySeedHosts.join(',')}` +
                 ` -e cluster.initial_master_nodes=${initialMasterNodes.join(',')}` +
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
             let failed = 0;
             function waitElasticsearchCluster() {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -787,7 +790,7 @@ class DistClusterToolDeploy {
                     }, 50000);
                     try {
                         // @ts-ignore
-                        let response = yield fetch(`http://${ES_CLUSTER_ENTRANCE}/_cluster/health?wait_for_status=green&timeout=60s`, { signal: controller.signal });
+                        let response = yield fetch(`http://${Tools.getEsClusterEntrance()}/_cluster/health?wait_for_status=green&timeout=60s`, { signal: controller.signal });
                         let data = yield response.json();
                         clearTimeout(timeout);
                         console.log('Es cluster: ', data);
@@ -807,7 +810,7 @@ class DistClusterToolDeploy {
                 console.log('Start to wait for es cluster ...');
                 yield waitElasticsearchCluster();
                 yield Tools.execAsync('curl -H "Content-Type: application/json"' +
-                    ` -PUT "${ES_CLUSTER_ENTRANCE}/_template/dist?pretty"` +
+                    ` -PUT "${Tools.getEsClusterEntrance()}/_template/dist?pretty"` +
                     ` -d @${Tools.getConfDir()}/elasticsearch/elk-index-template.json`, `services/${machine.name}/es_index`);
             }
         });
@@ -822,7 +825,7 @@ class DistClusterToolDeploy {
                 ` ${service.image}` +
                 ' --web.listen-address=0.0.0.0:9114' +
                 ' --web.telemetry-path=/metrics' +
-                ` --es.uri=http://${ES_CLUSTER_ENTRANCE}` +
+                ` --es.uri=http://${Tools.getEsClusterEntrance()}` +
                 ' --es.all' +
                 ' --es.cluster_settings' +
                 ' --es.shards' +
@@ -832,13 +835,12 @@ class DistClusterToolDeploy {
                 ' --log.level=info' +
                 ' --log.format=json' +
                 ' --log.output=stdout';
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
     deployServiceCassandra(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
-            CAS_CLUSTER_ENTRANCE = machine.ip;
             let initCommand = 'docker volume create cas_data &&' +
                 ` docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
@@ -860,20 +862,20 @@ class DistClusterToolDeploy {
                 ` -e CASSANDRA_SEEDS=${machine.ip}` +
                 ` -e JAVA_OPTS="-Dfile.encoding=UTF-8 -Xms${process.env.CAS_JVM_MEM} -Xmx${process.env.CAS_JVM_MEM}"` +
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
             // wait seconds for cassandra initialized
-            console.log('Start to wait for cassandra cluster ...');
+            console.log('Wait 30s, then create cassandra schema');
             yield new Promise((resolve) => {
                 setTimeout(() => resolve(), 30000); // 30s
             });
             const sqlCommand = 'docker run --rm --name jaeger-cassandra-schema' +
                 ` --network ${machine.name}` +
                 ' -e MODE=test' +
-                ` -e CQLSH_HOST=${CAS_CLUSTER_ENTRANCE}` +
+                ` -e CQLSH_HOST=${Tools.getCassandraClusterEntrance()}` +
                 ' -e DATACENTER=jaeger_dc' +
                 ' -e KEYSPACE=jaeger_keyspace' +
                 ` ${Tools.getServicesByType('cassandra_init')[0].image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${sqlCommand}"`, `services/${machine.name}/cassandra_init`);
+            yield Tools.execSSH(machine.ip, sqlCommand, `services/${machine.name}/cassandra_init`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -882,7 +884,6 @@ class DistClusterToolDeploy {
             const id = Number.parseInt(service.name.split('_')[1]); // jcollector_1 => [jcollector, 1] => 1
             const portGrpc = 14250 + (id - 1); // 14250、14251、14252、...
             const portHttp = 14268 + (id - 1); // 14268、14269、14270、...
-            JCOLLECTOR_ADDRESS.push(`${machine.ip}:${portGrpc}`);
             let initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
@@ -892,12 +893,12 @@ class DistClusterToolDeploy {
                 ` ${service.image}` +
                 ` --collector.grpc-port=14250` +
                 ` --collector.http-port=14268` +
-                ` --cassandra.servers=${CAS_CLUSTER_ENTRANCE}` +
+                ` --cassandra.servers=${Tools.getCassandraClusterEntrance()}` +
                 ' --cassandra.keyspace=jaeger_keyspace' +
                 ' --metrics-backend=prometheus' +
                 ' --metrics-http-route=/metrics' +
                 ' --log-level=info';
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -910,12 +911,12 @@ class DistClusterToolDeploy {
                 ' -e SPAN_STORAGE_TYPE=cassandra' +
                 ` ${service.image}` +
                 ' --query.port=16686' +
-                ` --cassandra.servers=${CAS_CLUSTER_ENTRANCE}` +
+                ` --cassandra.servers=${Tools.getCassandraClusterEntrance()}` +
                 ' --cassandra.keyspace=jaeger_keyspace' +
                 ' --metrics-backend=prometheus' +
                 ' --metrics-http-route=/metrics' +
                 ' --log-level=info';
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -933,7 +934,7 @@ class DistClusterToolDeploy {
                 ' --config.file=/etc/prometheus/prometheus.yml' +
                 ' --log.format=json' +
                 ' --log.level=info';
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -963,7 +964,7 @@ class DistClusterToolDeploy {
                 ' -e GF_PATHS_PROVISIONING=/etc/grafana/provisioning' +
                 ' -e GF_INSTALL_PLUGINS=grafana-piechart-panel' +
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -976,14 +977,14 @@ class DistClusterToolDeploy {
                 ' -e SERVER_PORT=5601' +
                 ' -e SERVER_HOST=0.0.0.0' +
                 ' -e SERVER_NAME=es_cluster' +
-                ` -e ELASTICSEARCH_HOSTS=["http://${ES_CLUSTER_ENTRANCE}"]` +
+                ` -e ELASTICSEARCH_HOSTS="[\\"http://${Tools.getEsClusterEntrance()}\\"]"` +
                 ' -e KIBANA_INDEX=.kibana' +
                 ' -e DIBANA_DEFAULTAPPID=home' +
                 ' -e ELASTICSEARCH_PINGTIMEOUT=1500' +
                 ' -e ELASTICSEARCH_REQUESTTIMEOUT=10000' +
                 ' -e ELASTICSEARCH_LOGQUERIES=false' +
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -996,7 +997,7 @@ class DistClusterToolDeploy {
                 ` -p 6831:6831` + // compact
                 ` -p 5778:5778` + // http (prometheus)
                 ` ${service.image}` +
-                ` --reporter.grpc.host-port=${JCOLLECTOR_ADDRESS.join(',')}` +
+                ` --reporter.grpc.host-port=${Tools.getJaegerCollectorsAddresses().join(',')}` +
                 ' --reporter.type=grpc' +
                 ' --processor.jaeger-binary.server-host-port=0.0.0.0:6832' +
                 ' --processor.jaeger-compact.server-host-port=0.0.0.0:6831' +
@@ -1004,7 +1005,7 @@ class DistClusterToolDeploy {
                 ' --metrics-backend=prometheus' +
                 ' --metrics-http-route=/metrics' +
                 ' --log-level=info';
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -1016,11 +1017,13 @@ class DistClusterToolDeploy {
                 ' -p 5066:5066' +
                 ` -v /tmp/filebeat.yaml:/usr/share/filebeat/filebeat.yml` +
                 ' -v /tmp/logs/app:/tmp/logs/app' +
-                ` -e ES_HOSTS=${ES_CLUSTER_NODES.join(',')}` +
+                ` -e ES_HOSTS=${Tools.getEsClusterNodes().join(',')}` +
                 ' -e LOGGING_LEVEL=info' +
                 ' -e NUM_OF_OUTPUT_WORKERS=12' +
+                ` -e NUM_OF_SHARDS=20` +
+                ` -e NUM_OF_REPLICAS=1` +
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -1035,7 +1038,7 @@ class DistClusterToolDeploy {
                 ` -beat.uri=http://${machine.ip}:5066` +
                 ' -web.listen-address=0.0.0.0:9479' +
                 ' -web.telemetry-path=/metrics';
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -1046,13 +1049,13 @@ class DistClusterToolDeploy {
                 ` --network ${machine.name}` +
                 ' -p 8000:8000' +
                 ` -v /tmp/logger.yaml:/app/logger.yaml` +
-                ' -v -v /tmp/logs:/app/logs' +
+                ' -v /tmp/logs:/app/logs' +
                 ' -e APP_NAME="app.web"' +
                 ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
                 ' -e WEB_HOST="0.0.0.0"' +
                 ' -e WEB_PORT="8000"' +
                 ` -e MAX_WORK_ID="${process.env.MAX_WORK_ID}"` +
-                ` -e RPC_SERVERS="[\"${Tools.getMachinesByType('service')[0].ip}:16241\"]"` +
+                ` -e RPC_SERVERS="[\\"${Tools.getMachinesByType('service')[0].ip}:16241\\"]"` +
                 ' -e JAEGER_SERVICE_NAME="app.web"' +
                 ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
                 ' -e JAEGER_AGENT_PORT="6831"' +
@@ -1061,7 +1064,7 @@ class DistClusterToolDeploy {
                 ' -e JAEGER_SAMPLER_TYPE="probabilistic"' +
                 ' -e JAEGER_SAMPLER_PARAM="0.01"' + // 1%
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -1072,11 +1075,12 @@ class DistClusterToolDeploy {
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
                 ' -p 8001:8001' +
-                ` -v /tmp/app/logger.yaml:/app/logger.yaml` +
-                ' -v -v /tmp/logs:/app/logs' +
+                ' -p 16241:16241' +
+                ` -v /tmp/logger.yaml:/app/logger.yaml` +
+                ' -v /tmp/logs:/app/logs' +
                 ' -e APP_NAME="app.service"' +
                 ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
-                ` -e CACHE_SERVERS="[\"${storageIp}:11211\"]"` +
+                ` -e CACHE_SERVERS="[\\"${storageIp}:11211\\"]"` +
                 ` -e DB_HOST="${storageIp}"` +
                 ' -e DB_PORT="3306"' +
                 ` -e DB_USER="${process.env.MYSQL_USER}"` +
@@ -1088,10 +1092,10 @@ class DistClusterToolDeploy {
                 ` -e DB_MAX_IDLE_CONN="${process.env.MYSQL_CONN_NUM}"` +
                 ' -e DB_CONN_MAX_LIFE_TIME="300"' +
                 ' -e SERVICE_HOST="0.0.0.0"' +
-                ' -e SERVICE_PORT="16241' +
+                ' -e SERVICE_PORT="16241"' +
                 ' -e WEB_HOST="0.0.0.0"' +
                 ' -e WEB_PORT="8001"' +
-                ` -e KAFKA_BROKERS="[\"${KAFKA_BROKERS_ADDRESS.join('","')}\"]"` +
+                ` -e KAFKA_BROKERS="[\\"${Tools.getKafkaBrokersAddresses().join('\\",\\"')}\\"]"` +
                 ' -e KAFKA_WRITE_ASYNC="false"' +
                 ' -e JAEGER_SERVICE_NAME="app.service"' +
                 ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
@@ -1101,7 +1105,7 @@ class DistClusterToolDeploy {
                 ' -e JAEGER_SAMPLER_TYPE="probabilistic"' +
                 ' -e JAEGER_SAMPLER_PARAM="0.01"' + // 1%
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
     //noinspection JSUnusedLocalSymbols
@@ -1112,11 +1116,11 @@ class DistClusterToolDeploy {
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
                 ' -p 8002:8002' +
-                ` -v /tmp/app/logger.yaml:/app/logger.yaml` +
-                ' -v -v /tmp/logs:/app/logs' +
+                ` -v /tmp/logger.yaml:/app/logger.yaml` +
+                ' -v /tmp/logs:/app/logs' +
                 ' -e APP_NAME="app.consumer"' +
                 ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
-                ` -e CACHE_SERVERS="[\"${storageIp}:11211\"]"` +
+                ` -e CACHE_SERVERS="[\\"${storageIp}:11211\\"]"` +
                 ` -e DB_HOST="${storageIp}"` +
                 ' -e DB_PORT="3306"' +
                 ` -e DB_USER="${process.env.MYSQL_USER}"` +
@@ -1131,7 +1135,7 @@ class DistClusterToolDeploy {
                 ' -e WEB_PORT="8002"' +
                 ` -e CONSUMER_ROUTINES="${process.env.KAFKA_PARTITIONS}"` +
                 ` -e CONSUMER_FACTOR="${process.env.CONSUMER_FACTOR}"` +
-                ` -e KAFKA_BROKERS="[\"${KAFKA_BROKERS_ADDRESS.join('","')}\"]"` +
+                ` -e KAFKA_BROKERS="[\\"${Tools.getKafkaBrokersAddresses().join('\\",\\"')}\\"]"` +
                 ' -e JAEGER_SERVICE_NAME="app.consumer"' +
                 ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
                 ' -e JAEGER_AGENT_PORT="6831"' +
@@ -1140,58 +1144,76 @@ class DistClusterToolDeploy {
                 ' -e JAEGER_SAMPLER_TYPE="probabilistic"' +
                 ' -e JAEGER_SAMPLER_PARAM="0.01"' + // 1%
                 ` ${service.image}`;
-            yield Tools.execAsync(`docker-machine ssh ${machine.name} "${initCommand}"`, `services/${machine.name}/${service.name}`);
+            yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
 }
 class DistClusterToolStop {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            MACHINES.forEach((machine) => {
+            for (let machine of MACHINES) {
+                if (ARGS_MACHINE_TYPE !== 'all' && machine.type !== ARGS_MACHINE_TYPE) {
+                    continue;
+                }
                 const commands = [];
-                machine.services.forEach((service) => {
+                for (let service of machine.services) {
                     if (service.type === 'vegeta' || service.type === 'cassandra_init') {
-                        return;
+                        continue;
+                    }
+                    if (ARGS_EXCLUDE_SERVICE_TYPES.indexOf(service.type) !== -1) {
+                        continue;
                     }
                     commands.push(`docker stop ${service.name}`);
-                });
-                Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
-            });
+                }
+                yield Tools.execSSH(machine.ip, commands.join('; '));
+            }
         });
     }
 }
 class DistClusterToolStart {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            MACHINES.forEach((machine) => {
+            for (let machine of MACHINES) {
+                if (ARGS_MACHINE_TYPE !== 'all' && machine.type !== ARGS_MACHINE_TYPE) {
+                    continue;
+                }
                 const commands = [];
-                machine.services.forEach((service) => {
+                for (let service of machine.services) {
                     if (service.type === 'vegeta' || service.type === 'cassandra_init') {
-                        return;
+                        continue;
+                    }
+                    if (ARGS_EXCLUDE_SERVICE_TYPES.indexOf(service.type) !== -1) {
+                        continue;
                     }
                     commands.push(`docker start ${service.name}`);
-                });
-                Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
-            });
+                }
+                yield Tools.execSSH(machine.ip, commands.join('; '));
+            }
         });
     }
 }
 class DistClusterToolCleanup {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            MACHINES.forEach((machine) => {
+            for (let machine of MACHINES) {
+                if (ARGS_MACHINE_TYPE !== 'all' && machine.type !== ARGS_MACHINE_TYPE) {
+                    continue;
+                }
                 const commands = [];
-                machine.services.forEach((service) => {
+                for (let service of machine.services) {
                     if (service.type === 'vegeta' || service.type === 'cassandra_init') {
-                        return;
+                        continue;
+                    }
+                    if (ARGS_EXCLUDE_SERVICE_TYPES.indexOf(service.type) !== -1) {
+                        continue;
                     }
                     commands.push(`docker stop ${service.name}`);
                     commands.push(`docker rm ${service.name}`);
-                });
+                }
                 commands.push('docker volume rm $(docker volume ls -f "dangling=true" -q)');
                 commands.push(`docker network rm ${machine.name}`);
-                Tools.execSync(`docker-machine ssh ${machine.name} "${commands.join(' && ')}"`);
-            });
+                yield Tools.execSSH(machine.ip, commands.join('; '));
+            }
         });
     }
 }
@@ -1204,6 +1226,18 @@ class DistClusterToolCapture {
 class DistClusterToolStress {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
+        });
+    }
+}
+class DistClusterToolDockerPs {
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let machine of MACHINES) {
+                if (ARGS_MACHINE_TYPE !== 'all' && machine.type !== ARGS_MACHINE_TYPE) {
+                    continue;
+                }
+                yield Tools.execAsync(`docker-machine ssh ${machine.name} "docker ps -a"`);
+            }
         });
     }
 }
@@ -1234,24 +1268,88 @@ class Tools {
     static getProjectDir() {
         return LibPath.join(__dirname, '..', '..', '..', '..'); // dist-system-practice
     }
-    static execSSH(ip, command) {
+    static getKafkaBrokersAddresses() {
+        const addresses = [];
+        Tools.getMachinesByType('kafka').forEach((machine) => {
+            machine.services.forEach((service) => {
+                if (service.type != 'kafka') {
+                    return;
+                }
+                const id = Number.parseInt(service.name.split('_')[1]); // kafka_1 => [kafka, 1] => 1
+                const brokerId = id - 1; // 1-1 => 0
+                const portExternal = `9${brokerId}92`; // 9092、9192、9292、...
+                addresses.push(`${machine.ip}:${portExternal}`);
+            });
+        });
+        return addresses;
+    }
+    static getEsClusterEntrance() {
+        return `${Tools.getMachinesByType('elasticsearch')[0].ip}:9200`;
+    }
+    static getEsClusterNodes() {
+        const nodes = [];
+        Tools.getMachinesByType('elasticsearch').forEach((machine) => {
+            machine.services.forEach((service) => {
+                if (service.type != 'elasticsearch') {
+                    return;
+                }
+                const portId = Number.parseInt(service.name.split('_')[1]) - 1;
+                nodes.push(`${machine.ip}:920${portId}`);
+            });
+        });
+        return nodes;
+    }
+    static getCassandraClusterEntrance() {
+        return Tools.getMachinesByType('monitor')[0].ip;
+    }
+    static getJaegerCollectorsAddresses() {
+        const addresses = [];
+        Tools.getMachinesByType('monitor').forEach((machine) => {
+            machine.services.forEach((service) => {
+                if (service.type != 'jaeger_collector') {
+                    return;
+                }
+                const id = Number.parseInt(service.name.split('_')[1]); // jcollector_1 => [jcollector, 1] => 1
+                const portGrpc = 14250 + (id - 1); // 14250、14251、14252、...
+                addresses.push(`${machine.ip}:${portGrpc}`);
+            });
+        });
+        return addresses;
+    }
+    static execSSH(ip, command, output) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(`ExecSSH: ${command}`);
             return new Promise((resolve, reject) => {
-                let conn = new ssh2.Client();
+                const conn = new ssh2.Client();
                 conn.on('ready', function () {
                     conn.exec(command, function (err, stream) {
                         if (err) {
                             return reject(err);
                         }
+                        let stdout = '';
+                        let stderr = '';
                         stream.on('close', function (code, signal) {
                             console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
                             conn.end();
+                            if (output) {
+                                const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
+                                mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
+                                LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+                                LibFs.appendFileSync(targetOutput, `IP:\n${ip}\nCOMMAND:\n${command}\n\n`);
+                                if (stdout) {
+                                    LibFs.appendFileSync(targetOutput, stdout);
+                                }
+                                if (stderr) {
+                                    LibFs.appendFileSync(targetOutput, stderr);
+                                }
+                            }
                             resolve();
                         }).on('data', function (data) {
-                            console.log('STDOUT: ' + data);
+                            console.log('STDOUT: ' + data.toString().trim());
+                            stdout += data.toString().trim() + "\n";
                         }).stderr.on('data', function (data) {
-                            console.log('STDERR: ' + data);
+                            console.log('STDERR: ' + data.toString().trim());
+                            stderr += data.toString().trim() + "\n";
                         });
                     });
                 }).connect({

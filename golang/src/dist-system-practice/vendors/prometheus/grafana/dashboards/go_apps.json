@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": 6671,
   "graphTooltip": 0,
-  "id": 17,
-  "iteration": 1560772771391,
+  "iteration": 1562003858114,
   "links": [],
   "panels": [
     {
@@ -68,7 +67,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_memstats_heap_alloc_bytes",
+          "expr": "go_memstats_heap_alloc_bytes{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}-inuse",
@@ -77,7 +76,7 @@
           "step": 4
         },
         {
-          "expr": "go_memstats_heap_idle_bytes",
+          "expr": "go_memstats_heap_idle_bytes{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-idle",
@@ -173,7 +172,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(go_memstats_alloc_bytes_total[$interval])",
+          "expr": "rate(go_memstats_alloc_bytes_total{instance=~\"$node\"}[$interval])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}-alloc",
@@ -182,7 +181,7 @@
           "step": 4
         },
         {
-          "expr": "rate(go_memstats_frees_total[$interval])",
+          "expr": "rate(go_memstats_frees_total{instance=~\"$node\"}[$interval])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-frees",
@@ -278,7 +277,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_memstats_heap_objects",
+          "expr": "go_memstats_heap_objects{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -376,7 +375,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_memstats_heap_released_bytes",
+          "expr": "go_memstats_heap_released_bytes{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}-released",
@@ -385,7 +384,7 @@
           "step": 4
         },
         {
-          "expr": "go_memstats_heap_sys_bytes",
+          "expr": "go_memstats_heap_sys_bytes{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}-alloc",
@@ -478,7 +477,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(go_gc_duration_seconds_count[$interval])",
+          "expr": "increase(go_gc_duration_seconds_count{instance=~\"$node\"}[$interval])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -571,7 +570,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_memstats_next_gc_bytes",
+          "expr": "go_memstats_next_gc_bytes{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -664,7 +663,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "quantile(0.25, go_gc_duration_seconds) by (instance)",
+          "expr": "quantile(0.25, go_gc_duration_seconds{instance=~\"$node\"}) by (instance)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}-0.25",
@@ -673,14 +672,14 @@
           "step": 4
         },
         {
-          "expr": "quantile(0.5, go_gc_duration_seconds) by (instance)",
+          "expr": "quantile(0.5, go_gc_duration_seconds{instance=~\"$node\"}) by (instance)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-0.5",
           "refId": "B"
         },
         {
-          "expr": "quantile(0.9, go_gc_duration_seconds) by (instance)",
+          "expr": "quantile(0.9, go_gc_duration_seconds{instance=~\"$node\"}) by (instance)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-0.9",
@@ -771,7 +770,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_goroutines",
+          "expr": "go_goroutines{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -859,7 +858,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_threads",
+          "expr": "go_threads{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -983,8 +982,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "192.168.3.111:8000",
-          "value": "192.168.3.111:8000"
+          "text": "192.81.133.128:8001",
+          "value": "192.81.133.128:8001"
         },
         "datasource": "Prometheus",
         "definition": "label_values(go_memstats_alloc_bytes, instance)",
@@ -1039,5 +1038,5 @@
   "timezone": "browser",
   "title": "Go Processes",
   "uid": "ypFZFgvmz",
-  "version": 14
+  "version": 1
 }
