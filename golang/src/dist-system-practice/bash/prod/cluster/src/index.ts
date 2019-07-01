@@ -180,6 +180,10 @@ program.version(pkg.version)
     .option('--cleanup', 'remove all deployed services')
     .option('--capture', 'capture stress test data')
     .option('--stress', 'stress test')
+    .option('--machine-type <string>', '--deploy sub param, specify target machine type of deployment')
+    .option('--exclude-service-types <types>', '--deploy sub param, specify exclude service types of deployment, e.g node_exporter,cadvisor,...', (types) => {
+        return types.split(',');
+    })
     .parse(process.argv);
 
 const ARGS_ACTION_MACHINE = (program as any).machine === undefined ? undefined : true;
@@ -191,6 +195,9 @@ const ARGS_ACTION_START = (program as any).start === undefined ? undefined : tru
 const ARGS_ACTION_CLEANUP = (program as any).cleanup === undefined ? undefined : true;
 const ARGS_ACTION_CAPTURE = (program as any).capture === undefined ? undefined : true;
 const ARGS_ACTION_STRESS = (program as any).stress === undefined ? undefined : true;
+
+const ARGS_MACHINE_TYPE = (program as any).machineType === undefined ? undefined : (program as any).machineType;
+const ARGS_EXCLUDE_SERVICE_TYPES = (program as any).excludeServiceTypes === undefined ? [] : (program as any).excludeServiceTypes;
 
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* IMPLEMENTATION
@@ -363,20 +370,21 @@ class DistClusterToolDeploy {
     private async deployMachines() {
         for (let machine of MACHINES) {
 
-            //FIXME **********
-            if (machine.type !== 'storage') {
+            if (machine.type !== ARGS_MACHINE_TYPE) {
                 continue;
             }
-            //FIXME **********
 
             await this.deployMachine(machine);
         }
     }
 
     private async deployMachine(machine: Machine) {
-        // deploy all services one by one
         for (let service of machine.services) {
             if (service.type === 'vegeta' || service.type === 'cassandra_init') {
+                continue;
+            }
+
+            if (ARGS_EXCLUDE_SERVICE_TYPES.indexOf(service.type) !== -1) {
                 continue;
             }
 
