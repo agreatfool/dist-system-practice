@@ -1104,7 +1104,7 @@ class DistClusterToolDeploy {
             ` -e MAX_WORK_ID="${process.env.MAX_WORK_ID}"` +
             ` -e RPC_SERVERS="[\\"${Tools.getMachinesByType('service')[0].ip}:16241\\"]"` +
             ' -e JAEGER_SERVICE_NAME="app.web"' +
-            ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
+            ` -e JAEGER_AGENT_HOST="jagent_web"` +
             ' -e JAEGER_AGENT_PORT="6831"' +
             ' -e JAEGER_REPORTER_LOG_SPANS="true"' +
             ' -e JAEGER_REPORTER_FLUSH_INTERVAL="1s"' +
@@ -1146,7 +1146,7 @@ class DistClusterToolDeploy {
             ` -e KAFKA_BROKERS="[\\"${Tools.getKafkaBrokersAddresses().join('\\",\\"')}\\"]"` +
             ' -e KAFKA_WRITE_ASYNC="false"' +
             ' -e JAEGER_SERVICE_NAME="app.service"' +
-            ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
+            ` -e JAEGER_AGENT_HOST="jagent_service"` +
             ' -e JAEGER_AGENT_PORT="6831"' +
             ' -e JAEGER_REPORTER_LOG_SPANS="true"' +
             ' -e JAEGER_REPORTER_FLUSH_INTERVAL="1s"' +
@@ -1186,7 +1186,7 @@ class DistClusterToolDeploy {
             ` -e CONSUMER_FACTOR="${process.env.CONSUMER_FACTOR}"` +
             ` -e KAFKA_BROKERS="[\\"${Tools.getKafkaBrokersAddresses().join('\\",\\"')}\\"]"` +
             ' -e JAEGER_SERVICE_NAME="app.consumer"' +
-            ` -e JAEGER_AGENT_HOST="${machine.ip}"` +
+            ` -e JAEGER_AGENT_HOST="jagent_service"` +
             ' -e JAEGER_AGENT_PORT="6831"' +
             ' -e JAEGER_REPORTER_LOG_SPANS="true"' +
             ' -e JAEGER_REPORTER_FLUSH_INTERVAL="1s"' +
