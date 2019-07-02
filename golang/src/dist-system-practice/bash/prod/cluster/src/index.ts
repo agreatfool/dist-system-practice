@@ -1067,7 +1067,7 @@ class DistClusterToolDeploy {
             ` -e ES_HOSTS=${Tools.getEsClusterNodes().join(',')}` +
             ' -e LOGGING_LEVEL=info' +
             ' -e NUM_OF_OUTPUT_WORKERS=12' +
-            ` -e NUM_OF_SHARDS=20` +
+            ` -e NUM_OF_SHARDS=6` +
             ` -e NUM_OF_REPLICAS=1` +
             ` ${service.image}`;
 
