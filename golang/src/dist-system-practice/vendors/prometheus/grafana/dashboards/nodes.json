@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": 8919,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1560318272415,
+  "iteration": 1562141964987,
   "links": [
     {
       "icon": "external link",
@@ -92,7 +91,7 @@
         "h": 5,
         "w": 2,
         "x": 0,
-        "y": 1
+        "y": 5
       },
       "hideTimeOverride": true,
       "id": 15,
@@ -178,7 +177,7 @@
         "h": 2,
         "w": 2,
         "x": 2,
-        "y": 1
+        "y": 5
       },
       "id": 14,
       "interval": null,
@@ -264,7 +263,7 @@
         "h": 5,
         "w": 3,
         "x": 4,
-        "y": 1
+        "y": 5
       },
       "id": 167,
       "interval": null,
@@ -351,7 +350,7 @@
         "h": 5,
         "w": 3,
         "x": 7,
-        "y": 1
+        "y": 5
       },
       "id": 20,
       "interval": null,
@@ -438,7 +437,7 @@
         "h": 5,
         "w": 3,
         "x": 10,
-        "y": 1
+        "y": 5
       },
       "hideTimeOverride": false,
       "id": 172,
@@ -521,7 +520,7 @@
         "h": 5,
         "w": 3,
         "x": 13,
-        "y": 1
+        "y": 5
       },
       "hideTimeOverride": false,
       "id": 16,
@@ -601,7 +600,7 @@
         "h": 5,
         "w": 4,
         "x": 16,
-        "y": 1
+        "y": 5
       },
       "id": 166,
       "interval": null,
@@ -687,7 +686,7 @@
         "h": 5,
         "w": 4,
         "x": 20,
-        "y": 1
+        "y": 5
       },
       "id": 154,
       "interval": null,
@@ -774,7 +773,7 @@
         "h": 3,
         "w": 2,
         "x": 2,
-        "y": 3
+        "y": 7
       },
       "id": 75,
       "interval": null,
@@ -854,7 +853,7 @@
         "h": 6,
         "w": 11,
         "x": 0,
-        "y": 6
+        "y": 10
       },
       "height": "300",
       "id": 13,
@@ -977,7 +976,7 @@
         "h": 6,
         "w": 5,
         "x": 11,
-        "y": 6
+        "y": 10
       },
       "hideTimeOverride": false,
       "id": 171,
@@ -1019,7 +1018,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 10
       },
       "id": 164,
       "links": [],
@@ -1229,7 +1228,7 @@
         "h": 7,
         "w": 16,
         "x": 0,
-        "y": 12
+        "y": 16
       },
       "id": 7,
       "legend": {
@@ -1371,7 +1370,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 12
+        "y": 16
       },
       "height": "300",
       "id": 156,
@@ -1520,7 +1519,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 19
+        "y": 23
       },
       "height": "300",
       "id": 161,
@@ -1641,7 +1640,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 19
+        "y": 23
       },
       "height": "300",
       "id": 168,
@@ -1750,7 +1749,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 19
+        "y": 23
       },
       "height": "300",
       "id": 160,
@@ -1872,7 +1871,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 27
+        "y": 31
       },
       "height": "300",
       "id": 157,
@@ -1981,7 +1980,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 31
       },
       "height": "300",
       "id": 158,
@@ -2108,7 +2107,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 39
       },
       "id": 169,
       "legend": {
@@ -2187,7 +2186,7 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": "1m",
   "schemaVersion": 18,
   "style": "dark",
   "tags": [
@@ -2202,8 +2201,9 @@
         "auto_count": 10,
         "auto_min": "10s",
         "current": {
-          "text": "5s",
-          "value": "5s"
+          "tags": [],
+          "text": "30s",
+          "value": "30s"
         },
         "hide": 0,
         "label": "interval",
@@ -2215,7 +2215,7 @@
             "value": "$__auto_interval_interval"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "5s",
             "value": "5s"
           },
@@ -2225,7 +2225,7 @@
             "value": "10s"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "30s",
             "value": "30s"
           },
@@ -2329,7 +2329,9 @@
         "allValue": null,
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "Prometheus",
         "definition": "label_values(node_exporter_build_info{name=~'$name'},instance)",
@@ -2389,7 +2391,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
