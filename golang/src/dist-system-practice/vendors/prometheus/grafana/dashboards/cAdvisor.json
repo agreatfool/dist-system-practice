@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": 893,
   "graphTooltip": 1,
-  "id": 13,
-  "iteration": 1560348003173,
+  "iteration": 1562123134456,
   "links": [],
   "panels": [
     {
@@ -565,6 +564,7 @@
       "targets": [
         {
           "expr": "sum(rate(container_network_receive_bytes_total{id=\"/\"}[$interval])) by (id)",
+          "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "RECEIVED",
           "refId": "A",
@@ -572,6 +572,7 @@
         },
         {
           "expr": "- sum(rate(container_network_transmit_bytes_total{id=\"/\"}[$interval])) by (id)",
+          "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
           "legendFormat": "SENT",
@@ -1421,14 +1422,16 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_network_receive_bytes_total{name=~\".+\"}[$interval])) by (name)",
+          "expr": "sum(rate(container_network_receive_bytes_total{name=~\"$name\"}[$interval])) by (name)",
+          "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
           "refId": "A",
           "step": 240
         },
         {
-          "expr": "- rate(container_network_transmit_bytes_total{name=~\".+\"}[$interval])",
+          "expr": "- rate(container_network_transmit_bytes_total{name=~\"$name\"}[$interval])",
+          "format": "time_series",
           "hide": true,
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
@@ -1522,7 +1525,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_network_transmit_bytes_total{name=~\".+\"}[$interval])) by (name)",
+          "expr": "sum(rate(container_network_transmit_bytes_total{name=~\"$name\"}[$interval])) by (name)",
+          "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
           "refId": "A",
@@ -1530,6 +1534,7 @@
         },
         {
           "expr": "rate(container_network_transmit_bytes_total{id=\"/\"}[$interval])",
+          "format": "time_series",
           "hide": true,
           "intervalFactor": 2,
           "legendFormat": "",
@@ -1621,7 +1626,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\".+\"}[$interval])) by (name) * 100",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"$name\"}[$interval])) by (name) * 100",
+          "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
@@ -1714,7 +1720,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(container_memory_swap{name=~\".+\"}) by (name)",
+          "expr": "sum(container_memory_swap{name=~\"$name\"}) by (name)",
+          "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
@@ -1722,7 +1729,8 @@
           "step": 240
         },
         {
-          "expr": "container_memory_usage_bytes{name=~\".+\"}",
+          "expr": "container_memory_usage_bytes{name=~\"$name\"}",
+          "format": "time_series",
           "hide": true,
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
@@ -1814,7 +1822,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(container_memory_rss{name=~\".+\"}) by (name)",
+          "expr": "sum(container_memory_rss{name=~\"$name\"}) by (name)",
+          "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
@@ -1822,7 +1831,8 @@
           "step": 240
         },
         {
-          "expr": "container_memory_usage_bytes{name=~\".+\"}",
+          "expr": "container_memory_usage_bytes{name=~\"$name\"}",
+          "format": "time_series",
           "hide": true,
           "intervalFactor": 2,
           "legendFormat": "{{name}}",
@@ -2094,7 +2104,7 @@
       "type": "table"
     }
   ],
-  "refresh": "5m",
+  "refresh": "1m",
   "schemaVersion": 18,
   "style": "dark",
   "tags": [],
@@ -2107,7 +2117,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "",
+        "definition": "label_values(container_group)",
         "hide": 0,
         "includeAll": true,
         "label": "Container Group",
@@ -2130,8 +2140,8 @@
         "auto_count": 50,
         "auto_min": "50s",
         "current": {
-          "text": "auto",
-          "value": "$__auto_interval_interval"
+          "text": "1m",
+          "value": "1m"
         },
         "datasource": null,
         "hide": 0,
@@ -2141,7 +2151,7 @@
         "name": "interval",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "auto",
             "value": "$__auto_interval_interval"
           },
@@ -2151,7 +2161,7 @@
             "value": "30s"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "1m",
             "value": "1m"
           },
@@ -2234,14 +2244,14 @@
           "value": ""
         },
         "datasource": "Prometheus",
-        "definition": "",
+        "definition": "label_values(node_boot_time_seconds, instance)",
         "hide": 0,
         "includeAll": false,
         "label": "Node",
         "multi": true,
         "name": "server",
         "options": [],
-        "query": "label_values(node_boot_time, instance)",
+        "query": "label_values(node_boot_time_seconds, instance)",
         "refresh": 1,
         "regex": "/([^:]+):.*/",
         "skipUrlSync": false,
@@ -2251,11 +2261,39 @@
         "tagsQuery": null,
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(container_cpu_load_average_10s, name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "name",
+        "options": [],
+        "query": "label_values(container_cpu_load_average_10s, name)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
