@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 18,
+  "iteration": 1562139316104,
   "links": [],
   "panels": [
     {
@@ -536,6 +536,7 @@
       }
     }
   ],
+  "refresh": "30s",
   "schemaVersion": 18,
   "style": "dark",
   "tags": [],
@@ -600,5 +601,5 @@
   "timezone": "",
   "title": "Filebeat",
   "uid": "oF_Qr14Zz",
-  "version": 8
+  "version": 1
 }
