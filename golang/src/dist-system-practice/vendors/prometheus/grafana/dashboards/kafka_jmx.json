@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": 8563,
   "graphTooltip": 0,
-  "id": 15,
-  "iteration": 1560592182791,
+  "iteration": 1562140605858,
   "links": [],
   "panels": [
     {
@@ -868,7 +867,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1560592182791,
+      "repeatIteration": 1562140605858,
       "repeatPanelId": 8,
       "scopedVars": {
         "memarea": {
@@ -1091,47 +1090,81 @@
         "x": 12,
         "y": 26
       },
-      "id": 5,
+      "id": 46,
       "legend": {
         "alignAsTable": true,
-        "avg": false,
+        "avg": true,
         "current": true,
         "max": true,
         "min": true,
         "rightSide": false,
         "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
         "values": true
       },
       "lines": true,
       "linewidth": 1,
       "links": [],
+      "maxPerRow": 2,
       "nullPointMode": "null",
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1562140605858,
+      "repeatPanelId": 2,
+      "scopedVars": {
+        "mempool": {
+          "selected": false,
+          "text": "Compressed Class Space",
+          "value": "Compressed Class Space"
+        }
+      },
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jvm_gc_collection_seconds_sum{job=\"$job\",instance=~\"$instance\"}[$__interval])",
+          "expr": "jvm_memory_pool_bytes_max{pool=\"$mempool\",job=\"$job\",instance=\"$instance\"}",
           "format": "time_series",
-          "interval": "60s",
+          "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{gc}}",
-          "metric": "jvm_gc_collection_seconds_sum",
+          "legendFormat": "Max",
+          "metric": "jvm_memory_bytes_used",
+          "refId": "B",
+          "step": 5
+        },
+        {
+          "expr": "jvm_memory_pool_bytes_used{pool=\"$mempool\",job=\"$job\",instance=\"$instance\"}",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Used",
+          "metric": "jvm_memory_bytes_used",
           "refId": "A",
-          "step": 10
+          "step": 5
+        },
+        {
+          "expr": "jvm_memory_pool_bytes_committed{pool=\"$mempool\",job=\"$job\",instance=\"$instance\"}",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Committed",
+          "metric": "jvm_memory_bytes_used",
+          "refId": "C",
+          "step": 5
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "GC time",
+      "title": "Memory pool [$mempool]",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1147,7 +1180,7 @@
       },
       "yaxes": [
         {
-          "format": "s",
+          "format": "bytes",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -1160,7 +1193,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": false
+          "show": true
         }
       ],
       "yaxis": {
@@ -1206,7 +1239,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1560592182791,
+      "repeatIteration": 1562140605858,
       "repeatPanelId": 2,
       "scopedVars": {
         "mempool": {
@@ -1305,7 +1338,7 @@
         "x": 12,
         "y": 35
       },
-      "id": 46,
+      "id": 48,
       "legend": {
         "alignAsTable": true,
         "avg": true,
@@ -1330,13 +1363,13 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1560592182791,
+      "repeatIteration": 1562140605858,
       "repeatPanelId": 2,
       "scopedVars": {
         "mempool": {
           "selected": false,
-          "text": "Compressed Class Space",
-          "value": "Compressed Class Space"
+          "text": "G1 Old Gen",
+          "value": "G1 Old Gen"
         }
       },
       "seriesOverrides": [],
@@ -1454,7 +1487,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1560592182791,
+      "repeatIteration": 1562140605858,
       "repeatPanelId": 2,
       "scopedVars": {
         "mempool": {
@@ -1553,7 +1586,7 @@
         "x": 12,
         "y": 44
       },
-      "id": 48,
+      "id": 50,
       "legend": {
         "alignAsTable": true,
         "avg": true,
@@ -1578,13 +1611,13 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1560592182791,
+      "repeatIteration": 1562140605858,
       "repeatPanelId": 2,
       "scopedVars": {
         "mempool": {
           "selected": false,
-          "text": "G1 Old Gen",
-          "value": "G1 Old Gen"
+          "text": "Metaspace",
+          "value": "Metaspace"
         }
       },
       "seriesOverrides": [],
@@ -1761,6 +1794,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "$datasource",
+      "decimals": 0,
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -1768,81 +1802,47 @@
         "x": 12,
         "y": 53
       },
-      "id": 50,
+      "id": 5,
       "legend": {
         "alignAsTable": true,
-        "avg": true,
+        "avg": false,
         "current": true,
         "max": true,
         "min": true,
         "rightSide": false,
         "show": true,
-        "sort": "current",
-        "sortDesc": true,
         "total": false,
         "values": true
       },
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "maxPerRow": 2,
       "nullPointMode": "null",
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
-      "repeatIteration": 1560592182791,
-      "repeatPanelId": 2,
-      "scopedVars": {
-        "mempool": {
-          "selected": false,
-          "text": "Metaspace",
-          "value": "Metaspace"
-        }
-      },
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "jvm_memory_pool_bytes_max{pool=\"$mempool\",job=\"$job\",instance=\"$instance\"}",
+          "expr": "increase(jvm_gc_collection_seconds_sum{job=\"$job\",instance=~\"$instance\"}[$__interval])",
           "format": "time_series",
-          "interval": "",
+          "interval": "60s",
           "intervalFactor": 1,
-          "legendFormat": "Max",
-          "metric": "jvm_memory_bytes_used",
-          "refId": "B",
-          "step": 5
-        },
-        {
-          "expr": "jvm_memory_pool_bytes_used{pool=\"$mempool\",job=\"$job\",instance=\"$instance\"}",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "Used",
-          "metric": "jvm_memory_bytes_used",
+          "legendFormat": "{{gc}}",
+          "metric": "jvm_gc_collection_seconds_sum",
           "refId": "A",
-          "step": 5
-        },
-        {
-          "expr": "jvm_memory_pool_bytes_committed{pool=\"$mempool\",job=\"$job\",instance=\"$instance\"}",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "Committed",
-          "metric": "jvm_memory_bytes_used",
-          "refId": "C",
-          "step": 5
+          "step": 10
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Memory pool [$mempool]",
+      "title": "GC time",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1858,7 +1858,7 @@
       },
       "yaxes": [
         {
-          "format": "bytes",
+          "format": "s",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -1871,7 +1871,7 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -2178,7 +2178,7 @@
       }
     }
   ],
-  "refresh": "10s",
+  "refresh": "1m",
   "schemaVersion": 18,
   "style": "dark",
   "tags": [
@@ -2188,6 +2188,7 @@
     "list": [
       {
         "current": {
+          "tags": [],
           "text": "Prometheus",
           "value": "Prometheus"
         },
@@ -2205,6 +2206,7 @@
       },
       {
         "current": {
+          "tags": [],
           "text": "kafka",
           "value": "kafka"
         },
@@ -2213,6 +2215,7 @@
         "name": "job",
         "options": [
           {
+            "selected": true,
             "text": "kafka",
             "value": "kafka"
           }
@@ -2224,9 +2227,8 @@
       {
         "allValue": ".*",
         "current": {
-          "tags": [],
-          "text": "kafka_2:7071",
-          "value": "kafka_2:7071"
+          "text": "kafka_1:7071",
+          "value": "kafka_1:7071"
         },
         "datasource": "$datasource",
         "definition": "",
@@ -2300,7 +2302,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
