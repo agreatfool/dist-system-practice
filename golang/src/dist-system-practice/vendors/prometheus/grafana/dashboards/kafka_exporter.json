@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": 7589,
   "graphTooltip": 0,
-  "id": 17,
-  "iteration": 1560595607609,
+  "iteration": 1562140466429,
   "links": [],
   "panels": [
     {
@@ -470,7 +469,7 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": "1m",
   "schemaVersion": 18,
   "style": "dark",
   "tags": [
@@ -558,7 +557,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
