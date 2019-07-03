@@ -16,7 +16,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1560868430252,
+  "iteration": 1562139572029,
   "links": [],
   "panels": [
     {
@@ -69,7 +69,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "jaeger_agent_reporter_batch_size{format=\"jaeger\",protocol=\"grpc\"}",
+          "expr": "jaeger_agent_reporter_batch_size{format=\"jaeger\",protocol=\"grpc\",instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -154,7 +154,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_agent_reporter_batches_submitted_total{format=\"jaeger\",protocol=\"grpc\"}[1m])",
+          "expr": "increase(jaeger_agent_reporter_batches_submitted_total{format=\"jaeger\",protocol=\"grpc\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -239,7 +239,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_agent_reporter_batches_failures_total{format=\"jaeger\",protocol=\"grpc\"}[1m])",
+          "expr": "increase(jaeger_agent_reporter_batches_failures_total{format=\"jaeger\",protocol=\"grpc\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -337,7 +337,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_agent_reporter_spans_submitted_total{format=\"jaeger\",protocol=\"grpc\"}[1m])",
+          "expr": "increase(jaeger_agent_reporter_spans_submitted_total{format=\"jaeger\",protocol=\"grpc\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -422,7 +422,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_agent_reporter_spans_failures_total{format=\"jaeger\",protocol=\"grpc\"}[1m])",
+          "expr": "increase(jaeger_agent_reporter_spans_failures_total{format=\"jaeger\",protocol=\"grpc\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -520,7 +520,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "jaeger_agent_thrift_udp_server_queue_size{model=\"jaeger\",protocol=\"compact\"}",
+          "expr": "jaeger_agent_thrift_udp_server_queue_size{model=\"jaeger\",protocol=\"compact\",instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -605,7 +605,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_agent_thrift_udp_server_read_errors_total{model=\"jaeger\",protocol=\"compact\"}[1m])",
+          "expr": "increase(jaeger_agent_thrift_udp_server_read_errors_total{model=\"jaeger\",protocol=\"compact\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -690,7 +690,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "jaeger_agent_thrift_udp_server_packet_size{model=\"jaeger\",protocol=\"compact\"}",
+          "expr": "jaeger_agent_thrift_udp_server_packet_size{model=\"jaeger\",protocol=\"compact\",instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -775,7 +775,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_agent_thrift_udp_server_packets_processed_total{model=\"jaeger\",protocol=\"compact\"}[1m])",
+          "expr": "increase(jaeger_agent_thrift_udp_server_packets_processed_total{model=\"jaeger\",protocol=\"compact\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -860,7 +860,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_agent_thrift_udp_server_packets_dropped_total{model=\"jaeger\",protocol=\"compact\"}[1m])",
+          "expr": "increase(jaeger_agent_thrift_udp_server_packets_dropped_total{model=\"jaeger\",protocol=\"compact\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -917,8 +917,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "jagent_consumer:5778",
-          "value": "jagent_consumer:5778"
+          "tags": [],
+          "text": "jagent_web:5778",
+          "value": "jagent_web:5778"
         },
         "datasource": "Prometheus",
         "definition": "label_values(jaeger_agent_thrift_udp_server_queue_size, instance)",
@@ -929,7 +930,7 @@
         "name": "node",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "jagent_consumer:5778",
             "value": "jagent_consumer:5778"
           },
@@ -939,7 +940,7 @@
             "value": "jagent_service:5778"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "jagent_web:5778",
             "value": "jagent_web:5778"
           }
