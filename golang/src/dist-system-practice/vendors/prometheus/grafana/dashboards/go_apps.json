@@ -16,7 +16,7 @@
   "editable": true,
   "gnetId": 6671,
   "graphTooltip": 0,
-  "iteration": 1562003858114,
+  "iteration": 1562139479052,
   "links": [],
   "panels": [
     {
@@ -907,7 +907,7 @@
       }
     }
   ],
-  "refresh": "30s",
+  "refresh": "1m",
   "schemaVersion": 18,
   "style": "dark",
   "tags": [],
@@ -982,8 +982,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "192.81.133.128:8001",
-          "value": "192.81.133.128:8001"
+          "text": "192.168.3.111:8000",
+          "value": "192.168.3.111:8000"
         },
         "datasource": "Prometheus",
         "definition": "label_values(go_memstats_alloc_bytes, instance)",
