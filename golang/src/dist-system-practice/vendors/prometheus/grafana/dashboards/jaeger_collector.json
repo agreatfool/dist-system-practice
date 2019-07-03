@@ -16,7 +16,7 @@
   "editable": true,
   "gnetId": 7439,
   "graphTooltip": 0,
-  "iteration": 1560867211073,
+  "iteration": 1562139849587,
   "links": [],
   "panels": [
     {
@@ -69,7 +69,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_collector_traces_received_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m]) ",
+          "expr": "increase(jaeger_collector_traces_received_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\",instance=~\"$node\"}[1m]) ",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{svc}}",
@@ -154,7 +154,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_collector_traces_rejected_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m])",
+          "expr": "increase(jaeger_collector_traces_rejected_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{svc}}",
@@ -239,7 +239,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_collector_spans_received_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m])",
+          "expr": "increase(jaeger_collector_spans_received_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{svc}}",
@@ -324,7 +324,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_collector_spans_dropped_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m])",
+          "expr": "increase(jaeger_collector_spans_dropped_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{svc}}",
@@ -409,7 +409,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_collector_spans_rejected_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\"}[1m])",
+          "expr": "increase(jaeger_collector_spans_rejected_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{svc}}",
@@ -494,7 +494,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "jaeger_collector_queue_length",
+          "expr": "jaeger_collector_queue_length{instance=~\"$node\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -579,7 +579,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(jaeger_collector_in_queue_latency_bucket[1m])) by (le, instance))",
+          "expr": "histogram_quantile(0.95, sum(rate(jaeger_collector_in_queue_latency_bucket{instance=~\"$node\"}[1m])) by (le, instance))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -664,7 +664,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(jaeger_collector_save_latency_bucket[1m])) by (le, instance))",
+          "expr": "histogram_quantile(0.95, sum(rate(jaeger_collector_save_latency_bucket{instance=~\"$node\"}[1m])) by (le, instance))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -762,7 +762,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_cassandra_attempts_total{table=\"traces\"}[1m])) by (instance)",
+          "expr": "sum(rate(jaeger_cassandra_attempts_total{table=\"traces\",instance=~\"$node\"}[1m])) by (instance)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -847,7 +847,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(jaeger_cassandra_errors_total{table=\"traces\"}[1m])) by (instance)",
+          "expr": "sum(rate(jaeger_cassandra_errors_total{table=\"traces\",instance=~\"$node\"}[1m])) by (instance)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -896,7 +896,7 @@
       }
     }
   ],
-  "refresh": "10s",
+  "refresh": "1m",
   "schemaVersion": 18,
   "style": "dark",
   "tags": [],
@@ -905,8 +905,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "jcollector_1:14268",
-          "value": "jcollector_1:14268"
+          "tags": [],
+          "text": "jcollector_2:14268",
+          "value": "jcollector_2:14268"
         },
         "datasource": "Prometheus",
         "definition": "label_values(jaeger_collector_queue_length, instance)",
