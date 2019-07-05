@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1562139316104,
+  "iteration": 1562316784844,
   "links": [],
   "panels": [
     {
@@ -140,14 +140,14 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "filebeat_libbeat_output_read_errors{instance=~\"$node\"}",
+          "expr": "increase(filebeat_libbeat_output_read_errors{instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-read-errors",
           "refId": "A"
         },
         {
-          "expr": "filebeat_libbeat_output_write_errors{instance=~\"$node\"}",
+          "expr": "increase(filebeat_libbeat_output_write_errors{instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-write-errors",
@@ -232,7 +232,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "filebeat_filebeat_events{instance=~\"$node\"}",
+          "expr": "increase(filebeat_filebeat_events{instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{event}}",
@@ -317,7 +317,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "filebeat_libbeat_output_events{instance=~\"$node\"}",
+          "expr": "increase(filebeat_libbeat_output_events{instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{type}}",
@@ -402,7 +402,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "filebeat_libbeat_pipeline_events{instance=~\"$node\"}",
+          "expr": "increase(filebeat_libbeat_pipeline_events{instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{type}}",
@@ -487,7 +487,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "filebeat_libbeat_pipeline_queue{instance=~\"$node\"}",
+          "expr": "increase(filebeat_libbeat_pipeline_queue{instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{type}}",
@@ -601,5 +601,5 @@
   "timezone": "",
   "title": "Filebeat",
   "uid": "oF_Qr14Zz",
-  "version": 1
+  "version": 2
 }
