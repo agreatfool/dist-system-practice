@@ -16,7 +16,6 @@
   "editable": true,
   "gnetId": 7439,
   "graphTooltip": 0,
-  "id": 18,
   "iteration": 1562315409687,
   "links": [],
   "panels": [
@@ -410,7 +409,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_collector_spans_rejected_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\",instance=~\"$node\"}[1m])",
+          "expr": "increase(jaeger_collector_spans_rejected_total{debug=\"false\",format=\"jaeger\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{svc}}",
@@ -580,7 +579,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(jaeger_collector_in_queue_latency_bucket{instance=~\"$node\"}[1m])) by (le, instance))",
+          "expr": "histogram_quantile(0.95, sum(rate(jaeger_collector_in_queue_latency_bucket{instance=~\"$node\"}[1m])) by (instance, le))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}",
@@ -906,7 +905,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "jcollector_1:14268",
           "value": "jcollector_1:14268"
         },
