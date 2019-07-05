@@ -16,7 +16,8 @@
   "editable": true,
   "gnetId": 7439,
   "graphTooltip": 0,
-  "iteration": 1562139849587,
+  "id": 18,
+  "iteration": 1562315409687,
   "links": [],
   "panels": [
     {
@@ -154,7 +155,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_collector_traces_rejected_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\",instance=~\"$node\"}[1m])",
+          "expr": "increase(jaeger_collector_traces_rejected_total{debug=\"false\",format=\"jaeger\",instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{svc}}",
@@ -324,7 +325,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(jaeger_collector_spans_dropped_total{debug=\"false\",format=\"jaeger\",svc=~\"app.*\",instance=~\"$node\"}[1m])",
+          "expr": "increase(jaeger_collector_spans_dropped_total{instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{instance}}-{{svc}}",
@@ -906,8 +907,8 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "jcollector_2:14268",
-          "value": "jcollector_2:14268"
+          "text": "jcollector_1:14268",
+          "value": "jcollector_1:14268"
         },
         "datasource": "Prometheus",
         "definition": "label_values(jaeger_collector_queue_length, instance)",
@@ -962,5 +963,5 @@
   "timezone": "",
   "title": "Jaeger Collector",
   "uid": "mb6-JR5iz",
-  "version": 1
+  "version": 2
 }
