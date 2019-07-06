@@ -143,6 +143,305 @@ const MACHINES: Array<Machine> = [
     },
 ];
 
+const REPORT_CONFIG: Array<ReportConfig> = [
+    {
+        "name": "node_exporter",
+        "type": "node_exporter",
+        "dashboard": "9CWBz0bik",
+        "params": {
+            "var-interval": "5s",
+            "var-env": "All",
+            "var-name": "All",
+            "var-node": "Function", // dynamic
+            "var-maxmount": "",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 15, "display": "系统运行时间", "file": "system_up_time"},
+            {"id": 14, "display": "CPU 核数", "file": "cpu_core_count"},
+            {"id": 75, "display": "内存总量", "file": "memory_total"},
+            {"id": 167, "display": "CPU使用率（5m）", "file": "cpu_usage_5m"},
+            {"id": 20, "display": "CPU iowait（5m）", "file": "cpu_iowait_5m"},
+            {"id": 172, "display": "内存使用率", "file": "memory_usage"},
+            {"id": 16, "display": "当前打开的文件描述符", "file": "open_files"},
+            {"id": 166, "display": "根分区使用率", "file": "disk_usage"},
+            {"id": 13, "display": "系统平均负载", "file": "load_average"},
+            {"id": 171, "display": "磁盘总空间", "file": "disk_total"},
+            {"id": 164, "display": "各分区可用空间", "file": "disk_usage_total"},
+            {"id": 7, "display": "CPU使用率、磁盘每秒的I/O操作耗费时间（%）", "file": "disk_cpu_time"},
+            {"id": 156, "display": "内存信息", "file": "memory_info"},
+            {"id": 161, "display": "磁盘读写速率（IOPS）", "file": "disk_iops"},
+            {"id": 168, "display": "磁盘读写容量大小", "file": "disk_io_amount"},
+            {"id": 160, "display": "磁盘IO读写时间", "file": "disk_io_time"},
+            {"id": 157, "display": "网络流量", "file": "network_traffic"},
+            {"id": 158, "display": "TCP 连接情况", "file": "tcp_count"},
+        ],
+    },
+    {
+        "name": "cadvisor",
+        "type": "cadvisor",
+        "dashboard": "PV1XyHnWz",
+        "params": {
+            "refresh": "30s",
+            "var-containergroup": "All",
+            "var-interval": "30s",
+            "var-server": "Function",
+            "var-name": "Function",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 8, "display": "Received Network Traffic per Container", "file": "received_network_traffic"},
+            {"id": 9, "display": "Sent Network Traffic per Container", "file": "sent_network_traffic"},
+            {"id": 1, "display": "CPU Usage per Container", "file": "cpu_usage"},
+            {"id": 10, "display": "Memory Usage per Container", "file": "memory_usage"},
+            {"id": 34, "display": "Memory Swap per Container", "file": "memory_swap"},
+        ]
+    },
+    {
+        "name": "memcached",
+        "type": "memcached",
+        "dashboard": "NgzwcO7Zz",
+        "params": {
+            "var-node": "Function",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 1, "display": "% Hit ratio", "file": "hit_ratio"},
+            {"id": 4, "display": "Connections", "file": "connections"},
+            {"id": 3, "display": "Get / Set ratio", "file": "get_set_ratio"},
+            {"id": 2, "display": "Commands", "file": "commands"},
+            {"id": 8, "display": "evicts / reclaims", "file": "evicts_reclaims"},
+            {"id": 6, "display": "Read / written bytes", "file": "read_written_bytes"},
+            {"id": 7, "display": "Total memory usage", "file": "memory_usage"},
+            {"id": 5, "display": "Items in cache", "file": "items_count"},
+        ]
+    },
+    {
+        "name": "mysqld",
+        "type": "mysqld",
+        "dashboard": "MQWgroiiz",
+        "params": {
+            "var-interval": "1m",
+            "var-host": "Function",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 92, "display": "MySQL Connections", "file": "connections"},
+            {"id": 47, "display": "MySQL Aborted Connections", "file": "aborted_connections"},
+            {"id": 10, "display": "MySQL Client Thread Activity", "file": "client_thread_activity"},
+            {"id": 11, "display": "MySQL Thread Cache", "file": "thread_cache"},
+            {"id": 53, "display": "MySQL Questions", "file": "questions"},
+            {"id": 48, "display": "MySQL Slow Queries", "file": "slow_queries"},
+            {"id": 32, "display": "MySQL Table Locks", "file": "table_locks"},
+            {"id": 9, "display": "MySQL Network Traffic", "file": "network_traffic"},
+            {"id": 381, "display": "MySQL Network Usage Hourly", "file": "network_usage_hourly"},
+            {"id": 50, "display": "MySQL Internal Memory Overview", "file": "internal_memory"},
+            {"id": 14, "display": "Top Command Counters", "file": "command_counters"},
+            {"id": 39, "display": "Top Command Counters Hourly", "file": "command_counters_hourly"},
+            {"id": 46, "display": "MySQL Query Cache Memory", "file": "query_cache_memory"},
+            {"id": 45, "display": "MySQL Query Cache Activity", "file": "query_cache_activity"},
+            {"id": 43, "display": "MySQL File Openings", "file": "file_openings"},
+            {"id": 41, "display": "MySQL Open Files", "file": "open_files"},
+        ]
+    },
+    {
+        "name": "prometheus",
+        "type": "prometheus",
+        "dashboard": "54e7hO7Wk",
+        "params": {
+            "var-job": "prometheus",
+            "var-instance": "prometheus",
+            "var-interval": "1h",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 3, "display": "Series Count", "file": "series_count"},
+            {"id": 33, "display": "Failures and Errors", "file": "errors"},
+            {"id": 4, "display": "Appended Samples per Second", "file": "appended_samples"},
+            {"id": 29, "display": "Scrape Duration", "file": "scrape_duration"},
+            {"id": 15, "display": "Prometheus Engine Query Duration Seconds", "file": "query_duration"},
+        ]
+    },
+    {
+        "name": "kafka_jmx",
+        "type": "kafka",
+        "dashboard": "chanjarster-jvm-dashboard",
+        "params": {
+            "var-datasource": "Prometheus",
+            "var-job": "kafka",
+            "var-instance": "Function",
+            "var-mempool": "All",
+            "var-memarea": "All",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 38, "display": "Open file descriptors", "file": "open_file_descriptors"},
+            {"id": 29, "display": "CPU load", "file": "cpu_load"},
+            {"id": 8, "display": "Memory area [heap]", "file": "memory_area_heap"},
+            {"id": 45, "display": "Memory area [nonheap]", "file": "memory_area_nonheap"},
+            {"id": 6, "display": "GC count increase", "file": "gc_count_increase"},
+            {"id": 5, "display": "GC time", "file": "gc_time"},
+            {"id": 3, "display": "Threads used", "file": "threads_used"},
+            {"id": 44, "display": "Physical memory", "file": "physical_memory"},
+        ]
+    },
+    {
+        "name": "kafka_exporter",
+        "type": "kafka",
+        "dashboard": "jwPKIsniz",
+        "params": {
+            "var-job": "kafka-exporter",
+            "var-instance": "Function",
+            "var-topic": "All",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 14, "display": "Message in per second", "file": "message_in_sec"},
+            {"id": 12, "display": "Lag by Consumer Group", "file": "lag_consumer_group"},
+            {"id": 16, "display": "Message in per minute", "file": "message_in_min"},
+            {"id": 18, "display": "Message consume per minute", "file": "consume_count_min"},
+        ]
+    },
+    {
+        "name": "jaeger_agent",
+        "type": "jaeger_agent",
+        "dashboard": "Z8ieXpnWk",
+        "params": {
+            "var-node": "Function",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 6, "display": "Reporter batches submitted", "file": "batches_submitted"},
+            {"id": 8, "display": "Reporter batches failures", "file": "batches_failures"},
+            {"id": 10, "display": "Reporter spans submitted", "file": "spans_submitted"},
+            {"id": 12, "display": "Reporter spans failures", "file": "spans_failures"},
+            {"id": 24, "display": "Queue size", "file": "queue_size"},
+            {"id": 26, "display": "Read errors", "file": "read_errors"},
+            {"id": 20, "display": "Packets processed", "file": "packets_processed"},
+            {"id": 22, "display": "Packets dropped", "file": "packets_dropped"},
+        ]
+    },
+    {
+        "name": "jaeger_collector",
+        "type": "jaeger_collector",
+        "dashboard": "Z8ieXpnWk",
+        "params": {
+            "var-node": "Function",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 20, "display": "Traces received", "file": "traces_received"},
+            {"id": 22, "display": "Traces rejected", "file": "traces_rejected"},
+            {"id": 18, "display": "Spans received", "file": "spans_received"},
+            {"id": 4, "display": "Spans dropped", "file": "spans_dropped"},
+            {"id": 24, "display": "Spans rejected", "file": "spans_rejected"},
+            {"id": 2, "display": "Queue length", "file": "queue_length"},
+            {"id": 10, "display": "Span queue latency", "file": "span_queue_latency"},
+            {"id": 26, "display": "Save latency", "file": "save_latency"},
+            {"id": 16, "display": "Cassandra attempts", "file": "cassandra_attempts"},
+            {"id": 12, "display": "Cassandra errors", "file": "cassandra_errors"},
+        ]
+    },
+    {
+        "name": "filebeat",
+        "type": "filebeat",
+        "dashboard": "oF_Qr14Zz",
+        "params": {
+            "var-node": "Function",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 2, "display": "Harvester", "file": "harvester"},
+            {"id": 8, "display": "IO errors", "file": "io_errors"},
+            {"id": 4, "display": "Filebeat events", "file": "filebeat_events"},
+            {"id": 6, "display": "Output events", "file": "output_events"},
+            {"id": 10, "display": "Pipeline events", "file": "pipeline_events"},
+            {"id": 12, "display": "Pipeline queue", "file": "pipeline_queue"},
+        ]
+    },
+    {
+        "name": "elasticsearch",
+        "type": "elasticsearch",
+        "dashboard": "FNysokSWk",
+        "params": {
+            "var-interval": "5m",
+            "var-cluster": "es_cluster",
+            "var-name": "Function",
+            "var-instance": "Function",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 16, "display": "Pending tasks", "file": "pending_tasks"},
+            {"id": 30, "display": "Load average", "file": "load_average"},
+            {"id": 88, "display": "CPU usage", "file": "cpu usage"},
+            {"id": 31, "display": "JVM memory usage", "file": "jvm_memory_usage"},
+            {"id": 7, "display": "GC count", "file": "gc_count"},
+            {"id": 27, "display": "GC time", "file": "gc_time"},
+            {"id": 77, "display": "Total translog operations", "file": "total_translog_operations"},
+            {"id": 78, "display": "Total translog size in bytes", "file": "total_translog_size_in_bytes"},
+            {"id": 79, "display": "Tripped for breakers", "file": "tripped_for_breakers"},
+            {"id": 80, "display": "Estimated size in bytes of breaker", "file": "estimated_size_in_bytes_of_breaker"},
+            {"id": 32, "display": "Disk usage", "file": "disk_usage"},
+            {"id": 47, "display": "Network usage", "file": "network_usage"},
+            {"id": 1, "display": "Documents count on node", "file": "documents_count_on_node"},
+            {"id": 24, "display": "Documents indexed rate", "file": "documents_indexed_rate"},
+            {"id": 26, "display": "Documents merged rate", "file": "documents_merged_rate"},
+            {"id": 52, "display": "Documents merged bytes", "file": "documents_merged_bytes"},
+            {"id": 33, "display": "Query time", "file": "query_time"},
+            {"id": 5, "display": "Indexing time", "file": "indexing_time"},
+            {"id": 3, "display": "Merging time", "file": "merging_time"},
+            {"id": 48, "display": "Total Operations rate", "file": "total_Operations_rate"},
+            {"id": 49, "display": "Total Operations time", "file": "total_Operations_time"},
+        ]
+    },
+    {
+        "name": "go_app",
+        "type": "go_app",
+        "dashboard": "ypFZFgvmz",
+        "params": {
+            "var-job": "go-apps",
+            "var-interval": "1m",
+            "var-node": "Function",
+            "width": "1000",
+            "height": "500",
+            "tz": "Asia/Shanghai",
+        },
+        "panels": [
+            {"id": 1, "display": "Heap memory", "file": "heap_memory"},
+            {"id": 4, "display": "Heap memory trends", "file": "heap_memory_trends"},
+            {"id": 2, "display": "Heap objects", "file": "heap_objects"},
+            {"id": 5, "display": "Heap system alloc", "file": "heap_system_alloc"},
+            {"id": 3, "display": "GC rate", "file": "gc_rate"},
+            {"id": 6, "display": "Next gc target", "file": "next_gc_target"},
+            {"id": 8, "display": "GC duration quantiles", "file": "gc_duration"},
+            {"id": 7, "display": "Goroutines count", "file": "goroutines_count"},
+            {"id": 10, "display": "Threads count", "file": "threads_count"},
+        ]
+    }
+];
+
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* STRUCTURE
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -159,6 +458,20 @@ interface Service {
     image: string;
 }
 
+interface ReportConfig {
+    name: string; // kafka_jmx | kafka_exporter => type: kafka
+    type: string; // same to service type
+    dashboard: string; // dashboard uid
+    params: { [key: string]: string };
+    panels: Array<ReportPanel>;
+}
+
+interface ReportPanel {
+    id: number; // panel id
+    display: string; // display name used in report
+    file: string; // capture image file name
+}
+
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* COMMAND LINE
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -171,7 +484,7 @@ program.version(pkg.version)
     .option('--stop', 'stop all deployed services')
     .option('--start', 'start all deployed services')
     .option('--cleanup', 'remove all deployed services')
-    .option('--capture', 'capture stress test data')
+    .option('--report', 'capture stress test data and file report')
     .option('--stress', 'stress test')
     .option('--docker-ps', 'docker ps -a, remotely')
     .option('--machine-type <string>', '--sub param, specify target machine type of action, using "all" to specify all machines')
@@ -187,7 +500,7 @@ const ARGS_ACTION_DEPLOY = (program as any).deploy === undefined ? undefined : t
 const ARGS_ACTION_STOP = (program as any).stop === undefined ? undefined : true;
 const ARGS_ACTION_START = (program as any).start === undefined ? undefined : true;
 const ARGS_ACTION_CLEANUP = (program as any).cleanup === undefined ? undefined : true;
-const ARGS_ACTION_CAPTURE = (program as any).capture === undefined ? undefined : true;
+const ARGS_ACTION_REPORT = (program as any).report === undefined ? undefined : true;
 const ARGS_ACTION_STRESS = (program as any).stress === undefined ? undefined : true;
 const ARGS_ACTION_DOCKER_PS = (program as any).dockerPs === undefined ? undefined : true;
 
@@ -247,8 +560,8 @@ class DistClusterTool {
             await this.start();
         } else if (ARGS_ACTION_CLEANUP) {
             await this.cleanup();
-        } else if (ARGS_ACTION_CAPTURE) {
-            await this.capture();
+        } else if (ARGS_ACTION_REPORT) {
+            await this.report();
         } else if (ARGS_ACTION_STRESS) {
             await this.stress();
         } else if (ARGS_ACTION_DOCKER_PS) {
@@ -294,9 +607,9 @@ class DistClusterTool {
         await (new DistClusterToolCleanup()).run();
     }
 
-    private async capture() {
-        console.log('[Cluster Tool] capture ...');
-        await (new DistClusterToolCapture()).run();
+    private async report() {
+        console.log('[Cluster Tool] report ...');
+        await (new DistClusterToolReport()).run();
     }
 
     private async stress() {
@@ -1287,9 +1600,18 @@ class DistClusterToolCleanup {
 
 }
 
-class DistClusterToolCapture {
+class DistClusterToolReport {
 
     public async run() {
+        await this.captureData();
+        await this.fileReport();
+    }
+
+    private async captureData() {
+
+    }
+
+    private async fileReport() {
 
     }
 
@@ -1420,8 +1742,8 @@ class Tools {
 
         return new Promise((resolve, reject) => {
             const conn = new ssh2.Client();
-            conn.on('ready', function() {
-                conn.exec(command, function(err, stream) {
+            conn.on('ready', function () {
+                conn.exec(command, function (err, stream) {
                     if (err) {
                         return reject(err);
                     }
@@ -1429,7 +1751,7 @@ class Tools {
                     let stdout = '';
                     let stderr = '';
 
-                    stream.on('close', function(code, signal) {
+                    stream.on('close', function (code, signal) {
                         console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
                         conn.end();
 
@@ -1449,10 +1771,10 @@ class Tools {
                         }
 
                         resolve();
-                    }).on('data', function(data) {
+                    }).on('data', function (data) {
                         console.log('STDOUT: ' + data.toString().trim());
                         stdout += data.toString().trim() + "\n";
-                    }).stderr.on('data', function(data) {
+                    }).stderr.on('data', function (data) {
                         console.log('STDERR: ' + data.toString().trim());
                         stderr += data.toString().trim() + "\n";
                     });
