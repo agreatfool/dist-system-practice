@@ -1677,8 +1677,12 @@ class DistClusterToolReport {
 
     //noinspection JSUnusedLocalSymbols
     private async captureServicePrometheus(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-instance": `${machine.ip}:9090`
+        });
+
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, config.params);
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
         }
     }
 
