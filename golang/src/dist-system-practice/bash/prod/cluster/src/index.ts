@@ -152,11 +152,8 @@ const REPORT_CONFIG: Array<ReportConfig> = [
             "var-interval": "5s",
             "var-env": "All",
             "var-name": "All",
-            "var-node": "Function", // dynamic
+            "var-node": "", // dynamic
             "var-maxmount": "",
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
         },
         "panels": [
             {"id": 15, "display": "系统运行时间", "file": "system_up_time"},
@@ -187,11 +184,8 @@ const REPORT_CONFIG: Array<ReportConfig> = [
             "refresh": "30s",
             "var-containergroup": "All",
             "var-interval": "30s",
-            "var-server": "Function", // dynamic
+            "var-server": "", // dynamic
             "var-name": "All",
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
         },
         "panels": [
             {"id": 8, "display": "Received Network Traffic per Container", "file": "received_network_traffic"},
@@ -206,10 +200,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "uid": "NgzwcO7Zz",
         "node": "prometheus-memcached",
         "params": {
-            "var-node": "Function", // dynamic
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
+            "var-node": "", // dynamic
         },
         "panels": [
             {"id": 1, "display": "% Hit ratio", "file": "hit_ratio"},
@@ -228,10 +219,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "node": "mysql-overview",
         "params": {
             "var-interval": "1m",
-            "var-host": "Function", // dynamic
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
+            "var-host": "", // dynamic
         },
         "panels": [
             {"id": 92, "display": "MySQL Connections", "file": "connections"},
@@ -258,11 +246,8 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "node": "prometheus-2-0-overview",
         "params": {
             "var-job": "prometheus",
-            "var-instance": "prometheus",
+            "var-instance": "", // dynamic
             "var-interval": "1h",
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
         },
         "panels": [
             {"id": 3, "display": "Series Count", "file": "series_count"},
@@ -279,12 +264,9 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "params": {
             "var-datasource": "Prometheus",
             "var-job": "kafka",
-            "var-instance": "Function", // dynamic
+            "var-instance": "", // dynamic
             "var-mempool": "All",
             "var-memarea": "All",
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
         },
         "panels": [
             {"id": 38, "display": "Open file descriptors", "file": "open_file_descriptors"},
@@ -303,11 +285,8 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "node": "kafka-exporter-overview",
         "params": {
             "var-job": "kafka-exporter",
-            "var-instance": "Function", // dynamic
+            "var-instance": "", // dynamic
             "var-topic": "All",
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
         },
         "panels": [
             {"id": 14, "display": "Message in per second", "file": "message_in_sec"},
@@ -321,10 +300,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "uid": "Z8ieXpnWk",
         "node": "jaeger-agent",
         "params": {
-            "var-node": "Function", // dynamic
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
+            "var-node": "", // dynamic
         },
         "panels": [
             {"id": 6, "display": "Reporter batches submitted", "file": "batches_submitted"},
@@ -342,10 +318,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "uid": "Z8ieXpnWk",
         "node": "jaeger-collector",
         "params": {
-            "var-node": "Function", // dynamic
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
+            "var-node": "", // dynamic
         },
         "panels": [
             {"id": 20, "display": "Traces received", "file": "traces_received"},
@@ -365,10 +338,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "uid": "oF_Qr14Zz",
         "node": "filebeat",
         "params": {
-            "var-node": "Function", // dynamic
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
+            "var-node": "", // dynamic
         },
         "panels": [
             {"id": 2, "display": "Harvester", "file": "harvester"},
@@ -386,11 +356,8 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "params": {
             "var-interval": "5m",
             "var-cluster": "es_cluster",
-            "var-name": "Function", // dynamic
-            "var-instance": "Function", // dynamic
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
+            "var-name": "", // dynamic
+            "var-instance": "", // dynamic
         },
         "panels": [
             {"id": 16, "display": "Pending tasks", "file": "pending_tasks"},
@@ -423,10 +390,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "params": {
             "var-job": "go-apps",
             "var-interval": "1m",
-            "var-node": "Function", // dynamic
-            "width": "1000",
-            "height": "500",
-            "tz": "Asia/Shanghai",
+            "var-node": "", // dynamic
         },
         "panels": [
             {"id": 1, "display": "Heap memory", "file": "heap_memory"},
@@ -2029,7 +1993,15 @@ class Tools {
         const file = `${Tools.getBaseDir()}/data/${machine.name}/${service.name}/${panel.file}.png`;
         Tools.ensureFilePath(file);
 
-        params = Object.assign(params, {"panelId": panel.id});
+        params = Object.assign(params, {
+            "panelId": panel.id,
+            "width": process.env.GRAFANA_WIDTH,
+            "height": process.env.GRAFANA_HEIGHT,
+            "tz": process.env.GRAFANA_TIMEZONE,
+            "from": process.env.GRAFANA_START,
+            "to": process.env.GRAFANA_END,
+            "orgId": 1,
+        });
 
         const targetUrl = `http://${Tools.getGrafanaAddress()}/render/d-solo/${config.uid}/${config.node}?${Tools.serializeQueryString(params)}`;
         await Tools.execAsync(`curl -H "Authorization: Bearer ${process.env.GRAFANA_API}" "${targetUrl}" > ${file}`);
