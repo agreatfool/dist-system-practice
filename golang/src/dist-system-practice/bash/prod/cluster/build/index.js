@@ -192,7 +192,7 @@ const REPORT_CONFIG = [
             "var-containergroup": "All",
             "var-interval": "30s",
             "var-server": "Function",
-            "var-name": "Function",
+            "var-name": "All",
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -1562,7 +1562,7 @@ class DistClusterToolReport {
     captureServiceCadvisor(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-server": machine.ip, "var-name": service.name
+                "orgId": 1, "var-server": machine.ip
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(machine, service, config, panel, params);

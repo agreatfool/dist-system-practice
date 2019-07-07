@@ -188,7 +188,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
             "var-containergroup": "All",
             "var-interval": "30s",
             "var-server": "Function", // dynamic
-            "var-name": "Function", // dynamic
+            "var-name": "All",
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -1645,7 +1645,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceCadvisor(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-server": machine.ip, "var-name": service.name
+            "orgId": 1, "var-server": machine.ip
         });
 
         for (let panel of config.panels) {
