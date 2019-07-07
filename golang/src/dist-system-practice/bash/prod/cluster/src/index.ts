@@ -362,7 +362,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         "panels": [
             {"id": 16, "display": "Pending tasks", "file": "pending_tasks"},
             {"id": 30, "display": "Load average", "file": "load_average"},
-            {"id": 88, "display": "CPU usage", "file": "cpu usage"},
+            {"id": 88, "display": "CPU usage", "file": "cpu_usage"},
             {"id": 31, "display": "JVM memory usage", "file": "jvm_memory_usage"},
             {"id": 7, "display": "GC count", "file": "gc_count"},
             {"id": 27, "display": "GC time", "file": "gc_time"},
