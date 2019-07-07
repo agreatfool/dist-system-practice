@@ -10,6 +10,7 @@ import * as camel from 'camelcase';
 import * as fetch from 'node-fetch';
 import * as AbortController from 'abort-controller';
 import * as ssh2 from 'ssh2';
+import * as handlebars from 'handlebars';
 
 const pkg = require('../package.json');
 
@@ -1749,7 +1750,65 @@ class DistClusterToolReport {
     }
 
     private async fileReport() {
+        await Tools.execAsync(
+            `cp ${Tools.getBaseDir()}/template/topology.jpg ${Tools.getBaseDir()}/report/${this.reportId}/images/`
+        );
 
+        const machineReports = [];
+        for (let machine of MACHINES) {
+            machineReports.push(await this.reportMachine(machine));
+        }
+
+        const reportPath = `${Tools.getBaseDir()}/report/${this.reportId}/report_${this.reportId}.md`;
+        Tools.ensureFilePath(reportPath);
+
+        await LibFs.writeFile(reportPath, (await Tools.render('report', {
+            "title": `REPORT ${this.reportId}`,
+            "monitoring": machineReports.join(''),
+        }) as string).replace(/\_/g, "\\_"));
+    }
+
+    private async reportMachine(machine: Machine) {
+        const serviceReports = [];
+
+        for (let service of machine.services) {
+            serviceReports.push(await this.reportService(machine, service));
+        }
+
+        return await Tools.render('machine', {
+            "machine_name": machine.name,
+            "machine_type": machine.type,
+            "services": serviceReports.join(''),
+        });
+    }
+
+    private async reportService(machine: Machine, service: Service) {
+        const panelReports = [];
+
+        const configs = Tools.getReportConfigByType(service.type);
+
+        if (!configs || configs.length === 0) {
+            return; // specified service type not found, means no need to report this service
+        }
+
+        for (let config of configs) {
+            for (let panel of config.panels) {
+                panelReports.push(await this.reportPanel(machine, service, panel));
+            }
+        }
+
+        return await Tools.render('service', {
+            "service_name": service.name,
+            "service_type": service.type,
+            "panels": panelReports.join("\n"),
+        });
+    }
+
+    private async reportPanel(machine: Machine, service: Service, panel: ReportPanel) {
+        return await Tools.render('panel', {
+            "panel_display": panel.display,
+            "image_path": `./${Tools.generateGrafanaImagePath(machine, service, panel)}`,
+        });
     }
 
 }
@@ -1987,6 +2046,10 @@ class Tools {
         });
     }
 
+    public static generateGrafanaImagePath(machine: Machine, service: Service, panel: ReportPanel) {
+        return `images/${machine.name}/${service.name}/${panel.file}.png`;
+    }
+
     public static async captureGrafanaData(
         reportId: number,
         machine: Machine,
@@ -1995,7 +2058,8 @@ class Tools {
         panel: ReportPanel,
         params: { [key: string]: any }
     ) {
-        const file = `${Tools.getBaseDir()}/report/${reportId}/images/${machine.name}/${service.name}/${panel.file}.png`;
+        const file = `${Tools.getBaseDir()}/report/${reportId}/${Tools.generateGrafanaImagePath(machine, service, panel)}`;
+
         Tools.ensureFilePath(file);
 
         params = Object.assign(params, {
@@ -2034,6 +2098,14 @@ class Tools {
 
     public static replaceStrAll(str: string, search: string, replacement: string) {
         return str.replace(new RegExp(search, 'g'), replacement);
+    }
+
+    public static async render(templateName: string, params: { [key: string]: any }) {
+        const template = handlebars.compile(
+            (await LibFs.readFile(`${Tools.getBaseDir()}/template/${templateName}.hbs`)).toString()
+        ) as HandlebarsTemplateDelegate;
+
+        return template(params);
     }
 
 }
