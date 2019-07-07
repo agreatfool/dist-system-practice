@@ -145,9 +145,9 @@ const MACHINES: Array<Machine> = [
 
 const REPORT_CONFIG: Array<ReportConfig> = [
     {
-        "name": "node_exporter",
         "type": "node_exporter",
-        "dashboard": "9CWBz0bik",
+        "uid": "9CWBz0bik",
+        "node": "nodes",
         "params": {
             "var-interval": "5s",
             "var-env": "All",
@@ -180,15 +180,15 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ],
     },
     {
-        "name": "cadvisor",
         "type": "cadvisor",
-        "dashboard": "PV1XyHnWz",
+        "uid": "PV1XyHnWz",
+        "node": "docker-and-system-monitoring",
         "params": {
             "refresh": "30s",
             "var-containergroup": "All",
             "var-interval": "30s",
-            "var-server": "Function",
-            "var-name": "Function",
+            "var-server": "Function", // dynamic
+            "var-name": "Function", // dynamic
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -202,11 +202,11 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "memcached",
         "type": "memcached",
-        "dashboard": "NgzwcO7Zz",
+        "uid": "NgzwcO7Zz",
+        "node": "prometheus-memcached",
         "params": {
-            "var-node": "Function",
+            "var-node": "Function", // dynamic
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -223,12 +223,12 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "mysqld",
         "type": "mysqld",
-        "dashboard": "MQWgroiiz",
+        "uid": "MQWgroiiz",
+        "node": "mysql-overview",
         "params": {
             "var-interval": "1m",
-            "var-host": "Function",
+            "var-host": "Function", // dynamic
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -253,9 +253,9 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "prometheus",
         "type": "prometheus",
-        "dashboard": "54e7hO7Wk",
+        "uid": "54e7hO7Wk",
+        "node": "prometheus-2-0-overview",
         "params": {
             "var-job": "prometheus",
             "var-instance": "prometheus",
@@ -273,13 +273,13 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "kafka_jmx",
         "type": "kafka",
-        "dashboard": "chanjarster-jvm-dashboard",
+        "uid": "chanjarster-jvm-dashboard",
+        "node": "kafka-jmx-dashboard",
         "params": {
             "var-datasource": "Prometheus",
             "var-job": "kafka",
-            "var-instance": "Function",
+            "var-instance": "Function", // dynamic
             "var-mempool": "All",
             "var-memarea": "All",
             "width": "1000",
@@ -298,12 +298,12 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "kafka_exporter",
-        "type": "kafka",
-        "dashboard": "jwPKIsniz",
+        "type": "kafka_exporter",
+        "uid": "jwPKIsniz",
+        "node": "kafka-exporter-overview",
         "params": {
             "var-job": "kafka-exporter",
-            "var-instance": "Function",
+            "var-instance": "Function", // dynamic
             "var-topic": "All",
             "width": "1000",
             "height": "500",
@@ -317,11 +317,11 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "jaeger_agent",
         "type": "jaeger_agent",
-        "dashboard": "Z8ieXpnWk",
+        "uid": "Z8ieXpnWk",
+        "node": "jaeger-agent",
         "params": {
-            "var-node": "Function",
+            "var-node": "Function", // dynamic
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -338,11 +338,11 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "jaeger_collector",
         "type": "jaeger_collector",
-        "dashboard": "Z8ieXpnWk",
+        "uid": "Z8ieXpnWk",
+        "node": "jaeger-collector",
         "params": {
-            "var-node": "Function",
+            "var-node": "Function", // dynamic
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -361,11 +361,11 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "filebeat",
         "type": "filebeat",
-        "dashboard": "oF_Qr14Zz",
+        "uid": "oF_Qr14Zz",
+        "node": "filebeat",
         "params": {
-            "var-node": "Function",
+            "var-node": "Function", // dynamic
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -380,14 +380,14 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "elasticsearch",
         "type": "elasticsearch",
-        "dashboard": "FNysokSWk",
+        "uid": "FNysokSWk",
+        "node": "elasticsearch",
         "params": {
             "var-interval": "5m",
             "var-cluster": "es_cluster",
-            "var-name": "Function",
-            "var-instance": "Function",
+            "var-name": "Function", // dynamic
+            "var-instance": "Function", // dynamic
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -417,13 +417,13 @@ const REPORT_CONFIG: Array<ReportConfig> = [
         ]
     },
     {
-        "name": "go_app",
         "type": "go_app",
-        "dashboard": "ypFZFgvmz",
+        "uid": "ypFZFgvmz",
+        "node": "go-processes",
         "params": {
             "var-job": "go-apps",
             "var-interval": "1m",
-            "var-node": "Function",
+            "var-node": "Function", // dynamic
             "width": "1000",
             "height": "500",
             "tz": "Asia/Shanghai",
@@ -459,9 +459,9 @@ interface Service {
 }
 
 interface ReportConfig {
-    name: string; // kafka_jmx | kafka_exporter => type: kafka
     type: string; // same to service type
-    dashboard: string; // dashboard uid
+    uid: string; // dashboard uid
+    node: string; // dashboard url node
     params: { [key: string]: string };
     panels: Array<ReportPanel>;
 }
@@ -1608,7 +1608,172 @@ class DistClusterToolReport {
     }
 
     private async captureData() {
+        for (let machine of MACHINES) {
+            await this.captureMachine(machine);
+        }
+    }
 
+    private async captureMachine(machine: Machine) {
+        for (let service of machine.services) {
+            await this.captureService(machine, service);
+        }
+    }
+
+    private async captureService(machine: Machine, service: Service) {
+        const configs = Tools.getReportConfigByType(service.type);
+
+        if (!configs || configs.length === 0) {
+            return; // specified service type not found, means no need to capture for this service
+        }
+
+        for (let config of configs) {
+            await (this[`captureService${camel(config.type, {pascalCase: true})}`] as Function).apply(this, [machine, service, config]);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceNodeExporter(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-node": `${machine.ip}:9100`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceCadvisor(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-server": machine.ip, "var-name": service.name
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceMemcached(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-node": `${machine.ip}:9150`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceMysqld(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-host": `${machine.ip}:9104`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServicePrometheus(machine: Machine, service: Service, config: ReportConfig) {
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, config.params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceKafka(machine: Machine, service: Service, config: ReportConfig) {
+        const id = Number.parseInt(service.name.split('_')[1]); // kafka_1 => [kafka, 1] => 1
+        const brokerId = id - 1; // 1-1 => 0
+        const portMetrics = `7${brokerId}71`; // 7071、7171、7271、...
+
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-instance": `${machine.ip}:${portMetrics}`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceKafkaExporter(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-instance": `${machine.ip}:9308`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceJaegerAgent(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-node": `${machine.ip}:5778`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceJaegerCollector(machine: Machine, service: Service, config: ReportConfig) {
+        const id = Number.parseInt(service.name.split('_')[1]); // jcollector_1 => [jcollector, 1] => 1
+        const portHttp = 14268 + (id - 1); // 14268、14269、14270、...
+
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-node": `${machine.ip}:${portHttp}`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceFilebeat(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-node": `${machine.ip}:9479`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceElasticsearch(machine: Machine, service: Service, config: ReportConfig) {
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-name": service.name,
+            "var-instance": `${Tools.getMachinesByType('elasticsearch')[1].ip}:9114` // elasticsearch exporter machine
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
+    }
+
+    //noinspection JSUnusedLocalSymbols
+    private async captureServiceGoApp(machine: Machine, service: Service, config: ReportConfig) {
+        let port = null;
+        if (service.type.indexOf('web') !== -1) {
+            port = 8000;
+        } else if (service.type.indexOf('service') !== -1) {
+            port = 8001;
+        } else if (service.type.indexOf('consumer') !== -1) {
+            port = 8002;
+        }
+
+        const params = Object.assign(config.params, {
+            "orgId": 1, "var-node": `${machine.ip}:${port}`
+        });
+
+        for (let panel of config.panels) {
+            await Tools.captureGrafanaData(machine, service, config, panel, params);
+        }
     }
 
     private async fileReport() {
@@ -1658,6 +1823,16 @@ class Tools {
 
         return services.filter((service: Service) => {
             return service.type == type;
+        });
+    }
+
+    public static getReportConfigByType(type: string): Array<ReportConfig> {
+        if (type === 'app_web' || type === 'app_service' || type === 'app_consumer') {
+            type = 'go_app';
+        }
+
+        return REPORT_CONFIG.filter((config: ReportConfig) => {
+            return config.type === type;
         });
     }
 
@@ -1737,6 +1912,10 @@ class Tools {
         return addresses;
     }
 
+    public static getGrafanaAddress() {
+        return `${Tools.getMachinesByType('monitor')[0].ip}:3000`;
+    }
+
     public static async execSSH(ip: string, command: string, output?: string) {
         console.log(`ExecSSH: ${command}`);
 
@@ -1757,8 +1936,7 @@ class Tools {
 
                         if (output) {
                             const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
-                            mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
-                            LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+                            Tools.ensureFilePath(targetOutput);
 
                             LibFs.appendFileSync(targetOutput, `IP:\n${ip}\nCOMMAND:\n${command}\n\n`);
 
@@ -1825,8 +2003,7 @@ class Tools {
 
             if (output) {
                 const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
-                mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
-                LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+                Tools.ensureFilePath(targetOutput);
                 const outputStream = LibFs.createWriteStream(targetOutput);
 
                 child.stdout.pipe(outputStream);
@@ -1836,6 +2013,35 @@ class Tools {
             child.on('close', () => resolve());
             child.on('error', (err) => reject(err));
         });
+    }
+
+    public static async captureGrafanaData(
+        machine: Machine,
+        service: Service,
+        config: ReportConfig,
+        panel: ReportPanel,
+        params: { [key: string]: any }
+    ) {
+        const file = `${Tools.getBaseDir()}/data/${machine.name}/${service.name}/${panel.file}.png`;
+        Tools.ensureFilePath(file);
+        const targetUrl = `http://${Tools.getGrafanaAddress()}/render/d-solo/${config.uid}/${config.node}?${Tools.serializeQueryString(params)}`;
+        await Tools.execAsync(`curl -H "Authorization: Bearer ${process.env.GRAFANA_API}" ${targetUrl} > ${file}`);
+    }
+
+    public static serializeQueryString(params: { [key: string]: any }) {
+        const tmp = [];
+        for (let key in params) {
+            if (!params.hasOwnProperty(key)) {
+                continue;
+            }
+            tmp.push(`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`);
+        }
+        return tmp.join('&');
+    }
+
+    public static ensureFilePath(path: string) {
+        mkdir.sync(LibPath.dirname(path)); // ensure dir
+        LibFs.writeFileSync(path, ''); // ensure file & empty file
     }
 
     public static ucFirst(str: string) {

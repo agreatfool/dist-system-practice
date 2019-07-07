@@ -149,9 +149,9 @@ const MACHINES = [
 ];
 const REPORT_CONFIG = [
     {
-        "name": "node_exporter",
         "type": "node_exporter",
-        "dashboard": "9CWBz0bik",
+        "uid": "9CWBz0bik",
+        "node": "nodes",
         "params": {
             "var-interval": "5s",
             "var-env": "All",
@@ -184,9 +184,9 @@ const REPORT_CONFIG = [
         ],
     },
     {
-        "name": "cadvisor",
         "type": "cadvisor",
-        "dashboard": "PV1XyHnWz",
+        "uid": "PV1XyHnWz",
+        "node": "docker-and-system-monitoring",
         "params": {
             "refresh": "30s",
             "var-containergroup": "All",
@@ -206,9 +206,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "memcached",
         "type": "memcached",
-        "dashboard": "NgzwcO7Zz",
+        "uid": "NgzwcO7Zz",
+        "node": "prometheus-memcached",
         "params": {
             "var-node": "Function",
             "width": "1000",
@@ -227,9 +227,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "mysqld",
         "type": "mysqld",
-        "dashboard": "MQWgroiiz",
+        "uid": "MQWgroiiz",
+        "node": "mysql-overview",
         "params": {
             "var-interval": "1m",
             "var-host": "Function",
@@ -257,9 +257,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "prometheus",
         "type": "prometheus",
-        "dashboard": "54e7hO7Wk",
+        "uid": "54e7hO7Wk",
+        "node": "prometheus-2-0-overview",
         "params": {
             "var-job": "prometheus",
             "var-instance": "prometheus",
@@ -277,9 +277,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "kafka_jmx",
         "type": "kafka",
-        "dashboard": "chanjarster-jvm-dashboard",
+        "uid": "chanjarster-jvm-dashboard",
+        "node": "kafka-jmx-dashboard",
         "params": {
             "var-datasource": "Prometheus",
             "var-job": "kafka",
@@ -302,9 +302,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "kafka_exporter",
-        "type": "kafka",
-        "dashboard": "jwPKIsniz",
+        "type": "kafka_exporter",
+        "uid": "jwPKIsniz",
+        "node": "kafka-exporter-overview",
         "params": {
             "var-job": "kafka-exporter",
             "var-instance": "Function",
@@ -321,9 +321,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "jaeger_agent",
         "type": "jaeger_agent",
-        "dashboard": "Z8ieXpnWk",
+        "uid": "Z8ieXpnWk",
+        "node": "jaeger-agent",
         "params": {
             "var-node": "Function",
             "width": "1000",
@@ -342,9 +342,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "jaeger_collector",
         "type": "jaeger_collector",
-        "dashboard": "Z8ieXpnWk",
+        "uid": "Z8ieXpnWk",
+        "node": "jaeger-collector",
         "params": {
             "var-node": "Function",
             "width": "1000",
@@ -365,9 +365,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "filebeat",
         "type": "filebeat",
-        "dashboard": "oF_Qr14Zz",
+        "uid": "oF_Qr14Zz",
+        "node": "filebeat",
         "params": {
             "var-node": "Function",
             "width": "1000",
@@ -384,9 +384,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "elasticsearch",
         "type": "elasticsearch",
-        "dashboard": "FNysokSWk",
+        "uid": "FNysokSWk",
+        "node": "elasticsearch",
         "params": {
             "var-interval": "5m",
             "var-cluster": "es_cluster",
@@ -421,9 +421,9 @@ const REPORT_CONFIG = [
         ]
     },
     {
-        "name": "go_app",
         "type": "go_app",
-        "dashboard": "ypFZFgvmz",
+        "uid": "ypFZFgvmz",
+        "node": "go-processes",
         "params": {
             "var-job": "go-apps",
             "var-interval": "1m",
@@ -1524,6 +1524,172 @@ class DistClusterToolReport {
     }
     captureData() {
         return __awaiter(this, void 0, void 0, function* () {
+            for (let machine of MACHINES) {
+                yield this.captureMachine(machine);
+            }
+        });
+    }
+    captureMachine(machine) {
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let service of machine.services) {
+                yield this.captureService(machine, service);
+            }
+        });
+    }
+    captureService(machine, service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const configs = Tools.getReportConfigByType(service.type);
+            if (!configs || configs.length === 0) {
+                return; // specified service type not found, means no need to capture for this service
+            }
+            for (let config of configs) {
+                yield this[`captureService${camel(config.type, { pascalCase: true })}`].apply(this, [machine, service, config]);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceNodeExporter(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-node": `${machine.ip}:9100`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceCadvisor(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-server": machine.ip, "var-name": service.name
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceMemcached(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-node": `${machine.ip}:9150`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceMysqld(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-host": `${machine.ip}:9104`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServicePrometheus(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, config.params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceKafka(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const id = Number.parseInt(service.name.split('_')[1]); // kafka_1 => [kafka, 1] => 1
+            const brokerId = id - 1; // 1-1 => 0
+            const portMetrics = `7${brokerId}71`; // 7071、7171、7271、...
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-instance": `${machine.ip}:${portMetrics}`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceKafkaExporter(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-instance": `${machine.ip}:9308`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceJaegerAgent(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-node": `${machine.ip}:5778`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceJaegerCollector(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const id = Number.parseInt(service.name.split('_')[1]); // jcollector_1 => [jcollector, 1] => 1
+            const portHttp = 14268 + (id - 1); // 14268、14269、14270、...
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-node": `${machine.ip}:${portHttp}`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceFilebeat(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-node": `${machine.ip}:9479`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceElasticsearch(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-name": service.name,
+                "var-instance": `${Tools.getMachinesByType('elasticsearch')[1].ip}:9114` // elasticsearch exporter machine
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
+        });
+    }
+    //noinspection JSUnusedLocalSymbols
+    captureServiceGoApp(machine, service, config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let port = null;
+            if (service.type.indexOf('web') !== -1) {
+                port = 8000;
+            }
+            else if (service.type.indexOf('service') !== -1) {
+                port = 8001;
+            }
+            else if (service.type.indexOf('consumer') !== -1) {
+                port = 8002;
+            }
+            const params = Object.assign(config.params, {
+                "orgId": 1, "var-node": `${machine.ip}:${port}`
+            });
+            for (let panel of config.panels) {
+                yield Tools.captureGrafanaData(machine, service, config, panel, params);
+            }
         });
     }
     fileReport() {
@@ -1565,6 +1731,14 @@ class Tools {
         });
         return services.filter((service) => {
             return service.type == type;
+        });
+    }
+    static getReportConfigByType(type) {
+        if (type === 'app_web' || type === 'app_service' || type === 'app_consumer') {
+            type = 'go_app';
+        }
+        return REPORT_CONFIG.filter((config) => {
+            return config.type === type;
         });
     }
     static getBaseDir() {
@@ -1624,6 +1798,9 @@ class Tools {
         });
         return addresses;
     }
+    static getGrafanaAddress() {
+        return `${Tools.getMachinesByType('monitor')[0].ip}:3000`;
+    }
     static execSSH(ip, command, output) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(`ExecSSH: ${command}`);
@@ -1641,8 +1818,7 @@ class Tools {
                             conn.end();
                             if (output) {
                                 const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
-                                mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
-                                LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+                                Tools.ensureFilePath(targetOutput);
                                 LibFs.appendFileSync(targetOutput, `IP:\n${ip}\nCOMMAND:\n${command}\n\n`);
                                 if (stdout) {
                                     LibFs.appendFileSync(targetOutput, stdout);
@@ -1698,8 +1874,7 @@ class Tools {
                 const child = shell.exec(command, Object.assign(options, { async: true }));
                 if (output) {
                     const targetOutput = LibPath.join(Tools.getBaseDir(), 'output', output + '.txt');
-                    mkdir.sync(LibPath.dirname(targetOutput)); // ensure dir
-                    LibFs.writeFileSync(targetOutput, ''); // ensure file & empty file
+                    Tools.ensureFilePath(targetOutput);
                     const outputStream = LibFs.createWriteStream(targetOutput);
                     child.stdout.pipe(outputStream);
                     child.stderr.pipe(outputStream);
@@ -1708,6 +1883,28 @@ class Tools {
                 child.on('error', (err) => reject(err));
             });
         });
+    }
+    static captureGrafanaData(machine, service, config, panel, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const file = `${Tools.getBaseDir()}/data/${machine.name}/${service.name}/${panel.file}.png`;
+            Tools.ensureFilePath(file);
+            const targetUrl = `http://${Tools.getGrafanaAddress()}/render/d-solo/${config.uid}/${config.node}?${Tools.serializeQueryString(params)}`;
+            yield Tools.execAsync(`curl -H "Authorization: Bearer ${process.env.GRAFANA_API}" ${targetUrl} > ${file}`);
+        });
+    }
+    static serializeQueryString(params) {
+        const tmp = [];
+        for (let key in params) {
+            if (!params.hasOwnProperty(key)) {
+                continue;
+            }
+            tmp.push(`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`);
+        }
+        return tmp.join('&');
+    }
+    static ensureFilePath(path) {
+        mkdir.sync(LibPath.dirname(path)); // ensure dir
+        LibFs.writeFileSync(path, ''); // ensure file & empty file
     }
     static ucFirst(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
