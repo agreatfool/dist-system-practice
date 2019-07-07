@@ -1566,7 +1566,11 @@ class DistClusterToolCleanup {
 
 class DistClusterToolReport {
 
+    private reportId: number;
+
     public async run() {
+        this.reportId = Date.now();
+
         await this.captureData();
         await this.fileReport();
     }
@@ -1602,7 +1606,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1613,7 +1617,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1624,7 +1628,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1635,7 +1639,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1646,7 +1650,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1661,7 +1665,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1672,7 +1676,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1683,7 +1687,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1697,7 +1701,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1708,7 +1712,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1720,7 +1724,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1740,7 +1744,7 @@ class DistClusterToolReport {
         });
 
         for (let panel of config.panels) {
-            await Tools.captureGrafanaData(machine, service, config, panel, params);
+            await Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
         }
     }
 
@@ -1984,13 +1988,14 @@ class Tools {
     }
 
     public static async captureGrafanaData(
+        reportId: number,
         machine: Machine,
         service: Service,
         config: ReportConfig,
         panel: ReportPanel,
         params: { [key: string]: any }
     ) {
-        const file = `${Tools.getBaseDir()}/data/${machine.name}/${service.name}/${panel.file}.png`;
+        const file = `${Tools.getBaseDir()}/report/${reportId}/images/${machine.name}/${service.name}/${panel.file}.png`;
         Tools.ensureFilePath(file);
 
         params = Object.assign(params, {
