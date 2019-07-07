@@ -315,7 +315,7 @@ const REPORT_CONFIG: Array<ReportConfig> = [
     },
     {
         "type": "jaeger_collector",
-        "uid": "Z8ieXpnWk",
+        "uid": "mb6-JR5iz",
         "node": "jaeger-collector",
         "params": {
             "var-node": "", // dynamic
