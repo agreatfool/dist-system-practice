@@ -110,7 +110,7 @@ const MACHINES: Array<Machine> = [
             {"name": "jcollector_2", "type": "jaeger_collector", "image": "jaegertracing/jaeger-collector:1.11.0"},
             {"name": "jquery", "type": "jaeger_query", "image": "jaegertracing/jaeger-query:1.11.0"},
             {"name": "prometheus", "type": "prometheus", "image": "prom/prometheus:v2.8.1"},
-            {"name": "grafana", "type": "grafana", "image": "grafana/grafana:6.1.2"},
+            {"name": "grafana", "type": "grafana", "image": "grafana/grafana:6.1.3"},
             {"name": "kibana", "type": "kibana", "image": "kibana:7.0.0"},
         ]
     },
