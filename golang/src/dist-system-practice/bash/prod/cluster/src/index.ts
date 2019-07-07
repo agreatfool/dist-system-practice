@@ -2028,8 +2028,11 @@ class Tools {
     ) {
         const file = `${Tools.getBaseDir()}/data/${machine.name}/${service.name}/${panel.file}.png`;
         Tools.ensureFilePath(file);
+
+        params = Object.assign(params, {"panelId": panel.id});
+
         const targetUrl = `http://${Tools.getGrafanaAddress()}/render/d-solo/${config.uid}/${config.node}?${Tools.serializeQueryString(params)}`;
-        await Tools.execAsync(`curl -H "Authorization: Bearer ${process.env.GRAFANA_API}" ${targetUrl} > ${file}`);
+        await Tools.execAsync(`curl -H "Authorization: Bearer ${process.env.GRAFANA_API}" "${targetUrl}" > ${file}`);
     }
 
     public static serializeQueryString(params: { [key: string]: any }) {
