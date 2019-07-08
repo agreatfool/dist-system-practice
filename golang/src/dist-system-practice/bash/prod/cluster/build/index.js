@@ -1517,7 +1517,7 @@ class DistClusterToolReport {
     captureServiceNodeExporter(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-node": `${machine.ip}:9100`
+                "var-node": `${machine.ip}:9100`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1528,7 +1528,7 @@ class DistClusterToolReport {
     captureServiceCadvisor(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-server": machine.ip
+                "var-server": machine.ip
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1539,7 +1539,7 @@ class DistClusterToolReport {
     captureServiceMemcached(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-node": `${machine.ip}:9150`
+                "var-node": `${machine.ip}:9150`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1550,7 +1550,7 @@ class DistClusterToolReport {
     captureServiceMysqld(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-host": `${machine.ip}:9104`
+                "var-host": `${machine.ip}:9104`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1561,7 +1561,7 @@ class DistClusterToolReport {
     captureServicePrometheus(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-instance": `${machine.ip}:9090`
+                "var-instance": `${machine.ip}:9090`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1575,7 +1575,7 @@ class DistClusterToolReport {
             const brokerId = id - 1; // 1-1 => 0
             const portMetrics = `7${brokerId}71`; // 7071、7171、7271、...
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-instance": `${machine.ip}:${portMetrics}`
+                "var-instance": `${machine.ip}:${portMetrics}`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1586,7 +1586,7 @@ class DistClusterToolReport {
     captureServiceKafkaExporter(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-instance": `${machine.ip}:9308`
+                "var-instance": `${machine.ip}:9308`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1597,7 +1597,7 @@ class DistClusterToolReport {
     captureServiceJaegerAgent(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-node": `${machine.ip}:5778`
+                "var-node": `${machine.ip}:5778`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1610,7 +1610,7 @@ class DistClusterToolReport {
             const id = Number.parseInt(service.name.split('_')[1]); // jcollector_1 => [jcollector, 1] => 1
             const portHttp = 14268 + (id - 1); // 14268、14269、14270、...
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-node": `${machine.ip}:${portHttp}`
+                "var-node": `${machine.ip}:${portHttp}`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1621,7 +1621,7 @@ class DistClusterToolReport {
     captureServiceFilebeat(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-node": `${machine.ip}:9479`
+                "var-node": `${machine.ip}:9479`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);
@@ -1632,7 +1632,7 @@ class DistClusterToolReport {
     captureServiceElasticsearch(machine, service, config) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-name": service.name,
+                "var-name": service.name,
                 "var-instance": `${Tools.getMachinesByType('elasticsearch')[1].ip}:9114` // elasticsearch exporter machine
             });
             for (let panel of config.panels) {
@@ -1654,7 +1654,7 @@ class DistClusterToolReport {
                 port = 8002;
             }
             const params = Object.assign(config.params, {
-                "orgId": 1, "var-node": `${machine.ip}:${port}`
+                "var-node": `${machine.ip}:${port}`
             });
             for (let panel of config.panels) {
                 yield Tools.captureGrafanaData(this.reportId, machine, service, config, panel, params);

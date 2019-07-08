@@ -1603,7 +1603,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceNodeExporter(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-node": `${machine.ip}:9100`
+            "var-node": `${machine.ip}:9100`
         });
 
         for (let panel of config.panels) {
@@ -1614,7 +1614,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceCadvisor(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-server": machine.ip
+            "var-server": machine.ip
         });
 
         for (let panel of config.panels) {
@@ -1625,7 +1625,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceMemcached(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-node": `${machine.ip}:9150`
+            "var-node": `${machine.ip}:9150`
         });
 
         for (let panel of config.panels) {
@@ -1636,7 +1636,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceMysqld(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-host": `${machine.ip}:9104`
+            "var-host": `${machine.ip}:9104`
         });
 
         for (let panel of config.panels) {
@@ -1647,7 +1647,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServicePrometheus(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-instance": `${machine.ip}:9090`
+            "var-instance": `${machine.ip}:9090`
         });
 
         for (let panel of config.panels) {
@@ -1662,7 +1662,7 @@ class DistClusterToolReport {
         const portMetrics = `7${brokerId}71`; // 7071、7171、7271、...
 
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-instance": `${machine.ip}:${portMetrics}`
+            "var-instance": `${machine.ip}:${portMetrics}`
         });
 
         for (let panel of config.panels) {
@@ -1673,7 +1673,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceKafkaExporter(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-instance": `${machine.ip}:9308`
+            "var-instance": `${machine.ip}:9308`
         });
 
         for (let panel of config.panels) {
@@ -1684,7 +1684,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceJaegerAgent(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-node": `${machine.ip}:5778`
+            "var-node": `${machine.ip}:5778`
         });
 
         for (let panel of config.panels) {
@@ -1698,7 +1698,7 @@ class DistClusterToolReport {
         const portHttp = 14268 + (id - 1); // 14268、14269、14270、...
 
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-node": `${machine.ip}:${portHttp}`
+            "var-node": `${machine.ip}:${portHttp}`
         });
 
         for (let panel of config.panels) {
@@ -1709,7 +1709,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceFilebeat(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-node": `${machine.ip}:9479`
+            "var-node": `${machine.ip}:9479`
         });
 
         for (let panel of config.panels) {
@@ -1720,7 +1720,7 @@ class DistClusterToolReport {
     //noinspection JSUnusedLocalSymbols
     private async captureServiceElasticsearch(machine: Machine, service: Service, config: ReportConfig) {
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-name": service.name,
+            "var-name": service.name,
             "var-instance": `${Tools.getMachinesByType('elasticsearch')[1].ip}:9114` // elasticsearch exporter machine
         });
 
@@ -1741,7 +1741,7 @@ class DistClusterToolReport {
         }
 
         const params = Object.assign(config.params, {
-            "orgId": 1, "var-node": `${machine.ip}:${port}`
+            "var-node": `${machine.ip}:${port}`
         });
 
         for (let panel of config.panels) {
