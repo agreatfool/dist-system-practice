@@ -1720,6 +1720,19 @@ class DistClusterToolReport {
 class DistClusterToolStress {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
+            const machineWeb = Tools.getMachinesByType('web')[0];
+            const stressCmd = 'docker run --rm -i' +
+                ' -v /tmp:/tmp' +
+                ' peterevans/vegeta:6.5.0 sh -c' +
+                ` "echo \\"GET http://${machineWeb.ip}:8000/api\\" | vegeta attack` +
+                ` -connections=${process.env.STRESS_CONNECTIONS}` +
+                ` -duration=${process.env.STRESS_DURATION}` +
+                ` -rate=${process.env.STRESS_RATE}` +
+                ` -timeout=${process.env.STRESS_TIMEOUT}` +
+                ` -workers=${process.env.STRESS_WORKERS} | tee /tmp/results.bin | vegeta report --every=1s"`;
+            console.log('Run stress commands on "client" machine:');
+            console.log('docker-machine ssh client');
+            console.log(stressCmd);
         });
     }
 }
