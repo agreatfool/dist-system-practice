@@ -96,9 +96,9 @@ dist-system-practice
     * Exporter: 127.0.0.1:9104
 * Web: 127.0.0.1:8000
 * Service: 
-    * 127.0.0.1:16241 # service 
-    * 127.0.0.1:8001 # metrics
-* Consumer: 127.0.0.1:8002 # metrics
+    * 127.0.0.1:16241 service 
+    * 127.0.0.1:8001 metrics
+* Consumer: 127.0.0.1:8002 metrics
 * Kafka:
     * Zookeeper: 127.0.0.1:2181
     * Broker:
@@ -111,22 +111,22 @@ dist-system-practice
 * Jaeger:
     * Query: 127.0.0.1:16686
     * Collector: 
-        * 127.0.0.1:14250 # grpc
-        * 127.0.0.1:14268 # metrics
+        * 127.0.0.1:14250 grpc
+        * 127.0.0.1:14268 metrics
     * Agent:
-        * 127.0.0.1:6831 # compact
+        * 127.0.0.1:6831 compact
             * 6831
             * 6841
             * 6851
-        * 127.0.0.1:5778 # metrics
+        * 127.0.0.1:5778 metrics
 * Elasticsearch:
     * Kibana: 127.0.0.1:5601
     * Node:
-        * 127.0.0.1:9200 # client
+        * 127.0.0.1:9200 client
             * 9201
             * 9202
             * 9203
-        * 127.0.0.1:9300 # cluster
+        * 127.0.0.1:9300 cluster
     * Exporter:
         * 127.0.0.1:9114
     * Filebeat: 127.0.0.1:5066
@@ -154,9 +154,18 @@ dist-system-practice
 * bash/dev/logs.sh consumer
 
 #### App
-* bash/dev/run.sh consumer
-* bash/dev/run.sh service
-* bash/dev/run.sh web
+
+本地直接运行：
+
+* bash/dev/run.sh local consumer
+* bash/dev/run.sh local service
+* bash/dev/run.sh local web
+
+本地容器运行：
+
+* bash/dev/run.sh container consumer
+* bash/dev/run.sh container service
+* bash/dev/run.sh container web
 
 #### Test
 * bash/dev/query.sh work
