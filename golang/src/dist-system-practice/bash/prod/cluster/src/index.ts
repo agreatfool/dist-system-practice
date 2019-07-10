@@ -1589,7 +1589,7 @@ class DistClusterToolReport {
     }
 
     private async captureService(machine: Machine, service: Service) {
-        const configs = Tools.getReportConfigByType(service.type);
+        const configs = Tools.getReportConfigsByType(service.type);
 
         if (!configs || configs.length === 0) {
             return; // specified service type not found, means no need to capture for this service
@@ -1785,7 +1785,7 @@ class DistClusterToolReport {
     private async reportService(machine: Machine, service: Service) {
         const panelReports = [];
 
-        const configs = Tools.getReportConfigByType(service.type);
+        const configs = Tools.getReportConfigsByType(service.type);
 
         if (!configs || configs.length === 0) {
             return; // specified service type not found, means no need to report this service
@@ -1871,7 +1871,7 @@ class Tools {
         });
     }
 
-    public static getReportConfigByType(type: string): Array<ReportConfig> {
+    public static getReportConfigsByType(type: string): Array<ReportConfig> {
         if (type === 'app_web' || type === 'app_service' || type === 'app_consumer') {
             type = 'go_app';
         }
