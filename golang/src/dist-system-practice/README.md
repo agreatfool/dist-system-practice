@@ -1,6 +1,8 @@
 dist-system-practice
 ====================
 
+当前README内的内容皆为程序服务，如需要了解项目相关的内容，请移步博客：[分布式系统实战](https://xenojoshua.com/2019/07/dist-system-practice/){:target="_blank"}。
+
 ## ENV
 * APP_NAME：应用名称：web、service、consumer，etc...
 * LOGGER_CONF_PATH：日志配置文件位置
