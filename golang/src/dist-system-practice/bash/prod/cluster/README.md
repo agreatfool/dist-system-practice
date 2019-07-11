@@ -60,8 +60,8 @@ cluster
 * HOST_IP_WEB="192.168.3.111"：Web主机IP
 * HOST_IP_SERVICE="192.168.3.111"：Service主机IP
 * GRAFANA_API="eyJrIjoiUkhTVDhDWDM2VWdxQW81MTQ1cjdLWklDSnoxTUZjcDIiLCJuIjoiY2x1c3RlciIsImlkIjoxfQ=="：Grafana API Key
-* GRAFANA_START="1562493600000"：Grafana数据获取的开始时间点
-* GRAFANA_END="1562495400000"：Grafana数据获取的结束时间点
+* GRAFANA_START="1562493600000"：Grafana数据获取的开始时间点，timestamp * 1000
+* GRAFANA_END="1562495400000"：Grafana数据获取的结束时间点，timestamp * 1000
 * GRAFANA_WIDTH="1000"：Grafana截图Width
 * GRAFANA_HEIGHT="500"：Grafana截图Height
 * GRAFANA_TIMEZONE="Asia/Shanghai"：Grafana API调用时区
