@@ -182,12 +182,45 @@ $ docker-compose --version
 # docker-compose version 1.23.2, build 1110ad01
 ```
 
-## TODO
-* zap的错误输出日志为空；分离业务和错误日志
-* zap的配置，以及类似caller之类的Encoder的使用
-* gin配置zap之后，有一条输出的日志里有latency，该时间的单位需要查证
+## Files
 
-## Note
-* [Got "ambiguous import: found github.com/ugorji/go/codec in multiple modules" after upgraded to latest (1.3.1) #1673](https://github.com/gin-gonic/gin/issues/1673#issuecomment-482023570)
-* [cmd/go: <go module bug with github.com/ugorji/go > #29332](https://github.com/golang/go/issues/29332#issuecomment-448669442)
-* [怎么样输出错误日志到别外的一个文件中 #643](https://github.com/uber-go/zap/issues/643)
+```
+dist-system-practice/-
+                     | bash /-                                  # 自动化脚本
+                     |       | build /-                         # 构建脚本
+                     |       |        | build_app.sh            # 构建 web、service、consumer 三个应用镜像的脚本
+                     |       |        | build_beat_exporter.sh  # 构建 beat_exporter 镜像的脚本
+                     |       |        | build_proto.sh          # 由 proto 文件生成 go stub 代码的脚本
+                     |       | dev /-                           # dev 环境自动化脚本
+                     |       |      | clear.sh                  # 清除本地磁盘残留
+                     |       |      | docker*.sh                # 各组件的 docker 镜像启动脚本
+                     |       |      | log.sh                    # 日志相关，清理、创建、重置
+                     |       |      | query.sh                  # 向启动完成的集群发送请求的脚本
+                     |       |      | run.sh                    # web、service、consumer 三个应用的启动脚本
+                     |       | prod /-
+                     |       |       | cluster /-
+                     |       |       |          | cluster.sh    # prod 环境自动化脚本
+                     | conf /-
+                     |       | dev      # dev 环境配置文件
+                     |       | prod     # prod 环境配置文件
+                     | consumer         # consumer 应用代码
+                     | data /-          # 一些测试生成的数据文件
+                     |       | linode   # Linode 硬件的 benchmark 数据
+                     |       | vultr    # Vultr 硬件的 benchmark 数据
+                     | lib              # library 代码文件
+                     | message          # 由 proto 文件生成的 go stub 代码
+                     | proto            # protobuf 消息定义文件
+                     | schema           # 数据库 schema SQL
+                     | service          # service 应用代码
+                     | vendors /-                                       # 第三方工具相关资源
+                     |          | kafka /-                              # Kafka 相关资源
+                     |          |        | kafka                        # 文件夹是 Kafka 可执行文件包
+                     |          |        | jmx*                         # 用来进行 Kafka 镜像内 JMX Metrics 输出用
+                     |          |        | messages.txt                 # 用来测试 Kafka 集群消息收发的模拟数据
+                     |          | prometheus /-                         # Prometheus 相关资源
+                     |          |             | bin                     # 文件夹下只有一个 node_exporter，方便在镜像外运行
+                     |          |             | grafana /-              # Grafana 相关资源
+                     |          |             |          | dashboard    # Grafana 一系列 dashboard 模板
+                     |          |             |          | provisioning # Grafana 启动时需要导入的数据
+                     | web  # web 应用代码
+```
