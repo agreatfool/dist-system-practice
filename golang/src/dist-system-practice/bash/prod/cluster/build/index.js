@@ -1663,7 +1663,7 @@ class DistClusterToolReport {
     }
     fileReport() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield Tools.execAsync(`cp ${Tools.getBaseDir()}/template/topology.jpg ${Tools.getBaseDir()}/report/${this.reportId}/images/`);
+            yield Tools.execAsync(`cp ${Tools.getBaseDir()}/template/topology.png ${Tools.getBaseDir()}/report/${this.reportId}/images/`);
             const machineReports = [];
             for (let machine of MACHINES) {
                 machineReports.push(yield this.reportMachine(machine));

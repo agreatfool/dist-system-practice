@@ -1751,7 +1751,7 @@ class DistClusterToolReport {
 
     private async fileReport() {
         await Tools.execAsync(
-            `cp ${Tools.getBaseDir()}/template/topology.jpg ${Tools.getBaseDir()}/report/${this.reportId}/images/`
+            `cp ${Tools.getBaseDir()}/template/topology.png ${Tools.getBaseDir()}/report/${this.reportId}/images/`
         );
 
         const machineReports = [];
