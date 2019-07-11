@@ -469,7 +469,7 @@ const ARGS_ACTION_REPORT = (program as any).report === undefined ? undefined : t
 const ARGS_ACTION_STRESS = (program as any).stress === undefined ? undefined : true;
 const ARGS_ACTION_DOCKER_PS = (program as any).dockerPs === undefined ? undefined : true;
 
-const ARGS_MACHINE_TYPE = (program as any).machineType === undefined ? undefined : (program as any).machineType;
+let ARGS_MACHINE_TYPE = (program as any).machineType === undefined ? undefined : (program as any).machineType;
 const ARGS_EXCLUDE_SERVICE_TYPES = (program as any).excludeServiceTypes === undefined ? [] : (program as any).excludeServiceTypes;
 
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -482,8 +482,7 @@ class DistClusterTool {
 
         // validate "--machine-type"
         if (!ARGS_MACHINE_TYPE) {
-            console.log('[Cluster Tool] Machine type have to be specified: --machine-type');
-            process.exit(1);
+            ARGS_MACHINE_TYPE = 'all';
         }
         const machineFiltered = MACHINES.filter((machine: Machine) => {
             if (machine.type === ARGS_MACHINE_TYPE) {
@@ -1379,6 +1378,10 @@ class DistClusterToolDeploy {
             ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
             ' -e WEB_HOST="0.0.0.0"' +
             ' -e WEB_PORT="8000"' +
+            ` -e API_GET_WORK_PERCENTAGE_COUNT="${process.env.API_GET_WORK_PERCENTAGE_COUNT}"` +
+            ` -e API_UPDATE_VIEWED_PERCENTAGE_COUNT="${process.env.API_UPDATE_VIEWED_PERCENTAGE_COUNT}"` +
+            ` -e API_GET_ACHIEVEMENT_PERCENTAGE_COUNT="${process.env.API_GET_ACHIEVEMENT_PERCENTAGE_COUNT}"` +
+            ` -e API_PLAN_WORK_PERCENTAGE_COUNT="${process.env.API_PLAN_WORK_PERCENTAGE_COUNT}"` +
             ` -e MAX_WORK_ID="${process.env.MAX_WORK_ID}"` +
             ` -e RPC_SERVERS="[\\"${Tools.getMachinesByType('service')[0].ip}:16241\\"]"` +
             ' -e JAEGER_SERVICE_NAME="app.web"' +

@@ -440,7 +440,7 @@ const ARGS_ACTION_CLEANUP = program.cleanup === undefined ? undefined : true;
 const ARGS_ACTION_REPORT = program.report === undefined ? undefined : true;
 const ARGS_ACTION_STRESS = program.stress === undefined ? undefined : true;
 const ARGS_ACTION_DOCKER_PS = program.dockerPs === undefined ? undefined : true;
-const ARGS_MACHINE_TYPE = program.machineType === undefined ? undefined : program.machineType;
+let ARGS_MACHINE_TYPE = program.machineType === undefined ? undefined : program.machineType;
 const ARGS_EXCLUDE_SERVICE_TYPES = program.excludeServiceTypes === undefined ? [] : program.excludeServiceTypes;
 //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 //-* IMPLEMENTATION
@@ -451,8 +451,7 @@ class DistClusterTool {
             console.log('[Cluster Tool] run ...');
             // validate "--machine-type"
             if (!ARGS_MACHINE_TYPE) {
-                console.log('[Cluster Tool] Machine type have to be specified: --machine-type');
-                process.exit(1);
+                ARGS_MACHINE_TYPE = 'all';
             }
             const machineFiltered = MACHINES.filter((machine) => {
                 if (machine.type === ARGS_MACHINE_TYPE) {
@@ -1317,6 +1316,10 @@ class DistClusterToolDeploy {
                 ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
                 ' -e WEB_HOST="0.0.0.0"' +
                 ' -e WEB_PORT="8000"' +
+                ` -e API_GET_WORK_PERCENTAGE_COUNT="${process.env.API_GET_WORK_PERCENTAGE_COUNT}"` +
+                ` -e API_UPDATE_VIEWED_PERCENTAGE_COUNT="${process.env.API_UPDATE_VIEWED_PERCENTAGE_COUNT}"` +
+                ` -e API_GET_ACHIEVEMENT_PERCENTAGE_COUNT="${process.env.API_GET_ACHIEVEMENT_PERCENTAGE_COUNT}"` +
+                ` -e API_PLAN_WORK_PERCENTAGE_COUNT="${process.env.API_PLAN_WORK_PERCENTAGE_COUNT}"` +
                 ` -e MAX_WORK_ID="${process.env.MAX_WORK_ID}"` +
                 ` -e RPC_SERVERS="[\\"${Tools.getMachinesByType('service')[0].ip}:16241\\"]"` +
                 ' -e JAEGER_SERVICE_NAME="app.web"' +
