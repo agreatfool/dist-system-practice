@@ -199,6 +199,8 @@ scrape_configs:
     static_configs:
       - targets:
           - "HOST_IP_STORAGE:9150"
+          - "HOST_IP_STORAGE:9151"
+          - "HOST_IP_STORAGE:9152"
     metric_relabel_configs:
       - source_labels: [__name__]
         regex: "(\
