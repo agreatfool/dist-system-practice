@@ -1768,6 +1768,9 @@ class DistClusterToolReport {
 
     private async fileReport() {
         await Tools.execAsync(
+            `cp ${Tools.getBaseDir()}/template/logic_flow.png ${Tools.getBaseDir()}/report/${this.reportId}/images/`
+        );
+        await Tools.execAsync(
             `cp ${Tools.getBaseDir()}/template/topology.png ${Tools.getBaseDir()}/report/${this.reportId}/images/`
         );
 
