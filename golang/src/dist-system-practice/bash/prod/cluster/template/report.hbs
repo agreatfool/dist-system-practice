@@ -130,60 +130,72 @@ OVH BHS (CA):         17.60 MiB/s
 ## 5. 结论
 
 
-## 6. Appendix
-### 6.1 Elasticsearch数据
-**All Web requests**
+## 6. Elasticsearch数据
+### 6.1 All Web requests
 ![](./images/kibana_web.png)
 
-**All Consumer requests**
+### 6.2 All Consumer requests
 ![](./images/kibana_consumer.png)
 
 81 / 1552 = 5.21%；√✗
 
-**GetWork**
+### 6.3 GetWork
 ![](./images/kibana_get_work.png)
 
 704 / 1552 = 45.36%；√✗
 
-**UpdateViewed**
+### 6.4 UpdateViewed
 ![](./images/kibana_update_viewed.png)
 
 364 / 1552 = 23.45%；√✗
 
-**GetAchievement**
+### 6.5 GetAchievement
 ![](./images/kibana_get_achievement.png)
 
 403 / 1552 = 25.96%；√✗
 
-**PlanWork**
+### 6.6 PlanWork
 ![](./images/kibana_plan_work.png)
 
 与Consumer计数匹配；√✗
 
-### 6.2 Jaeger数据
+## 7. Jaeger数据
+### 7.1 GetWork
+![](./images/jaeger_get_work.png)
 
+### 7.2 UpdateViewed
+![](./images/jaeger_update_viewed.png)
 
-## 6.3 Go App Profiling
-### Web
-**Memory HEAP**
+### 7.3 GetAchievement
+![](./images/jaeger_get_achievement.png)
+
+### 7.4 PlanWork
+![](./images/jaeger_plan_work.png)
+
+### 7.5 Consumer
+![](./images/jaeger_consumer.png)
+
+## 8. Go App Profiling
+### 8.1 Web
+#### Memory HEAP
 ![](./images/web_heap.png)
 
-**CPU**
+#### CPU
 ![](./images/web_cpu.png)
 
-### Service
-**Memory HEAP**
+### 8.2 Service
+#### Memory HEAP
 ![](./images/service_heap.png)
 
-**CPU**
+#### CPU
 ![](./images/service_cpu.png)
 
-### Consumer
-**Memory HEAP**
+### 8.3 Consumer
+#### Memory HEAP
 ![](./images/consumer_heap.png)
 
-**CPU**
+#### CPU
 ![](./images/consumer_cpu.png)
 
-## 6.4 监控指标
+## 9. 监控指标
 {{{monitoring}}}
