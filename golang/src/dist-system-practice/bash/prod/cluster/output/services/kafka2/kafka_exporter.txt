@@ -3,4 +3,4 @@ IP:
 COMMAND:
 docker run -d --name kafka_exporter --log-driver json-file --log-opt max-size=1G --network kafka2 -p 9308:9308 danielqsj/kafka-exporter:v1.2.0 --web.listen-address=0.0.0.0:9308 --web.telemetry-path=/metrics --log.level=info --topic.filter=.* --group.filter=.* --kafka.server=45.79.97.104:9092 --kafka.server=45.79.97.104:9192 --kafka.server=104.237.157.138:9292 --kafka.server=104.237.157.138:9392
 
-37f9e7f71559591c54b7054f8ec2cc4df676e71b795127446b17ae036a186e47
+c03c2c2f199caa615f0e37a95eb27e16c88fb144b357e986da7871a8d22a0aec

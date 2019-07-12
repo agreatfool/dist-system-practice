@@ -3,4 +3,4 @@ IP:
 COMMAND:
 docker run -d --name mysqld_exporter --log-driver json-file --log-opt max-size=1G --network storage -p 9104:9104 -e DATA_SOURCE_NAME="root:35OKc0F0EvIfXq6P@tcp(mysqld:3306)/dist?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true&loc=Local" prom/mysqld-exporter:v0.11.0 --collect.binlog_size --collect.info_schema.processlist --collect.info_schema.innodb_cmp --collect.info_schema.innodb_cmpmem --collect.engine_innodb_status --collect.info_schema.innodb_metrics --collect.info_schema.innodb_tablespaces --collect.perf_schema.eventsstatements --collect.perf_schema.eventswaits --collect.perf_schema.file_events --collect.perf_schema.file_instances --collect.perf_schema.indexiowaits --collect.perf_schema.tablelocks --collect.perf_schema.tableiowaits
 
-dc04581d4375848fa7891a5a2b7353cf408f442ddf9b0284cb5ec192860d9cef
+77937f68172d9fec167cd10928a1aab8bd3db4b2257d605306b35f94d44c42c2

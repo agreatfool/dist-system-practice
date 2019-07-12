@@ -3,5 +3,5 @@ IP:
 COMMAND:
 docker network create storage && docker run -d --name cadvisor_storage --log-driver json-file --log-opt max-size=1G --network storage -p 8080:8080 -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro -v /var/lib/docker/:/var/lib/docker:ro google/cadvisor:v0.33.0 --listen_ip=0.0.0.0 --port=8080
 
-ee56a1621254a9d955de4d0b8c01ddee7bf79d912a16ed79f5fcd63eb9bda089
-b956815db856a80cccc67c7acbd141a1cffb9f466babed9f8920fac1681338bf
+d7a061d4309a648e65326a8b557edc44136edfe6140a32c3504215b800f4a7cd
+7340d1c45490406f3c6596e2732ee17aa4495b0b193b67ff4d478241f91cb9e9

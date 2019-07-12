@@ -3,5 +3,5 @@ IP:
 COMMAND:
 docker network create kafka1 && docker run -d --name cadvisor_kafka_1 --log-driver json-file --log-opt max-size=1G --network kafka1 -p 8080:8080 -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro -v /var/lib/docker/:/var/lib/docker:ro google/cadvisor:v0.33.0 --listen_ip=0.0.0.0 --port=8080
 
-72f1f88ee445ed14ab29d2ada1406be3d04e48d078634ce1e384e8f556a2741f
-7a4c6b9db9bddf2851636d248c40c12f2e09893c2ab120801905ed16bb1e236e
+3e3e69f8318873c7cada6e1a3ee17ef9d5b2736c582199b8cd07e912d9ef4b64
+a6d084a05d48584721dc8e6686578d73a2623cc22a0eae819b328e7cc58626da

@@ -5,4 +5,4 @@ docker volume create kafka_data_3 && docker volume create kafka_home_3 && docker
 
 kafka_data_3
 kafka_home_3
-7a6775094c648363300773040115b382e43a950be13cc380be1b9cdc85b243d5
+8a88a9788f34d7633baa060aa2e51ff5661b959a8abf82f525dbffb82fcf3544

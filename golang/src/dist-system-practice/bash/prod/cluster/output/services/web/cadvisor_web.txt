@@ -3,5 +3,5 @@ IP:
 COMMAND:
 docker network create web && docker run -d --name cadvisor_web --log-driver json-file --log-opt max-size=1G --network web -p 8080:8080 -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro -v /var/lib/docker/:/var/lib/docker:ro google/cadvisor:v0.33.0 --listen_ip=0.0.0.0 --port=8080
 
-66db7610ae401b6db2638b8f3a03ce7fcf9817fab2ae61aa650243824065b0c5
-f3034d17ed437c6723688b2541c7800a1bbc2bd9fd621afba5574ff9f039870f
+de4b96cec8a8d72280ba602b979a2a7f9d99f1091a82a5c90a4c5222dd919c1b
+0a6edbf296280f61c53862c935262336721881354212f192d0028d37b3ed65f3

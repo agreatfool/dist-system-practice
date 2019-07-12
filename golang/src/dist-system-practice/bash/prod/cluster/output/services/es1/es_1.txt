@@ -5,4 +5,4 @@ docker volume create es_data_1 && docker volume create es_logs_1 && docker run -
 
 es_data_1
 es_logs_1
-0413a150648ce9c436302a81fc504e48ecb61c1823ac51fe3ab137b76b9c213e
+26d026a4029fc518bbbeee7fd8613fa9068bf687125d6b3df054364f941b0d23

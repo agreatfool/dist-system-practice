@@ -1,0 +1,6 @@
+IP:
+23.239.4.110
+COMMAND:
+docker run -d --name memcached_1 --log-driver json-file --log-opt max-size=1G --network storage -p 11211:11211 memcached:1.5.14-alpine -l 0.0.0.0 -p 11211 -c 10240 -m 3072
+
+c8011ef70fcf9c114acb18a83140bd66ad2a090c35b8e64c925bfac1147d0c89

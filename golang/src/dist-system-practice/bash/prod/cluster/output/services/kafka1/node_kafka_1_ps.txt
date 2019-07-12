@@ -3,6 +3,6 @@ IP:
 COMMAND:
 ps aux|grep node_exporter
 
-root     18452  1.0  0.0 115096 10300 ?        Sl   06:56   0:00 ./node_exporter/node_exporter
-root     18539  0.0  0.0  12884  3172 ?        Ss   06:56   0:00 bash -c ps aux|grep node_exporter
-root     18541  0.0  0.0  14428  1108 ?        S    06:56   0:00 grep node_exporter
+root     31112  0.0  0.0 113688 10132 ?        Sl   08:44   0:00 ./node_exporter/node_exporter
+root     31200  0.0  0.0  12884  3192 ?        Ss   08:44   0:00 bash -c ps aux|grep node_exporter
+root     31202  0.0  0.0  14428  1092 ?        S    08:44   0:00 grep node_exporter

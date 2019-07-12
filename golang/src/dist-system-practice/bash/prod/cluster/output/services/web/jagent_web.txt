@@ -3,4 +3,4 @@ IP:
 COMMAND:
 docker run -d --name jagent_web --log-driver json-file --log-opt max-size=1G --network web -p 6832:6832 -p 6831:6831 -p 5778:5778 jaegertracing/jaeger-agent:1.11.0 --reporter.grpc.host-port=74.207.241.245:14250,74.207.241.245:14251 --reporter.type=grpc --processor.jaeger-binary.server-host-port=0.0.0.0:6832 --processor.jaeger-compact.server-host-port=0.0.0.0:6831 --http-server.host-port=0.0.0.0:5778 --metrics-backend=prometheus --metrics-http-route=/metrics --log-level=info
 
-f0688b57a6e49c24b67cec0bc1ae262bd9ba25bf6328a948c338bae8a65b35e1
+b847ae2e90c6e72c23a5dbcead4ec10c50e9d682ae4d5969928519014f8019a9

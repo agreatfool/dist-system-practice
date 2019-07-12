@@ -3,5 +3,5 @@ IP:
 COMMAND:
 docker network create monitor && docker run -d --name cadvisor_monitor --log-driver json-file --log-opt max-size=1G --network monitor -p 8080:8080 -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro -v /var/lib/docker/:/var/lib/docker:ro google/cadvisor:v0.33.0 --listen_ip=0.0.0.0 --port=8080
 
-9cb34e3dbdb765496b49e17fdd7edeca280add75c08619d1dc72d4b8e1f3413a
-fd2cf641b1ea8f4bcd4c95d8edb76fcc58d9cf815bd474ecbc4e3db06d8687af
+a5bc73f33287138023ebf4fb37e8c5090ea8ef10a33d0a38802405e9dd4ce55f
+704383bd323e82213a407c0d7f563b0e4c4f941e038df281baef1b6ffecff54f

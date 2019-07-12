@@ -3,4 +3,4 @@ IP:
 COMMAND:
 docker run -d --name jquery --log-driver json-file --log-opt max-size=1G --network monitor -p 16686:16686 -e SPAN_STORAGE_TYPE=cassandra jaegertracing/jaeger-query:1.11.0 --query.port=16686 --cassandra.servers=74.207.241.245 --cassandra.keyspace=jaeger_keyspace --metrics-backend=prometheus --metrics-http-route=/metrics --log-level=info
 
-f057995e3d1b5ba25eb53a88338785096cd4d3d410fd3dfe4ba8c27dda26efcd
+d878782db0ea716b29bfaf96fe652cdbaff8e69fb99f7c1b1a2c8eae43ba82b8

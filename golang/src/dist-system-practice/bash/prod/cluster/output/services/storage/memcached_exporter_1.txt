@@ -1,0 +1,6 @@
+IP:
+23.239.4.110
+COMMAND:
+docker run -d --name memcached_exporter_1 --log-driver json-file --log-opt max-size=1G --network storage -p 9150:9150 prom/memcached-exporter:v0.5.0 --memcached.address=memcached_1:11211
+
+672b316a8fd72acdb87d4b864eba3ded4802c4d9c781876d4b9e1bc808ec47e7

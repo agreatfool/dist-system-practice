@@ -4,4 +4,4 @@ COMMAND:
 docker volume create mysqld_data && docker run -d --name mysqld --log-driver json-file --log-opt max-size=1G --ulimit nproc=65535 --ulimit nofile=65535:65535 --ulimit memlock=-1:-1 --network storage -p 3306:3306 -v /tmp/schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql -v /tmp/storage_mysqld_init.sql:/docker-entrypoint-initdb.d/storage_mysqld_init.sql -v mysqld_data:/var/lib/mysql -e MYSQL_DATABASE="dist" -e MYSQL_ROOT_PASSWORD="35OKc0F0EvIfXq6P" mysql:5.7.26 --bind-address=0.0.0.0 --max-connections=1000 --max-allowed-packet=33554432
 
 mysqld_data
-88e8126109f996d71c56a0b1e30818310b8ad502771fcc05c40de2c5262cc424
+9fa3a789c275760f680e93001325220ef699920ea1b12f54f792450913abb908

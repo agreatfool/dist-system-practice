@@ -5,4 +5,4 @@ docker volume create kafka_data_1 && docker volume create kafka_home_1 && docker
 
 kafka_data_1
 kafka_home_1
-f731ef12e02b97f92b004068b5a821f936eb5f38bcc11d92870103fc0aa952e0
+8a2c572156c43a2337b7cb30124f5922a3f2ba41cd03481c7ff22d6ff2093760
