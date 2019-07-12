@@ -1,0 +1,10 @@
+NAME      ACTIVE   DRIVER    STATE     URL                          SWARM   DOCKER     ERRORS
+client    -        generic   Running   tcp://173.255.252.62:2376            v18.09.7   
+es1       -        generic   Running   tcp://50.116.11.242:2376             v18.09.7   
+es2       -        generic   Running   tcp://192.81.135.195:2376            v18.09.7   
+kafka1    -        generic   Running   tcp://45.79.97.104:2376              v18.09.7   
+kafka2    -        generic   Running   tcp://104.237.157.138:2376           v18.09.7   
+monitor   -        generic   Running   tcp://74.207.241.245:2376            v18.09.7   
+service   -        generic   Running   tcp://45.79.103.237:2376             v18.09.7   
+storage   -        generic   Running   tcp://23.239.4.110:2376              v18.09.7   
+web       -        generic   Running   tcp://173.255.211.188:2376           v18.09.7   
