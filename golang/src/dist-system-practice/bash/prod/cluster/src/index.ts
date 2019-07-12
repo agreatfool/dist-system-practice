@@ -1638,8 +1638,11 @@ class DistClusterToolReport {
 
     //noinspection JSUnusedLocalSymbols
     private async captureServiceMemcached(machine: Machine, service: Service, config: ReportConfig) {
+        const id = Number.parseInt(service.name.split('_')[1]); // memcached_1 => [memcached, 1] => 1
+        const port = 9150 + (id - 1); // 9150、9151、9152、...
+
         const params = Object.assign(config.params, {
-            "var-node": `${machine.ip}:9150`
+            "var-node": `${machine.ip}:${port}`
         });
 
         for (let panel of config.panels) {
