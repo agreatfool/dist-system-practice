@@ -2,18 +2,184 @@
 
 [toc]
 
-## 服务器拓扑
-![](./images/topology.jpg)
+## 1. 测试硬件
+```
+$ wget -qO- bench.sh | bash
 
-## 测试变量
+----------------------------------------------------------------------
+CPU model            : AMD EPYC 7601 32-Core Processor
+Number of cores      : 6
+CPU frequency        : 2199.996 MHz
+Total size of Disk   : 315.0 GB (2.2 GB Used)
+Total amount of Mem  : 16040 MB (120 MB Used)
+Total amount of Swap : 511 MB (0 MB Used)
+System uptime        : 0 days, 0 hour 2 min
+Load average         : 0.29, 0.22, 0.09
+OS                   : Ubuntu 18.04.2 LTS
+Arch                 : x86_64 (64 Bit)
+Kernel               : 4.15.0-50-generic
+----------------------------------------------------------------------
+I/O speed(1st run)   : 892 MB/s
+I/O speed(2nd run)   : 1.1 GB/s
+I/O speed(3rd run)   : 1.0 GB/s
+Average I/O speed    : 1014.1 MB/s
+----------------------------------------------------------------------
+Node Name                       IPv4 address            Download Speed
+CacheFly                        205.234.175.175         144MB/s
+Linode, Tokyo, JP               106.187.96.148          20.7MB/s
+Linode, Singapore, SG           139.162.23.4            6.48MB/s
+Linode, London, UK              176.58.107.39           9.71MB/s
+Linode, Frankfurt, DE           139.162.130.8           15.4MB/s
+Linode, Fremont, CA             50.116.14.9             205MB/s
+Softlayer, Dallas, TX           173.192.68.18           44.9MB/s
+Softlayer, Seattle, WA          67.228.112.250          44.8MB/s
+Softlayer, Frankfurt, DE        159.122.69.4            4.92MB/s
+Softlayer, Singapore, SG        119.81.28.170           8.21MB/s
+Softlayer, HongKong, CN         119.81.130.170          10.4MB/s
+----------------------------------------------------------------------
+Node Name                       IPv6 address            Download Speed
+Linode, Atlanta, GA             2600:3c02::4b           39.3MB/s
+Linode, Dallas, TX              2600:3c00::4b           28.9MB/s
+Linode, Newark, NJ              2600:3c03::4b           18.3MB/s
+Linode, Singapore, SG           2400:8901::4b           5.36MB/s
+Linode, Tokyo, JP               2400:8900::4b           20.5MB/s
+Softlayer, San Jose, CA         2607:f0d0:2601:2a::4    95.4MB/s
+...
+----------------------------------------------------------------------
+```
+
+```
+$ (curl -s wget.racing/nench.sh | bash) 2>&1 | tee nench.log
+
+-------------------------------------------------
+nench.sh v2019.06.29 -- https://git.io/nench.sh
+benchmark timestamp:    2019-07-12 05:48:17 UTC
+-------------------------------------------------
+
+Processor:    AMD EPYC 7601 32-Core Processor
+CPU cores:    6
+Frequency:    2199.996 MHz
+RAM:          15G
+Swap:         511M
+Kernel:       Linux 4.15.0-50-generic x86_64
+
+Disks:
+sda  319.5G  HDD
+sdb    512M  HDD
+
+CPU: SHA256-hashing 500 MB
+2.962 seconds
+CPU: bzip2-compressing 500 MB
+6.310 seconds
+CPU: AES-encrypting 500 MB
+1.362 seconds
+
+ioping: seek rate
+min/avg/max/mdev = 62.2 us / 112.5 us / 2.94 ms / 75.5 us
+ioping: sequential read speed
+generated 16.5 k requests in 5.00 s, 4.03 GiB, 3.30 k iops, 824.3 MiB/s
+
+dd: sequential write speed
+1st run:    855.45 MiB/s
+2nd run:    1049.04 MiB/s
+3rd run:    1049.04 MiB/s
+average:    984.51 MiB/s
+
+IPv4 speedtests
+your IPv4:    173.255.252.xxxx
+
+Cachefly CDN:         175.13 MiB/s
+Leaseweb (NL):        13.85 MiB/s
+Softlayer DAL (US):   38.74 MiB/s
+Online.net (FR):      11.06 MiB/s
+OVH BHS (CA):         16.75 MiB/s
+
+IPv6 speedtests
+your IPv6:    2600:3c01::xxxx
+
+Leaseweb (NL):        7.77 MiB/s
+Softlayer DAL (US):   0.00 MiB/s
+Online.net (FR):      8.44 MiB/s
+OVH BHS (CA):         17.60 MiB/s
+-------------------------------------------------
+```
+
+## 2. 服务器拓扑
+![](./images/topology.png)
+
+## 3. 测试变量
 
 * 客户端并发数：
 * 客户端请求速率：
-* Elasticsearch JVM：
-* 数据库单表量级：
+* 数据库表量级：
+* 数据库连接：
+* Kafka Topic的分片数量：
+* 各服务的JVM设置：
+    *
 * 消费者计算因子：
 
-## 监控指标
-{{{monitoring}}}
+## 4. 压测客户端报表
+```
 
-## 结论
+```
+
+## 5. 结论
+
+
+## 6. Appendix
+### 6.1 Elasticsearch数据
+**All Web requests**
+![](./images/kibana_web.png)
+
+**All Consumer requests**
+![](./images/kibana_consumer.png)
+
+81 / 1552 = 5.21%；√✗
+
+**GetWork**
+![](./images/kibana_get_work.png)
+
+704 / 1552 = 45.36%；√✗
+
+**UpdateViewed**
+![](./images/kibana_update_viewed.png)
+
+364 / 1552 = 23.45%；√✗
+
+**GetAchievement**
+![](./images/kibana_get_achievement.png)
+
+403 / 1552 = 25.96%；√✗
+
+**PlanWork**
+![](./images/kibana_plan_work.png)
+
+与Consumer计数匹配；√✗
+
+### 6.2 Jaeger数据
+
+
+## 6.3 Go App Profiling
+### Web
+**Memory HEAP**
+![](./images/web_heap.png)
+
+**CPU**
+![](./images/web_cpu.png)
+
+### Service
+**Memory HEAP**
+![](./images/service_heap.png)
+
+**CPU**
+![](./images/service_cpu.png)
+
+### Consumer
+**Memory HEAP**
+![](./images/consumer_heap.png)
+
+**CPU**
+![](./images/consumer_cpu.png)
+
+## 6.4 监控指标
+{{{monitoring}}}
