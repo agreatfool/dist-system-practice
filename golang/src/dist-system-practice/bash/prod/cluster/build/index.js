@@ -44,8 +44,12 @@ const MACHINES = [
             { "name": "cadvisor_storage", "type": "cadvisor", "image": "google/cadvisor:v0.33.0" },
             { "name": "mysqld", "type": "mysqld", "image": "mysql:5.7.26" },
             { "name": "mysqld_exporter", "type": "mysqld_exporter", "image": "prom/mysqld-exporter:v0.11.0" },
-            { "name": "memcached", "type": "memcached", "image": "memcached:1.5.14-alpine" },
-            { "name": "memcached_exporter", "type": "memcached_exporter", "image": "prom/memcached-exporter:v0.5.0" }
+            { "name": "memcached_1", "type": "memcached", "image": "memcached:1.5.14-alpine" },
+            { "name": "memcached_2", "type": "memcached", "image": "memcached:1.5.14-alpine" },
+            { "name": "memcached_3", "type": "memcached", "image": "memcached:1.5.14-alpine" },
+            { "name": "memcached_exporter_1", "type": "memcached_exporter", "image": "prom/memcached-exporter:v0.5.0" },
+            { "name": "memcached_exporter_2", "type": "memcached_exporter", "image": "prom/memcached-exporter:v0.5.0" },
+            { "name": "memcached_exporter_3", "type": "memcached_exporter", "image": "prom/memcached-exporter:v0.5.0" }
         ],
     },
     {
@@ -876,13 +880,16 @@ class DistClusterToolDeploy {
     //noinspection JSUnusedLocalSymbols
     deployServiceMemcached(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
+            const id = Number.parseInt(service.name.split('_')[1]); // memcached_1 => [memcached, 1] => 1
+            const port = 11211 + (id - 1); // 11211、11212、11213、...
             const initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
-                ' -p 11211:11211' +
+                ` -p ${port}:11211` +
                 ` ${service.image}` +
                 ' -l 0.0.0.0' +
                 ' -p 11211' +
+                ' -c 10240' + // max connections
                 ` -m ${process.env.MEMCACHED_MEM}`;
             yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
@@ -890,12 +897,14 @@ class DistClusterToolDeploy {
     //noinspection JSUnusedLocalSymbols
     deployServiceMemcachedExporter(machine, service) {
         return __awaiter(this, void 0, void 0, function* () {
+            const id = Number.parseInt(service.name.split('_')[2]); // memcached_exporter_1 => [memcached, exporter, 1] => 1
+            const port = 9150 + (id - 1); // 9150、9151、9152、...
             const initCommand = `docker run -d --name ${service.name}` +
                 ' --log-driver json-file --log-opt max-size=1G' +
                 ` --network ${machine.name}` +
-                ' -p 9150:9150' +
+                ` -p ${port}:9150` +
                 ` ${service.image}` +
-                ' --memcached.address=memcached:11211';
+                ` --memcached.address=memcached_${id}:11211`;
             yield Tools.execSSH(machine.ip, initCommand, `services/${machine.name}/${service.name}`);
         });
     }
@@ -1346,7 +1355,7 @@ class DistClusterToolDeploy {
                 ' -v /tmp/logs:/app/logs' +
                 ' -e APP_NAME="app.service"' +
                 ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
-                ` -e CACHE_SERVERS="[\\"${storageIp}:11211\\"]"` +
+                ` -e CACHE_SERVERS="[\\"${Tools.getMemcachedNodes().join('\\",\\"')}\\"]"` +
                 ` -e DB_HOST="${storageIp}"` +
                 ' -e DB_PORT="3306"' +
                 ` -e DB_USER="${process.env.MYSQL_USER}"` +
@@ -1386,7 +1395,7 @@ class DistClusterToolDeploy {
                 ' -v /tmp/logs:/app/logs' +
                 ' -e APP_NAME="app.consumer"' +
                 ' -e LOGGER_CONF_PATH="/app/logger.yaml"' +
-                ` -e CACHE_SERVERS="[\\"${storageIp}:11211\\"]"` +
+                ` -e CACHE_SERVERS="[\\"${Tools.getMemcachedNodes().join('\\",\\"')}\\"]"` +
                 ` -e DB_HOST="${storageIp}"` +
                 ' -e DB_PORT="3306"' +
                 ` -e DB_USER="${process.env.MYSQL_USER}"` +
@@ -1836,6 +1845,17 @@ class Tools {
     }
     static getGrafanaAddress() {
         return `${Tools.getMachinesByType('monitor')[0].ip}:3000`;
+    }
+    static getMemcachedNodes() {
+        const nodes = [];
+        const storageMachine = Tools.getMachinesByType('storage')[0];
+        const memcachedServices = Tools.getServicesByType('memcached');
+        memcachedServices.forEach((svc) => {
+            const id = Number.parseInt(svc.name.split('_')[1]); // memcached_1 => [memcached, 1] => 1
+            const port = 11211 + (id - 1); // 11211、11212、11213、...
+            nodes.push(`${storageMachine.ip}:${port}`);
+        });
+        return nodes;
     }
     static execSSH(ip, command, output) {
         return __awaiter(this, void 0, void 0, function* () {
