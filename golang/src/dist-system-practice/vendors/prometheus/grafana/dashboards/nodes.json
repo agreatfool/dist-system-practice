@@ -16,7 +16,8 @@
   "editable": true,
   "gnetId": 8919,
   "graphTooltip": 0,
-  "iteration": 1562141964987,
+  "id": 12,
+  "iteration": 1562946515634,
   "links": [
     {
       "icon": "external link",
@@ -91,7 +92,7 @@
         "h": 5,
         "w": 2,
         "x": 0,
-        "y": 5
+        "y": 1
       },
       "hideTimeOverride": true,
       "id": 15,
@@ -141,7 +142,7 @@
         }
       ],
       "thresholds": "1,2",
-      "title": "系统运行时间",
+      "title": "System Up Time",
       "type": "singlestat",
       "valueFontSize": "100%",
       "valueMaps": [
@@ -177,7 +178,7 @@
         "h": 2,
         "w": 2,
         "x": 2,
-        "y": 5
+        "y": 1
       },
       "id": 14,
       "interval": null,
@@ -227,7 +228,7 @@
         }
       ],
       "thresholds": "1,2",
-      "title": "CPU 核数",
+      "title": "CPU Core",
       "type": "singlestat",
       "valueFontSize": "100%",
       "valueMaps": [
@@ -263,7 +264,7 @@
         "h": 5,
         "w": 3,
         "x": 4,
-        "y": 5
+        "y": 1
       },
       "id": 167,
       "interval": null,
@@ -314,7 +315,7 @@
         }
       ],
       "thresholds": "50,80",
-      "title": "CPU使用率（5m）",
+      "title": "CPU Usage 5m",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -350,7 +351,7 @@
         "h": 5,
         "w": 3,
         "x": 7,
-        "y": 5
+        "y": 1
       },
       "id": 20,
       "interval": null,
@@ -401,7 +402,7 @@
         }
       ],
       "thresholds": "20,50",
-      "title": "CPU iowait（5m）",
+      "title": "CPU iowait 5m",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -437,7 +438,7 @@
         "h": 5,
         "w": 3,
         "x": 10,
-        "y": 5
+        "y": 1
       },
       "hideTimeOverride": false,
       "id": 172,
@@ -488,7 +489,7 @@
         }
       ],
       "thresholds": "80,90",
-      "title": "内存使用率",
+      "title": "Memory Usage",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [],
@@ -520,7 +521,7 @@
         "h": 5,
         "w": 3,
         "x": 13,
-        "y": 5
+        "y": 1
       },
       "hideTimeOverride": false,
       "id": 16,
@@ -570,7 +571,7 @@
         }
       ],
       "thresholds": "7000,9000",
-      "title": "当前打开的文件描述符",
+      "title": "Open Files",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [],
@@ -600,7 +601,7 @@
         "h": 5,
         "w": 4,
         "x": 16,
-        "y": 5
+        "y": 1
       },
       "id": 166,
       "interval": null,
@@ -650,7 +651,7 @@
         }
       ],
       "thresholds": "70,90",
-      "title": "根分区使用率",
+      "title": "Root Fs Usage",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -686,7 +687,7 @@
         "h": 5,
         "w": 4,
         "x": 20,
-        "y": 5
+        "y": 1
       },
       "id": 154,
       "interval": null,
@@ -773,7 +774,7 @@
         "h": 3,
         "w": 2,
         "x": 2,
-        "y": 7
+        "y": 3
       },
       "id": 75,
       "interval": null,
@@ -823,7 +824,7 @@
         }
       ],
       "thresholds": "2,3",
-      "title": "内存总量",
+      "title": "Total Memory",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -853,7 +854,7 @@
         "h": 6,
         "w": 11,
         "x": 0,
-        "y": 10
+        "y": 6
       },
       "height": "300",
       "id": 13,
@@ -920,7 +921,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "系统平均负载",
+      "title": "Load Average",
       "tooltip": {
         "msResolution": false,
         "shared": true,
@@ -976,7 +977,7 @@
         "h": 6,
         "w": 5,
         "x": 11,
-        "y": 10
+        "y": 6
       },
       "hideTimeOverride": false,
       "id": 171,
@@ -1006,7 +1007,7 @@
           "refId": "A"
         }
       ],
-      "title": "磁盘总空间",
+      "title": "Total Disk Space",
       "type": "grafana-piechart-panel",
       "valueName": "current"
     },
@@ -1018,7 +1019,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 10
+        "y": 6
       },
       "id": 164,
       "links": [],
@@ -1037,7 +1038,7 @@
           "type": "hidden"
         },
         {
-          "alias": "分区",
+          "alias": "Mount",
           "colorMode": null,
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -1055,7 +1056,7 @@
           "unit": "bytes"
         },
         {
-          "alias": "可用空间",
+          "alias": "Available",
           "colorMode": "value",
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1074,7 +1075,7 @@
           "unit": "bytes"
         },
         {
-          "alias": "使用率",
+          "alias": "Usage",
           "colorMode": "cell",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -1093,7 +1094,7 @@
           "unit": "percentunit"
         },
         {
-          "alias": "总空间",
+          "alias": "Total Space",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1110,7 +1111,7 @@
           "unit": "bytes"
         },
         {
-          "alias": "文件系统",
+          "alias": "File System",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1198,7 +1199,7 @@
           "refId": "D"
         }
       ],
-      "title": "各分区可用空间",
+      "title": "Volumes Available",
       "transform": "table",
       "type": "table"
     },
@@ -1228,7 +1229,7 @@
         "h": 7,
         "w": 16,
         "x": 0,
-        "y": 16
+        "y": 12
       },
       "id": 7,
       "legend": {
@@ -1304,7 +1305,7 @@
           "expr": "irate(node_disk_io_time_seconds_total{instance=~\"$node\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}_{{device}}_每秒I/O操作%",
+          "legendFormat": "{{instance}}_{{device}}_IOps%",
           "refId": "C"
         }
       ],
@@ -1312,7 +1313,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "CPU使用率、磁盘每秒的I/O操作耗费时间（%）",
+      "title": "CPU Usage, Disk IO Time/s (%)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1370,7 +1371,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 16
+        "y": 12
       },
       "height": "300",
       "id": 156,
@@ -1406,7 +1407,7 @@
           "hide": false,
           "instant": false,
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_总内存",
+          "legendFormat": "{{instance}}_Total",
           "refId": "A",
           "step": 4
         },
@@ -1415,7 +1416,7 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_已用",
+          "legendFormat": "{{instance}}_Used",
           "refId": "B",
           "step": 4
         },
@@ -1452,7 +1453,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_可用",
+          "legendFormat": "{{instance}}_Available",
           "refId": "F",
           "step": 4
         },
@@ -1468,7 +1469,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "内存信息",
+      "title": "Memory Info",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1519,7 +1520,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 23
+        "y": 19
       },
       "height": "300",
       "id": 161,
@@ -1561,7 +1562,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_{{device}}_读取",
+          "legendFormat": "{{instance}}_{{device}}_Read",
           "refId": "A",
           "step": 10
         },
@@ -1570,7 +1571,7 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_{{device}}_写入",
+          "legendFormat": "{{instance}}_{{device}}_Write",
           "refId": "B",
           "step": 10
         },
@@ -1588,7 +1589,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "磁盘读写速率（IOPS）",
+      "title": "Disk IO Rate (IOPS)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1640,7 +1641,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 23
+        "y": 19
       },
       "height": "300",
       "id": 168,
@@ -1679,7 +1680,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_{{device}}_读取",
+          "legendFormat": "{{instance}}_{{device}}_Read",
           "refId": "A",
           "step": 10
         },
@@ -1688,7 +1689,7 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_{{device}}_写入",
+          "legendFormat": "{{instance}}_{{device}}_Write",
           "refId": "B",
           "step": 10
         }
@@ -1697,7 +1698,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "磁盘读写容量大小",
+      "title": "Disk IO Amount",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1749,7 +1750,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 23
+        "y": 19
       },
       "height": "300",
       "id": 160,
@@ -1807,7 +1808,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}_{{device}}_读取",
+          "legendFormat": "{{instance}}_{{device}}_Read",
           "refId": "B"
         },
         {
@@ -1815,7 +1816,7 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{instance}}_{{device}}_写入",
+          "legendFormat": "{{instance}}_{{device}}_Write",
           "refId": "C"
         }
       ],
@@ -1823,7 +1824,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "磁盘IO读写时间",
+      "title": "Disk IO Time",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1871,7 +1872,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 31
+        "y": 27
       },
       "height": "300",
       "id": 157,
@@ -1912,7 +1913,7 @@
           "expr": "irate(node_network_receive_bytes_total{instance=~'$node',device!~'tap.*|veth.*|br.*|docker.*|virbr*|lo*'}[5m])*8",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_{{device}}_in下载",
+          "legendFormat": "{{instance}}_{{device}}_in(Download)",
           "refId": "A",
           "step": 4
         },
@@ -1920,7 +1921,7 @@
           "expr": "irate(node_network_transmit_bytes_total{instance=~'$node',device!~'tap.*|veth.*|br.*|docker.*|virbr*|lo*'}[5m])*8",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}_{{device}}_out上传",
+          "legendFormat": "{{instance}}_{{device}}_out(Upload)",
           "refId": "B",
           "step": 4
         }
@@ -1929,7 +1930,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "网络流量",
+      "title": "Network Traffic",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1980,7 +1981,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 31
+        "y": 27
       },
       "height": "300",
       "id": 158,
@@ -2059,7 +2060,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "TCP 连接情况",
+      "title": "TCP Connections",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2107,7 +2108,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 35
       },
       "id": 169,
       "legend": {
@@ -2201,7 +2202,6 @@
         "auto_count": 10,
         "auto_min": "10s",
         "current": {
-          "tags": [],
           "text": "30s",
           "value": "30s"
         },
