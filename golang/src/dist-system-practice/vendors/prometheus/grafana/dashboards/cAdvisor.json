@@ -16,7 +16,8 @@
   "editable": true,
   "gnetId": 893,
   "graphTooltip": 1,
-  "iteration": 1562123134456,
+  "id": 19,
+  "iteration": 1562942951487,
   "links": [],
   "panels": [
     {
@@ -2265,21 +2266,20 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "All",
           "value": [
             "$__all"
           ]
         },
         "datasource": "Prometheus",
-        "definition": "label_values(container_cpu_load_average_10s, name)",
+        "definition": "label_values(container_cpu_load_average_10s{instance=~\"$server:8080\"}, name)",
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": true,
         "name": "name",
         "options": [],
-        "query": "label_values(container_cpu_load_average_10s, name)",
+        "query": "label_values(container_cpu_load_average_10s{instance=~\"$server:8080\"}, name)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
