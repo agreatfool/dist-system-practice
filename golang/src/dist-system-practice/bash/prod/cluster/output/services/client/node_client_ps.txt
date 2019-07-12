@@ -1,0 +1,8 @@
+IP:
+173.255.252.62
+COMMAND:
+ps aux|grep node_exporter
+
+root     18462  0.0  0.0 113688 10236 ?        Sl   06:54   0:00 ./node_exporter/node_exporter
+root     18547  0.0  0.0  12884  3236 ?        Ss   06:54   0:00 bash -c ps aux|grep node_exporter
+root     18549  0.0  0.0  14428  1036 ?        S    06:54   0:00 grep node_exporter

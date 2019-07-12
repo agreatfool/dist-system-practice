@@ -1,0 +1,7 @@
+IP:
+74.207.241.245
+COMMAND:
+docker volume create prometheus_vol && docker run -d --name prometheus --log-driver json-file --log-opt max-size=1G --network monitor -p 9090:9090 -v /tmp/prom-master.yaml:/etc/prometheus/prometheus.yml -v prometheus_vol:/prometheus prom/prometheus:v2.8.1 --web.listen-address=0.0.0.0:9090 --config.file=/etc/prometheus/prometheus.yml --log.format=json --log.level=info
+
+prometheus_vol
+60b9e67be4492aa4cc55b7bdefe0fb2d3a6178b594b4db62e0715d4f79b44a88

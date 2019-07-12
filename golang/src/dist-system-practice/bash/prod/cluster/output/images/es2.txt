@@ -1,0 +1,171 @@
+IP:
+192.81.135.195
+COMMAND:
+docker pull prom/node-exporter:v0.18.1 && docker pull google/cadvisor:v0.33.0 && docker pull elasticsearch:7.0.0 && docker pull justwatch/elasticsearch_exporter:1.1.0rc1 && docker images && sudo sysctl -w vm.max_map_count=262144
+
+v0.18.1:
+Pulling from prom/node-exporter
+49a2d53aa1af:
+Pulling fs layer
+3589a6efd9ce:
+Pulling fs layer
+190160031744:
+Pulling fs layer
+3589a6efd9ce:
+Verifying Checksum
+3589a6efd9ce:
+Download complete
+190160031744:
+Verifying Checksum
+190160031744:
+Download complete
+49a2d53aa1af:
+Pull complete
+3589a6efd9ce:
+Pull complete
+190160031744:
+Pull complete
+Digest: sha256:a2f29256e53cc3e0b64d7a472512600b2e9410347d53cdc85b49f659c17e02ee
+Status: Downloaded newer image for prom/node-exporter:v0.18.1
+v0.33.0: Pulling from google/cadvisor
+169185f82c45: Pulling fs layer
+bd29476a29dd: Pulling fs layer
+a2eb18ca776e: Pulling fs layer
+bd29476a29dd: Verifying Checksum
+bd29476a29dd: Download complete
+a2eb18ca776e: Verifying Checksum
+169185f82c45: Verifying Checksum
+169185f82c45: Download complete
+169185f82c45: Pull complete
+bd29476a29dd: Pull complete
+a2eb18ca776e: Pull complete
+Digest: sha256:47f1f8c02a3acfab77e74e2ec7acc0d475adc180ddff428503a4ce63f3d6061b
+Status: Downloaded newer image for google/cadvisor:v0.33.0
+7.0.0: Pulling from library/elasticsearch
+8ba884070f61: Pulling fs layer
+425761a617d6: Pulling fs layer
+797be7ef5799: Pulling fs layer
+dd3f6ae7e22e: Pulling fs layer
+fb7749d38311: Pulling fs layer
+1d98f1b30ec5: Pulling fs layer
+82211323c889: Pulling fs layer
+fb7749d38311: Waiting
+1d98f1b30ec5: Waiting
+dd3f6ae7e22e: Waiting
+797be7ef5799: Verifying Checksum
+797be7ef5799:
+Download complete
+425761a617d6: Verifying Checksum
+425761a617d6: Download complete
+8ba884070f61: Verifying Checksum
+8ba884070f61: Download complete
+fb7749d38311: Download complete
+1d98f1b30ec5: Verifying Checksum
+1d98f1b30ec5: Download complete
+82211323c889: Verifying Checksum
+82211323c889: Download complete
+dd3f6ae7e22e: Verifying Checksum
+dd3f6ae7e22e: Download complete
+8ba884070f61: Pull complete
+425761a617d6:
+Pull complete
+797be7ef5799:
+Pull complete
+dd3f6ae7e22e:
+Pull complete
+fb7749d38311:
+Pull complete
+1d98f1b30ec5:
+Pull complete
+82211323c889:
+Pull complete
+Digest: sha256:90fff516ac229a01b494b21f6b5aaca23bfd425c79fcf8861069098796a7fcb7
+Status: Downloaded newer image for elasticsearch:7.0.0
+1.1.0rc1:
+Pulling from justwatch/elasticsearch_exporter
+f70adabe43c0:
+Pulling fs layer
+b91f96ddd9e3:
+Pulling fs layer
+246638dbb86c:
+Pulling fs layer
+f70adabe43c0: Download complete
+b91f96ddd9e3: Verifying Checksum
+b91f96ddd9e3: Download complete
+f70adabe43c0: Pull complete
+b91f96ddd9e3: Pull complete
+246638dbb86c: Verifying Checksum
+246638dbb86c: Download complete
+246638dbb86c:
+Pull complete
+Digest: sha256:fa8dfb56e08a4159c6db5f7a51fb36e64a5721478fa96b6770f23d7b4626c6d8
+Status: Downloaded newer image for justwatch/elasticsearch_exporter:1.1.0rc1
+REPOSITORY
+
+
+
+
+TAG
+
+
+
+IMAGE ID
+
+
+CREATED
+
+
+SIZE
+
+prom/node-exporter
+
+
+
+v0.18.1
+
+
+e5a616e4b9cf
+
+5 weeks ago
+
+
+22.9MB
+
+elasticsearch
+
+
+
+7.0.0
+
+
+8f46db60ddd6
+
+3 months ago
+
+811MB
+
+google/cadvisor
+
+
+
+v0.33.0
+
+
+752d61707eac
+
+4 months ago
+
+68.6MB
+
+justwatch/elasticsearch_exporter
+
+1.1.0rc1
+
+
+02943b93a701
+
+4 months ago
+
+10.1MB
+
+vm.max_map_count = 262144

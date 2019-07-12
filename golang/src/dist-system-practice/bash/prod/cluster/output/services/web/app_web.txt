@@ -1,0 +1,6 @@
+IP:
+173.255.211.188
+COMMAND:
+docker run -d --name app_web --log-driver json-file --log-opt max-size=1G --network web -p 8000:8000 -v /tmp/logger.yaml:/app/logger.yaml -v /tmp/logs:/app/logs -e APP_NAME="app.web" -e LOGGER_CONF_PATH="/app/logger.yaml" -e WEB_HOST="0.0.0.0" -e WEB_PORT="8000" -e API_GET_WORK_PERCENTAGE_COUNT="4500" -e API_UPDATE_VIEWED_PERCENTAGE_COUNT="2500" -e API_GET_ACHIEVEMENT_PERCENTAGE_COUNT="2500" -e API_PLAN_WORK_PERCENTAGE_COUNT="500" -e MAX_WORK_ID="5000000" -e RPC_SERVERS="[\"45.79.103.237:16241\"]" -e JAEGER_SERVICE_NAME="app.web" -e JAEGER_AGENT_HOST="jagent_web" -e JAEGER_AGENT_PORT="6831" -e JAEGER_REPORTER_LOG_SPANS="true" -e JAEGER_REPORTER_FLUSH_INTERVAL="1s" -e JAEGER_SAMPLER_TYPE="probabilistic" -e JAEGER_SAMPLER_PARAM="0.01" agreatfool/dist_app_web:0.0.2
+
+f79e054ad4550dbda7830a2b598fff2e995801f93a5b85fef47d84ee4a340832

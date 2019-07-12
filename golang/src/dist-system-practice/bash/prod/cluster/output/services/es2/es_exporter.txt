@@ -1,0 +1,6 @@
+IP:
+192.81.135.195
+COMMAND:
+docker run -d --name es_exporter --log-driver json-file --log-opt max-size=1G --network es2 -p 9114:9114 justwatch/elasticsearch_exporter:1.1.0rc1 --web.listen-address=0.0.0.0:9114 --web.telemetry-path=/metrics --es.uri=http://50.116.11.242:9200 --es.all --es.cluster_settings --es.shards --es.indices --es.indices_settings --es.snapshots --log.level=info --log.format=json --log.output=stdout
+
+6b08abd2a803044411a91420b42f2c3896e36a2fc735a2da8b1370cd99614f94

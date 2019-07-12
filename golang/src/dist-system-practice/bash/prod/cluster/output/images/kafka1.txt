@@ -1,0 +1,205 @@
+IP:
+45.79.97.104
+COMMAND:
+docker pull prom/node-exporter:v0.18.1 && docker pull google/cadvisor:v0.33.0 && docker pull wurstmeister/zookeeper:latest && docker pull wurstmeister/kafka:2.12-2.2.0 && docker images && sudo sysctl -w vm.max_map_count=262144
+
+v0.18.1: Pulling from prom/node-exporter
+49a2d53aa1af: Pulling fs layer
+3589a6efd9ce: Pulling fs layer
+190160031744: Pulling fs layer
+49a2d53aa1af: Verifying Checksum
+49a2d53aa1af: Download complete
+3589a6efd9ce: Download complete
+190160031744: Verifying Checksum
+190160031744: Download complete
+49a2d53aa1af: Pull complete
+3589a6efd9ce: Pull complete
+190160031744: Pull complete
+Digest: sha256:a2f29256e53cc3e0b64d7a472512600b2e9410347d53cdc85b49f659c17e02ee
+Status: Downloaded newer image for prom/node-exporter:v0.18.1
+v0.33.0:
+Pulling from google/cadvisor
+169185f82c45:
+Pulling fs layer
+bd29476a29dd:
+Pulling fs layer
+a2eb18ca776e:
+Pulling fs layer
+169185f82c45: Verifying Checksum
+169185f82c45: Download complete
+a2eb18ca776e: Verifying Checksum
+a2eb18ca776e: Download complete
+bd29476a29dd: Verifying Checksum
+bd29476a29dd: Download complete
+169185f82c45: Pull complete
+bd29476a29dd: Pull complete
+a2eb18ca776e: Pull complete
+Digest: sha256:47f1f8c02a3acfab77e74e2ec7acc0d475adc180ddff428503a4ce63f3d6061b
+Status: Downloaded newer image for google/cadvisor:v0.33.0
+latest: Pulling from wurstmeister/zookeeper
+a3ed95caeb02:
+Pulling fs layer
+ef38b711a50f:
+Pulling fs layer
+e057c74597c7:
+Pulling fs layer
+666c214f6385:
+Pulling fs layer
+c3d6a96f1ffc:
+Pulling fs layer
+3fe26a83e0ca:
+Pulling fs layer
+3d3a7dd3a3b1:
+Pulling fs layer
+f8cc938abe5f:
+Pulling fs layer
+9978b75f7a58:
+Pulling fs layer
+4d4dbcc8f8cc:
+Pulling fs layer
+8b130a9baa49:
+Pulling fs layer
+6b9611650a73:
+Pulling fs layer
+5df5aac51927:
+Pulling fs layer
+76eea4448d9b:
+Pulling fs layer
+8b66990876c6:
+Pulling fs layer
+f0dd38204b6f:
+Pulling fs layer
+3fe26a83e0ca:
+Waiting
+f8cc938abe5f:
+Waiting
+9978b75f7a58:
+Waiting
+4d4dbcc8f8cc:
+Waiting
+3d3a7dd3a3b1:
+Waiting
+8b130a9baa49:
+Waiting
+666c214f6385:
+Waiting
+6b9611650a73:
+Waiting
+8b66990876c6:
+Waiting
+5df5aac51927:
+Waiting
+f0dd38204b6f:
+Waiting
+c3d6a96f1ffc:
+Waiting
+76eea4448d9b:
+Waiting
+e057c74597c7:
+Verifying Checksum
+e057c74597c7:
+Download complete
+a3ed95caeb02:
+Verifying Checksum
+a3ed95caeb02:
+Download complete
+a3ed95caeb02:
+Pull complete
+c3d6a96f1ffc:
+Download complete
+666c214f6385:
+Verifying Checksum
+666c214f6385:
+Download complete
+ef38b711a50f:
+Verifying Checksum
+ef38b711a50f:
+Download complete
+3fe26a83e0ca:
+Verifying Checksum
+3fe26a83e0ca:
+Download complete
+f8cc938abe5f:
+Verifying Checksum
+f8cc938abe5f:
+Download complete
+9978b75f7a58:
+Verifying Checksum
+9978b75f7a58:
+Download complete
+4d4dbcc8f8cc:
+Verifying Checksum
+4d4dbcc8f8cc:
+Download complete
+6b9611650a73:
+Verifying Checksum
+6b9611650a73:
+Download complete
+3d3a7dd3a3b1:
+Verifying Checksum
+3d3a7dd3a3b1:
+Download complete
+8b130a9baa49:
+Verifying Checksum
+8b130a9baa49:
+Download complete
+76eea4448d9b: Verifying Checksum
+76eea4448d9b: Download complete
+5df5aac51927: Verifying Checksum
+5df5aac51927: Download complete
+8b66990876c6: Verifying Checksum
+8b66990876c6: Download complete
+f0dd38204b6f: Verifying Checksum
+f0dd38204b6f: Download complete
+ef38b711a50f: Pull complete
+e057c74597c7: Pull complete
+666c214f6385: Pull complete
+c3d6a96f1ffc: Pull complete
+3fe26a83e0ca: Pull complete
+3d3a7dd3a3b1: Pull complete
+f8cc938abe5f: Pull complete
+9978b75f7a58: Pull complete
+4d4dbcc8f8cc: Pull complete
+8b130a9baa49: Pull complete
+6b9611650a73: Pull complete
+5df5aac51927: Pull complete
+76eea4448d9b: Pull complete
+8b66990876c6: Pull complete
+f0dd38204b6f: Pull complete
+Digest: sha256:7a7fd44a72104bfbd24a77844bad5fabc86485b036f988ea927d1780782a6680
+Status: Downloaded newer image for wurstmeister/zookeeper:latest
+2.12-2.2.0: Pulling from wurstmeister/kafka
+bdf0201b3a05: Pulling fs layer
+9e12771959ad: Pulling fs layer
+ae272eb2814b: Pulling fs layer
+a2dae775166f: Pulling fs layer
+4d53f6c7ca48: Pulling fs layer
+aa58da8c41d7: Pulling fs layer
+a2dae775166f: Waiting
+4d53f6c7ca48: Waiting
+aa58da8c41d7: Waiting
+9e12771959ad: Verifying Checksum
+9e12771959ad: Download complete
+bdf0201b3a05: Verifying Checksum
+bdf0201b3a05: Download complete
+bdf0201b3a05: Pull complete
+a2dae775166f: Verifying Checksum
+a2dae775166f: Download complete
+9e12771959ad: Pull complete
+ae272eb2814b: Verifying Checksum
+ae272eb2814b: Download complete
+aa58da8c41d7: Download complete
+4d53f6c7ca48: Verifying Checksum
+4d53f6c7ca48: Download complete
+ae272eb2814b: Pull complete
+a2dae775166f: Pull complete
+4d53f6c7ca48: Pull complete
+aa58da8c41d7: Pull complete
+Digest: sha256:1a70e7311d49a534cd25e72aa9e2d63b141c02b695bf61cd65195483c402367d
+Status: Downloaded newer image for wurstmeister/kafka:2.12-2.2.0
+REPOSITORY               TAG                 IMAGE ID            CREATED             SIZE
+prom/node-exporter       v0.18.1             e5a616e4b9cf        5 weeks ago         22.9MB
+wurstmeister/kafka       2.12-2.2.0          c364cbed5b86        2 months ago        421MB
+google/cadvisor          v0.33.0             752d61707eac        4 months ago        68.6MB
+wurstmeister/zookeeper   latest              3f43f72cb283        5 months ago        510MB
+vm.max_map_count = 262144

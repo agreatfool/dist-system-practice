@@ -1,0 +1,506 @@
+IP:
+74.207.241.245
+COMMAND:
+docker pull prom/node-exporter:v0.18.1 && docker pull google/cadvisor:v0.33.0 && docker pull cassandra:3.11.4 && docker pull jaegertracing/jaeger-cassandra-schema:1.11.0 && docker pull jaegertracing/jaeger-collector:1.11.0 && docker pull jaegertracing/jaeger-query:1.11.0 && docker pull prom/prometheus:v2.8.1 && docker pull grafana/grafana:6.1.3 && docker pull kibana:7.0.0 && docker images && sudo sysctl -w vm.max_map_count=262144
+
+v0.18.1: Pulling from prom/node-exporter
+49a2d53aa1af: Pulling fs layer
+3589a6efd9ce: Pulling fs layer
+190160031744: Pulling fs layer
+49a2d53aa1af: Verifying Checksum
+49a2d53aa1af: Download complete
+3589a6efd9ce: Download complete
+190160031744: Verifying Checksum
+190160031744: Download complete
+49a2d53aa1af: Pull complete
+3589a6efd9ce: Pull complete
+190160031744: Pull complete
+Digest: sha256:a2f29256e53cc3e0b64d7a472512600b2e9410347d53cdc85b49f659c17e02ee
+Status: Downloaded newer image for prom/node-exporter:v0.18.1
+v0.33.0: Pulling from google/cadvisor
+169185f82c45: Pulling fs layer
+bd29476a29dd:
+Pulling fs layer
+a2eb18ca776e: Pulling fs layer
+169185f82c45: Verifying Checksum
+169185f82c45: Download complete
+bd29476a29dd: Verifying Checksum
+bd29476a29dd: Download complete
+a2eb18ca776e: Verifying Checksum
+a2eb18ca776e: Download complete
+169185f82c45: Pull complete
+bd29476a29dd: Pull complete
+a2eb18ca776e: Pull complete
+Digest: sha256:47f1f8c02a3acfab77e74e2ec7acc0d475adc180ddff428503a4ce63f3d6061b
+Status: Downloaded newer image for google/cadvisor:v0.33.0
+3.11.4: Pulling from library/cassandra
+fc7181108d40:
+Pulling fs layer
+5d30a29d1ca7:
+Pulling fs layer
+71b1da59a33e:
+Pulling fs layer
+eef322d59447:
+Pulling fs layer
+1b972645cba8:
+Pulling fs layer
+adcafb3ea5c7:
+Pulling fs layer
+a1f579d537e1:
+Pulling fs layer
+d6d4053ef622:
+Pulling fs layer
+eef322d59447:
+Waiting
+1b972645cba8:
+Waiting
+adcafb3ea5c7:
+Waiting
+a1f579d537e1:
+Waiting
+d6d4053ef622:
+Waiting
+ebe94652798a:
+Pulling fs layer
+0db0a9a149fd:
+Pulling fs layer
+0db0a9a149fd:
+Waiting
+5d30a29d1ca7:
+Verifying Checksum
+5d30a29d1ca7:
+Download complete
+71b1da59a33e:
+Verifying Checksum
+71b1da59a33e:
+Download complete
+fc7181108d40:
+Verifying Checksum
+fc7181108d40:
+Download complete
+eef322d59447:
+Verifying Checksum
+eef322d59447:
+Download complete
+1b972645cba8:
+Verifying Checksum
+1b972645cba8:
+Download complete
+a1f579d537e1:
+Verifying Checksum
+a1f579d537e1:
+Download complete
+d6d4053ef622:
+Verifying Checksum
+d6d4053ef622:
+Download complete
+ebe94652798a:
+Verifying Checksum
+ebe94652798a:
+Download complete
+adcafb3ea5c7:
+Verifying Checksum
+adcafb3ea5c7:
+Download complete
+0db0a9a149fd:
+Verifying Checksum
+0db0a9a149fd:
+Download complete
+fc7181108d40:
+Pull complete
+5d30a29d1ca7:
+Pull complete
+71b1da59a33e:
+Pull complete
+eef322d59447:
+Pull complete
+1b972645cba8:
+Pull complete
+adcafb3ea5c7:
+Pull complete
+a1f579d537e1:
+Pull complete
+d6d4053ef622:
+Pull complete
+ebe94652798a:
+Pull complete
+0db0a9a149fd:
+Pull complete
+Digest: sha256:f2a7e4510f37ae65c6d8aa9409ff94bda6590444c5db1186bd68d88a237e6fd8
+Status: Downloaded newer image for cassandra:3.11.4
+1.11.0: Pulling from jaegertracing/jaeger-cassandra-schema
+f7e2b70d04ae: Pulling fs layer
+d3f191f1b689: Pulling fs layer
+b19a5d39fadd: Pulling fs layer
+2b5f75b71aa5: Pulling fs layer
+a818fde575e2: Pulling fs layer
+27f27d48b09e: Pulling fs layer
+173a08da348c: Pulling fs layer
+2b5f75b71aa5: Waiting
+a818fde575e2: Waiting
+27f27d48b09e: Waiting
+67f1786035df: Pulling fs layer
+2eb7b63413cc: Pulling fs layer
+a11a39dca782:
+Pulling fs layer
+872e75a28c7e:
+Pulling fs layer
+2eb7b63413cc:
+Waiting
+a11a39dca782: Waiting
+67f1786035df: Waiting
+872e75a28c7e: Waiting
+173a08da348c: Waiting
+f7e2b70d04ae: Verifying Checksum
+f7e2b70d04ae: Download complete
+d3f191f1b689: Download complete
+b19a5d39fadd: Verifying Checksum
+b19a5d39fadd: Download complete
+2b5f75b71aa5: Verifying Checksum
+2b5f75b71aa5: Download complete
+a818fde575e2: Verifying Checksum
+a818fde575e2: Download complete
+173a08da348c: Verifying Checksum
+173a08da348c: Download complete
+f7e2b70d04ae: Pull complete
+67f1786035df: Download complete
+d3f191f1b689: Pull complete
+2eb7b63413cc: Verifying Checksum
+2eb7b63413cc: Download complete
+b19a5d39fadd: Pull complete
+a11a39dca782: Verifying Checksum
+a11a39dca782: Download complete
+2b5f75b71aa5: Pull complete
+a818fde575e2: Pull complete
+872e75a28c7e: Verifying Checksum
+872e75a28c7e: Download complete
+27f27d48b09e: Verifying Checksum
+27f27d48b09e: Download complete
+27f27d48b09e: Pull complete
+173a08da348c: Pull complete
+67f1786035df: Pull complete
+2eb7b63413cc: Pull complete
+a11a39dca782: Pull complete
+872e75a28c7e: Pull complete
+Digest: sha256:09c7797d4d2a294bcd16aee16c850e4e33fd962e09d973791ff5493a88e44873
+Status: Downloaded newer image for jaegertracing/jaeger-cassandra-schema:1.11.0
+1.11.0: Pulling from jaegertracing/jaeger-collector
+d767b5711f06: Pulling fs layer
+6273ea479bfa: Pulling fs layer
+d767b5711f06:
+Download complete
+d767b5711f06:
+Pull complete
+6273ea479bfa:
+Verifying Checksum
+6273ea479bfa:
+Download complete
+6273ea479bfa:
+Pull complete
+Digest: sha256:0b6d28bb52410f7b50c0f0fc16d7ee391e2e3eca47b713ac88d0891ca8a63cb9
+Status: Downloaded newer image for jaegertracing/jaeger-collector:1.11.0
+1.11.0: Pulling from jaegertracing/jaeger-query
+d767b5711f06: Already exists
+e8eaa304dc29: Pulling fs layer
+e8eaa304dc29: Verifying Checksum
+e8eaa304dc29: Download complete
+e8eaa304dc29: Pull complete
+Digest: sha256:cddc521d0166c868931282685a863368ae2c14c4de0c1be38e388ece3080439e
+Status: Downloaded newer image for jaegertracing/jaeger-query:1.11.0
+v2.8.1:
+Pulling from prom/prometheus
+697743189b6d:
+Pulling fs layer
+f1989cfd335b:
+Pulling fs layer
+b4cdee23b8f2:
+Pulling fs layer
+d1fd10041652:
+Pulling fs layer
+e409a78e815f:
+Pulling fs layer
+785c4d79cf51:
+Pulling fs layer
+232a5dba5d0c:
+Pulling fs layer
+30fd0cc23f29:
+Pulling fs layer
+09f6d1bc9905:
+Pulling fs layer
+785c4d79cf51:
+Waiting
+232a5dba5d0c:
+Waiting
+30fd0cc23f29:
+Waiting
+d1fd10041652:
+Waiting
+e409a78e815f:
+Waiting
+09f6d1bc9905:
+Waiting
+f1989cfd335b: Verifying Checksum
+f1989cfd335b: Download complete
+697743189b6d: Verifying Checksum
+697743189b6d: Download complete
+b4cdee23b8f2: Verifying Checksum
+b4cdee23b8f2: Download complete
+697743189b6d: Pull complete
+f1989cfd335b: Pull complete
+d1fd10041652: Verifying Checksum
+d1fd10041652: Download complete
+785c4d79cf51: Verifying Checksum
+785c4d79cf51: Download complete
+232a5dba5d0c: Verifying Checksum
+232a5dba5d0c: Download complete
+30fd0cc23f29: Verifying Checksum
+30fd0cc23f29: Download complete
+e409a78e815f: Verifying Checksum
+e409a78e815f: Download complete
+09f6d1bc9905: Verifying Checksum
+09f6d1bc9905: Download complete
+b4cdee23b8f2: Pull complete
+d1fd10041652: Pull complete
+e409a78e815f: Pull complete
+785c4d79cf51: Pull complete
+232a5dba5d0c: Pull complete
+30fd0cc23f29: Pull complete
+09f6d1bc9905: Pull complete
+Digest: sha256:7ebbdf175da46fa346ba1e24cf0299bf47c31d199ffc276df1c68ed323606c31
+Status: Downloaded newer image for prom/prometheus:v2.8.1
+6.1.3: Pulling from grafana/grafana
+27833a3ba0a5:
+Pulling fs layer
+2e3c1753114f:
+Pulling fs layer
+bc0d0f546679:
+Pulling fs layer
+1f48322d619f:
+Pulling fs layer
+5170fb997ff3:
+Pulling fs layer
+c62a382f187a:
+Pulling fs layer
+5170fb997ff3:
+Waiting
+c62a382f187a:
+Waiting
+1f48322d619f:
+Waiting
+2e3c1753114f:
+Verifying Checksum
+2e3c1753114f:
+Download complete
+27833a3ba0a5:
+Verifying Checksum
+27833a3ba0a5:
+Download complete
+5170fb997ff3:
+Verifying Checksum
+5170fb997ff3:
+Download complete
+bc0d0f546679:
+Download complete
+c62a382f187a:
+Verifying Checksum
+c62a382f187a:
+Download complete
+27833a3ba0a5:
+Pull complete
+2e3c1753114f:
+Pull complete
+bc0d0f546679:
+Pull complete
+1f48322d619f:
+Download complete
+1f48322d619f:
+Pull complete
+5170fb997ff3:
+Pull complete
+c62a382f187a:
+Pull complete
+Digest: sha256:8fad1cc242f9a6b61fa8ee28956022a89ca3d687f6733e7b1407ba513be174d5
+Status: Downloaded newer image for grafana/grafana:6.1.3
+7.0.0: Pulling from library/kibana
+8ba884070f61: Pulling fs layer
+fb13981bc185: Pulling fs layer
+fb6fdde9c89a: Pulling fs layer
+8c206861615a: Pulling fs layer
+63cd246ddaff: Pulling fs layer
+8b4f7f0c7878: Pulling fs layer
+3bf5084285e9: Pulling fs layer
+a04bc029a7ae:
+Pulling fs layer
+63cd246ddaff: Waiting
+8b4f7f0c7878: Waiting
+a04bc029a7ae: Waiting
+3bf5084285e9: Waiting
+8c206861615a: Waiting
+fb13981bc185: Verifying Checksum
+fb13981bc185: Download complete
+8ba884070f61: Verifying Checksum
+8ba884070f61: Download complete
+8c206861615a: Verifying Checksum
+8c206861615a: Download complete
+63cd246ddaff: Verifying Checksum
+63cd246ddaff: Download complete
+8b4f7f0c7878: Verifying Checksum
+8b4f7f0c7878: Download complete
+3bf5084285e9: Verifying Checksum
+3bf5084285e9: Download complete
+a04bc029a7ae: Verifying Checksum
+a04bc029a7ae: Download complete
+8ba884070f61: Pull complete
+fb13981bc185: Pull complete
+fb6fdde9c89a: Verifying Checksum
+fb6fdde9c89a: Download complete
+fb6fdde9c89a: Pull complete
+8c206861615a: Pull complete
+63cd246ddaff: Pull complete
+8b4f7f0c7878:
+Pull complete
+3bf5084285e9:
+Pull complete
+a04bc029a7ae:
+Pull complete
+Digest: sha256:6bbd0e886b47406929fab070c8631280551e8c5433ffff610953454275de8ae8
+Status: Downloaded newer image for kibana:7.0.0
+REPOSITORY
+
+
+
+
+TAG
+
+
+
+IMAGE ID
+
+
+CREATED
+
+
+SIZE
+
+cassandra
+
+
+
+
+3.11.4
+
+
+a34c036183d1
+
+8 days ago
+
+
+323MB
+
+prom/node-exporter
+
+
+
+v0.18.1
+
+
+e5a616e4b9cf
+
+5 weeks ago
+
+
+22.9MB
+
+grafana/grafana
+
+
+
+
+6.1.3
+
+
+a8b0c77b00b7
+
+3 months ago
+
+245MB
+
+kibana
+
+
+
+
+
+7.0.0
+
+
+7f92ab934206
+
+3 months ago
+
+661MB
+
+prom/prometheus
+
+
+
+
+v2.8.1
+
+
+0694fc214c9f
+
+3 months ago
+
+109MB
+
+jaegertracing/jaeger-query
+
+
+1.11.0
+
+
+ace63c5f7301
+
+4 months ago
+
+33.1MB
+
+jaegertracing/jaeger-collector
+
+
+1.11.0
+
+
+4c899a152043
+
+4 months ago
+
+32.9MB
+
+jaegertracing/jaeger-cassandra-schema
+
+1.11.0
+
+
+83758ef97aed
+
+4 months ago
+
+323MB
+
+google/cadvisor
+
+
+
+
+v0.33.0
+
+
+752d61707eac
+
+4 months ago
+
+68.6MB
+
+vm.max_map_count = 262144

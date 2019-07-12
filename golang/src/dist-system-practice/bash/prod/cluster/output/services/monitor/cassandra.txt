@@ -1,0 +1,7 @@
+IP:
+74.207.241.245
+COMMAND:
+docker volume create cas_data && docker run -d --name cassandra --log-driver json-file --log-opt max-size=1G --ulimit nproc=65535 --ulimit nofile=65535:65535 --ulimit memlock=-1:-1 --network monitor -p 7199:7199 -p 9042:9042 -p 9160:9160 -p 7000:7000 -e CASSANDRA_BROADCAST_ADDRESS=74.207.241.245 -e CASSANDRA_LISTEN_ADDRESS=cassandra -e MAX_HEAP_SIZE=8G -e HEAP_NEWSIZE=600M -e CASSANDRA_RPC_ADDRESS=0.0.0.0 -e CASSANDRA_START_RPC=true -e CASSANDRA_CLUSTER_NAME=cassandra_cluster -e CASSANDRA_SEEDS=74.207.241.245 -e JAVA_OPTS="-Dfile.encoding=UTF-8 -Xms9G -Xmx9G" cassandra:3.11.4
+
+cas_data
+5df418afa86373ad4cb3771b8e5dd544cf61453737dc9ed842a8e023b6f75952

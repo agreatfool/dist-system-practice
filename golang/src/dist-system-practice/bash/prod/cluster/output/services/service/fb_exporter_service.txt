@@ -1,0 +1,6 @@
+IP:
+45.79.103.237
+COMMAND:
+docker run -d --name fb_exporter_service --log-driver json-file --log-opt max-size=1G --network service -p 9479:9479 agreatfool/beat-exporter:v0.1.2 -beat.timeout=10s -beat.uri=http://45.79.103.237:5066 -web.listen-address=0.0.0.0:9479 -web.telemetry-path=/metrics
+
+2c7ad56aba8b90f2279a8d6df8d2a10a6482335249b39b995abe92e6fc889f05

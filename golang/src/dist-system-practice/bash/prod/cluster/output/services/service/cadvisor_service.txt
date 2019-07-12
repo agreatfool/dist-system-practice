@@ -1,0 +1,7 @@
+IP:
+45.79.103.237
+COMMAND:
+docker network create service && docker run -d --name cadvisor_service --log-driver json-file --log-opt max-size=1G --network service -p 8080:8080 -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro -v /var/lib/docker/:/var/lib/docker:ro google/cadvisor:v0.33.0 --listen_ip=0.0.0.0 --port=8080
+
+867c27020b4f8d48a9853cfe4ebccd5daa5f2ef4b5d5cf51b77e0029a58a44eb
+be4c34a811c85627609775877612d2247973245daa6f4b76ae2ff840de5d0992

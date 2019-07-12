@@ -1,0 +1,6 @@
+IP:
+45.79.103.237
+COMMAND:
+docker run -d --name app_consumer --log-driver json-file --log-opt max-size=1G --network service -p 8002:8002 -v /tmp/logger.yaml:/app/logger.yaml -v /tmp/logs:/app/logs -e APP_NAME="app.consumer" -e LOGGER_CONF_PATH="/app/logger.yaml" -e CACHE_SERVERS="[\"23.239.4.110:11211\"]" -e DB_HOST="23.239.4.110" -e DB_PORT="3306" -e DB_USER="root" -e DB_PWD="35OKc0F0EvIfXq6P" -e DB_NAME="dist" -e DB_CHARSET="utf8mb4" -e DB_COLLATION="utf8mb4_general_ci" -e DB_MAX_OPEN_CONN="900" -e DB_MAX_IDLE_CONN="900" -e DB_CONN_MAX_LIFE_TIME="300" -e WEB_HOST="0.0.0.0" -e WEB_PORT="8002" -e CONSUMER_ROUTINES="20" -e CONSUMER_FACTOR="37" -e KAFKA_BROKERS="[\"45.79.97.104:9092\",\"45.79.97.104:9192\",\"104.237.157.138:9292\",\"104.237.157.138:9392\"]" -e JAEGER_SERVICE_NAME="app.consumer" -e JAEGER_AGENT_HOST="jagent_service" -e JAEGER_AGENT_PORT="6831" -e JAEGER_REPORTER_LOG_SPANS="true" -e JAEGER_REPORTER_FLUSH_INTERVAL="1s" -e JAEGER_SAMPLER_TYPE="probabilistic" -e JAEGER_SAMPLER_PARAM="0.01" agreatfool/dist_app_consumer:0.0.2
+
+23a94482b15d9a0607714f69453b25057f2941aeb75a1cd4f2ff14a6d5648f6b

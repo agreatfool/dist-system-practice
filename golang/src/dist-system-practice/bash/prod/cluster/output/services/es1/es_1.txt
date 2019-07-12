@@ -1,0 +1,8 @@
+IP:
+50.116.11.242
+COMMAND:
+docker volume create es_data_1 && docker volume create es_logs_1 && docker run -d --name es_1 --log-driver json-file --log-opt max-size=1G --ulimit nproc=65535 --ulimit nofile=65535:65535 --ulimit memlock=-1:-1 --network es1 -p 9300:9300 -p 9200:9200 -v es_data_1:/usr/share/elasticsearch/data -v es_logs_1:/usr/share/elasticsearch/logs -v /tmp/elasticsearch.yaml:/usr/share/elasticsearch/config/elasticsearch.yml -e node.name="es_1" -e network.host="0.0.0.0" -e http.port=9200 -e network.publish_host="50.116.11.242" -e transport.tcp.port=9300 -e node.master=true -e node.data=true -e ES_JAVA_OPTS="-Xms6G -Xmx6G" -e discovery.seed_hosts=50.116.11.242:9300,50.116.11.242:9301,192.81.135.195:9302,192.81.135.195:9303 -e cluster.initial_master_nodes=es_1,es_2,es_3,es_4 elasticsearch:7.0.0
+
+es_data_1
+es_logs_1
+0413a150648ce9c436302a81fc504e48ecb61c1823ac51fe3ab137b76b9c213e

@@ -1,0 +1,8 @@
+IP:
+104.237.157.138
+COMMAND:
+docker volume create kafka_data_4 && docker volume create kafka_home_4 && docker run -d --name kafka_4 --log-driver json-file --log-opt max-size=1G --ulimit nproc=65535 --ulimit nofile=65535:65535 --ulimit memlock=-1:-1 --network kafka2 -p 9393:9393 -p 9392:9392 -p 7371:7071 -v /tmp/jmx_prometheus_javaagent-0.9.jar:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar -v /tmp/jmx-kafka-2_0_0.yaml:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml -v kafka_data_4:/tmp/kafka/data -v kafka_home_4:/kafka -e KAFKA_LISTENERS="INSIDE://0.0.0.0:9393,OUTSIDE://0.0.0.0:9392" -e KAFKA_ADVERTISED_LISTENERS="INSIDE://104.237.157.138:9393,OUTSIDE://104.237.157.138:9392" -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP="INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT" -e KAFKA_INTER_BROKER_LISTENER_NAME="INSIDE" -e KAFKA_BROKER_ID=3 -e KAFKA_ZOOKEEPER_CONNECT="45.79.97.104:2181" -e JMX_PORT=9991 -e KAFKA_OPTS="-javaagent:/usr/local/bin/jmx_prometheus_javaagent-0.9.jar=7071:/etc/jmx-exporter/jmx-kafka-2_0_0.yaml" -e KAFKA_HEAP_OPTS="-Xms6G -Xmx6G" -e KAFKA_LOG_DIRS="/tmp/kafka/data" -e KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1 -e KAFKA_MIN_INSYNC_REPLICAS=1 wurstmeister/kafka:2.12-2.2.0
+
+kafka_data_4
+kafka_home_4
+22f53593e907f95181b73ceb429da290c9dc9912db19d7904c97158a74137990

@@ -1,0 +1,6 @@
+IP:
+74.207.241.245
+COMMAND:
+docker run -d --name jcollector_1 --log-driver json-file --log-opt max-size=1G --network monitor -p 14250:14250 -p 14268:14268 -e SPAN_STORAGE_TYPE=cassandra jaegertracing/jaeger-collector:1.11.0 --collector.grpc-port=14250 --collector.http-port=14268 --cassandra.servers=74.207.241.245 --cassandra.keyspace=jaeger_keyspace --metrics-backend=prometheus --metrics-http-route=/metrics --log-level=info
+
+d8504c044bdd09e7519298b7c0c3640926cf2bfa82aaa953d31fbae1a1359bab

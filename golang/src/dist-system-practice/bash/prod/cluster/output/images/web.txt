@@ -1,0 +1,119 @@
+IP:
+173.255.211.188
+COMMAND:
+docker pull prom/node-exporter:v0.18.1 && docker pull google/cadvisor:v0.33.0 && docker pull jaegertracing/jaeger-agent:1.11.0 && docker pull agreatfool/dist_app_web:0.0.2 && docker pull elastic/filebeat:7.0.0 && docker pull agreatfool/beat-exporter:v0.1.2 && docker images && sudo sysctl -w vm.max_map_count=262144
+
+v0.18.1: Pulling from prom/node-exporter
+49a2d53aa1af: Pulling fs layer
+3589a6efd9ce: Pulling fs layer
+190160031744: Pulling fs layer
+3589a6efd9ce: Verifying Checksum
+3589a6efd9ce: Download complete
+49a2d53aa1af: Verifying Checksum
+49a2d53aa1af: Download complete
+190160031744: Verifying Checksum
+190160031744: Download complete
+49a2d53aa1af: Pull complete
+3589a6efd9ce: Pull complete
+190160031744: Pull complete
+Digest: sha256:a2f29256e53cc3e0b64d7a472512600b2e9410347d53cdc85b49f659c17e02ee
+Status: Downloaded newer image for prom/node-exporter:v0.18.1
+v0.33.0: Pulling from google/cadvisor
+169185f82c45: Pulling fs layer
+bd29476a29dd: Pulling fs layer
+a2eb18ca776e: Pulling fs layer
+169185f82c45: Verifying Checksum
+169185f82c45: Download complete
+a2eb18ca776e: Verifying Checksum
+a2eb18ca776e: Download complete
+bd29476a29dd: Verifying Checksum
+bd29476a29dd: Download complete
+169185f82c45: Pull complete
+bd29476a29dd: Pull complete
+a2eb18ca776e: Pull complete
+Digest: sha256:47f1f8c02a3acfab77e74e2ec7acc0d475adc180ddff428503a4ce63f3d6061b
+Status: Downloaded newer image for google/cadvisor:v0.33.0
+1.11.0: Pulling from jaegertracing/jaeger-agent
+658deb099b0c: Pulling fs layer
+658deb099b0c: Verifying Checksum
+658deb099b0c: Download complete
+658deb099b0c: Pull complete
+Digest: sha256:7ad33c19fd66307f2a3c07c95eb07c335ddce1b487f6b6128faa75d042c496cb
+Status: Downloaded newer image for jaegertracing/jaeger-agent:1.11.0
+0.0.2: Pulling from agreatfool/dist_app_web
+e7c96db7181b:
+Pulling fs layer
+dbc414229570: Pulling fs layer
+3969a18e1df9: Pulling fs layer
+e7c96db7181b: Verifying Checksum
+e7c96db7181b: Download complete
+dbc414229570: Verifying Checksum
+dbc414229570: Download complete
+e7c96db7181b: Pull complete
+dbc414229570: Pull complete
+3969a18e1df9: Verifying Checksum
+3969a18e1df9: Download complete
+3969a18e1df9: Pull complete
+Digest: sha256:49fe3e898a75225ea43a66782b0985eaed294583361a8446d701962454d8636a
+Status: Downloaded newer image for agreatfool/dist_app_web:0.0.2
+7.0.0: Pulling from elastic/filebeat
+8ba884070f61: Pulling fs layer
+c8a449f5b4a1: Pulling fs layer
+06eade42efe1: Pulling fs layer
+b06bbf3c5900: Pulling fs layer
+7b41b0659ab5: Pulling fs layer
+218ee8f78641: Pulling fs layer
+679e307ce202: Pulling fs layer
+7b41b0659ab5: Waiting
+679e307ce202: Waiting
+218ee8f78641: Waiting
+b06bbf3c5900: Waiting
+06eade42efe1: Verifying Checksum
+06eade42efe1: Download complete
+c8a449f5b4a1: Verifying Checksum
+c8a449f5b4a1: Download complete
+b06bbf3c5900: Verifying Checksum
+b06bbf3c5900: Download complete
+8ba884070f61: Verifying Checksum
+8ba884070f61: Download complete
+7b41b0659ab5: Verifying Checksum
+7b41b0659ab5: Download complete
+679e307ce202: Download complete
+218ee8f78641: Verifying Checksum
+218ee8f78641: Download complete
+8ba884070f61: Pull complete
+c8a449f5b4a1: Pull complete
+06eade42efe1:
+Pull complete
+b06bbf3c5900:
+Pull complete
+7b41b0659ab5:
+Pull complete
+218ee8f78641:
+Pull complete
+679e307ce202:
+Pull complete
+Digest: sha256:6388c7830ff51ea0f2af041933229d12b8a6221e386d35256267960da8de8489
+Status: Downloaded newer image for elastic/filebeat:7.0.0
+v0.1.2: Pulling from agreatfool/beat-exporter
+ff5eadacfa0b: Pulling fs layer
+aa7f2ab6505e: Pulling fs layer
+132c9f95bb85: Pulling fs layer
+ff5eadacfa0b: Download complete
+aa7f2ab6505e: Verifying Checksum
+aa7f2ab6505e: Download complete
+132c9f95bb85: Download complete
+ff5eadacfa0b: Pull complete
+aa7f2ab6505e: Pull complete
+132c9f95bb85: Pull complete
+Digest: sha256:0bbdc4111c8d3b7f89805c4ba382e1a829aff0107ed91d5fe2aa462e1888492c
+Status: Downloaded newer image for agreatfool/beat-exporter:v0.1.2
+REPOSITORY                   TAG                 IMAGE ID            CREATED             SIZE
+agreatfool/beat-exporter     v0.1.2
+2da72326774c        2 weeks ago         11.8MB
+agreatfool/dist_app_web      0.0.2               ce0df25ad5a8        2 weeks ago         27.4MB
+prom/node-exporter           v0.18.1             e5a616e4b9cf        5 weeks ago         22.9MB
+elastic/filebeat             7.0.0               893591509ff0        3 months ago        288MB
+jaegertracing/jaeger-agent   1.11.0              63fda04680f8        4 months ago        22.4MB
+google/cadvisor              v0.33.0             752d61707eac        4 months ago        68.6MB
+vm.max_map_count = 262144

@@ -1,0 +1,311 @@
+IP:
+23.239.4.110
+COMMAND:
+docker pull prom/node-exporter:v0.18.1 && docker pull google/cadvisor:v0.33.0 && docker pull mysql:5.7.26 && docker pull prom/mysqld-exporter:v0.11.0 && docker pull memcached:1.5.14-alpine && docker pull prom/memcached-exporter:v0.5.0 && docker images && sudo sysctl -w vm.max_map_count=262144
+
+v0.18.1: Pulling from prom/node-exporter
+49a2d53aa1af: Pulling fs layer
+3589a6efd9ce: Pulling fs layer
+190160031744: Pulling fs layer
+3589a6efd9ce: Verifying Checksum
+3589a6efd9ce: Download complete
+49a2d53aa1af: Verifying Checksum
+49a2d53aa1af: Download complete
+190160031744: Verifying Checksum
+190160031744: Download complete
+49a2d53aa1af: Pull complete
+3589a6efd9ce: Pull complete
+190160031744: Pull complete
+Digest: sha256:a2f29256e53cc3e0b64d7a472512600b2e9410347d53cdc85b49f659c17e02ee
+Status: Downloaded newer image for prom/node-exporter:v0.18.1
+v0.33.0: Pulling from google/cadvisor
+169185f82c45: Pulling fs layer
+bd29476a29dd: Pulling fs layer
+a2eb18ca776e: Pulling fs layer
+169185f82c45:
+Verifying Checksum
+169185f82c45:
+Download complete
+a2eb18ca776e:
+Download complete
+bd29476a29dd:
+Verifying Checksum
+bd29476a29dd:
+Download complete
+169185f82c45:
+Pull complete
+bd29476a29dd:
+Pull complete
+a2eb18ca776e: Pull complete
+Digest: sha256:47f1f8c02a3acfab77e74e2ec7acc0d475adc180ddff428503a4ce63f3d6061b
+Status: Downloaded newer image for google/cadvisor:v0.33.0
+5.7.26: Pulling from library/mysql
+fc7181108d40:
+Pulling fs layer
+787a24c80112:
+Pulling fs layer
+a08cb039d3cd:
+Pulling fs layer
+4f7d35eb5394:
+Pulling fs layer
+5aa21f895d95:
+Pulling fs layer
+a742e211b7a2:
+Pulling fs layer
+0163805ad937:
+Pulling fs layer
+62d0ebcbfc71:
+Pulling fs layer
+559856d01c93:
+Pulling fs layer
+c849d5f46e83:
+Pulling fs layer
+4f7d35eb5394:
+Waiting
+f114c210789a:
+Pulling fs layer
+a742e211b7a2:
+Waiting
+62d0ebcbfc71:
+Waiting
+559856d01c93:
+Waiting
+c849d5f46e83:
+Waiting
+f114c210789a:
+Waiting
+5aa21f895d95:
+Waiting
+a08cb039d3cd:
+Verifying Checksum
+a08cb039d3cd:
+Download complete
+787a24c80112:
+Verifying Checksum
+787a24c80112:
+Download complete
+fc7181108d40:
+Verifying Checksum
+fc7181108d40:
+Download complete
+4f7d35eb5394:
+Verifying Checksum
+4f7d35eb5394:
+Download complete
+5aa21f895d95:
+Verifying Checksum
+5aa21f895d95:
+Download complete
+a742e211b7a2:
+Verifying Checksum
+a742e211b7a2:
+Download complete
+62d0ebcbfc71:
+Verifying Checksum
+62d0ebcbfc71:
+Download complete
+0163805ad937:
+Verifying Checksum
+0163805ad937:
+Download complete
+c849d5f46e83:
+Download complete
+f114c210789a:
+Verifying Checksum
+f114c210789a:
+Download complete
+559856d01c93:
+Verifying Checksum
+559856d01c93:
+Download complete
+fc7181108d40:
+Pull complete
+787a24c80112:
+Pull complete
+a08cb039d3cd:
+Pull complete
+4f7d35eb5394:
+Pull complete
+5aa21f895d95:
+Pull complete
+a742e211b7a2:
+Pull complete
+0163805ad937:
+Pull complete
+62d0ebcbfc71:
+Pull complete
+559856d01c93:
+Pull complete
+c849d5f46e83:
+Pull complete
+f114c210789a:
+Pull complete
+Digest: sha256:c3594c6528b31c6222ba426d836600abd45f554d078ef661d3c882604c70ad0a
+Status: Downloaded newer image for mysql:5.7.26
+v0.11.0: Pulling from prom/mysqld-exporter
+f70adabe43c0: Pulling fs layer
+b91f96ddd9e3: Pulling fs layer
+25f34166cb87: Pulling fs layer
+f70adabe43c0: Verifying Checksum
+f70adabe43c0: Download complete
+b91f96ddd9e3:
+Verifying Checksum
+b91f96ddd9e3:
+Download complete
+25f34166cb87:
+Verifying Checksum
+25f34166cb87:
+Download complete
+f70adabe43c0:
+Pull complete
+b91f96ddd9e3:
+Pull complete
+25f34166cb87:
+Pull complete
+Digest: sha256:9f4fb61cca309cb4a8c1b9ed9fb4aa75af0f7a21f36d3954667db37c062a0172
+Status: Downloaded newer image for prom/mysqld-exporter:v0.11.0
+1.5.14-alpine: Pulling from library/memcached
+e7c96db7181b: Pulling fs layer
+4f068b59d6a0: Pulling fs layer
+170b317789fc: Pulling fs layer
+06d41d45c784: Pulling fs layer
+25c4398fd6eb: Pulling fs layer
+06d41d45c784: Waiting
+25c4398fd6eb: Waiting
+4f068b59d6a0: Verifying Checksum
+4f068b59d6a0: Download complete
+170b317789fc:
+Verifying Checksum
+170b317789fc:
+Download complete
+e7c96db7181b:
+Verifying Checksum
+e7c96db7181b:
+Download complete
+e7c96db7181b:
+Pull complete
+06d41d45c784:
+Verifying Checksum
+06d41d45c784:
+Download complete
+4f068b59d6a0:
+Pull complete
+25c4398fd6eb:
+Verifying Checksum
+25c4398fd6eb:
+Download complete
+170b317789fc:
+Pull complete
+06d41d45c784:
+Pull complete
+25c4398fd6eb: Pull complete
+Digest: sha256:0bbeac26979772b33843c9dd7bdafbb903c9b342179189b0d531b87bb287ee74
+Status: Downloaded newer image for memcached:1.5.14-alpine
+v0.5.0: Pulling from prom/memcached-exporter
+8c5a7da1afbc: Pulling fs layer
+cab0dd93492f: Pulling fs layer
+88ff8ff2b801:
+Pulling fs layer
+8c5a7da1afbc: Download complete
+cab0dd93492f:
+Download complete
+88ff8ff2b801:
+Verifying Checksum
+88ff8ff2b801:
+Download complete
+8c5a7da1afbc:
+Pull complete
+cab0dd93492f:
+Pull complete
+88ff8ff2b801:
+Pull complete
+Digest: sha256:308a4e66d9a09628536b1ebf7d1a743d239a460a14989bafafeaf789619ba3b9
+Status: Downloaded newer image for prom/memcached-exporter:v0.5.0
+REPOSITORY
+
+
+TAG
+
+
+
+IMAGE ID
+
+
+CREATED
+
+
+SIZE
+
+mysql
+
+
+
+5.7.26
+
+
+a1aa4f76fab9
+
+4 weeks ago
+
+
+373MB
+
+prom/node-exporter
+
+v0.18.1
+
+
+e5a616e4b9cf
+
+5 weeks ago
+
+
+22.9MB
+
+memcached
+
+
+
+1.5.14-alpine
+
+b24490cae92d
+
+2 months ago
+
+10.2MB
+
+google/cadvisor
+
+
+v0.33.0
+
+
+752d61707eac
+
+4 months ago
+
+68.6MB
+
+prom/memcached-exporter
+
+v0.5.0
+
+
+b347954f0912
+
+8 months ago
+
+15.1MB
+
+prom/mysqld-exporter
+
+v0.11.0
+
+
+e80442e91b90
+
+12 months ago
+
+17MB
+
+vm.max_map_count = 262144

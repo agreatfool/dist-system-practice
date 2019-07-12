@@ -1,0 +1,7 @@
+IP:
+50.116.11.242
+COMMAND:
+docker network create es1 && docker run -d --name cadvisor_es_1 --log-driver json-file --log-opt max-size=1G --network es1 -p 8080:8080 -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys:ro -v /var/lib/docker/:/var/lib/docker:ro google/cadvisor:v0.33.0 --listen_ip=0.0.0.0 --port=8080
+
+5cde18a517c368f55a72f06b7f00022920d46fab4157b0e223f40c85bd26eb1c
+f42cdadcaa25ba26ac211da1101c3a9b990d9ba4eda5b91c71a0516e09a6bcdc

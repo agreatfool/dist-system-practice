@@ -1,0 +1,14 @@
+IP:
+74.207.241.245
+COMMAND:
+docker run --rm --name jaeger-cassandra-schema --network monitor -e MODE=test -e CQLSH_HOST=74.207.241.245 -e DATACENTER=jaeger_dc -e KEYSPACE=jaeger_keyspace jaegertracing/jaeger-cassandra-schema:1.11.0
+
+system_traces  system_schema  system_auth  system  system_distributed
+Generating the schema for the keyspace jaeger_keyspace and datacenter jaeger_dc
+Using template file /cassandra-schema/v002.cql.tmpl with parameters:
+    mode = test
+    datacenter = jaeger_dc
+    keyspace = jaeger_keyspace
+    replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}
+    trace_ttl = 172800
+    dependencies_ttl = 0

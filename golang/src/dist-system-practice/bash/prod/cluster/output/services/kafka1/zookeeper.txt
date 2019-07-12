@@ -1,0 +1,8 @@
+IP:
+45.79.97.104
+COMMAND:
+docker volume create zookeeper_data && docker volume create zookeeper_conf && docker run -d --name zookeeper --log-driver json-file --log-opt max-size=1G --network kafka1 -p 2181:2181 -v zookeeper_data:/opt/zookeeper-3.4.13/data -v zookeeper_conf:/opt/zookeeper-3.4.13/conf wurstmeister/zookeeper:latest
+
+zookeeper_data
+zookeeper_conf
+3211c8e1ae51cfd308654e6cd0036b73440e3e396bc5bdf91f9b3da44787dbc4

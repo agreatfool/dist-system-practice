@@ -1,0 +1,6 @@
+IP:
+45.79.103.237
+COMMAND:
+docker run -d --name filebeat_service --log-driver json-file --log-opt max-size=1G --network service -p 5066:5066 -v /tmp/filebeat.yaml:/usr/share/filebeat/filebeat.yml -v /tmp/logs/app:/tmp/logs/app -e ES_HOSTS=50.116.11.242:9200,50.116.11.242:9201,192.81.135.195:9202,192.81.135.195:9203 -e LOGGING_LEVEL=info -e NUM_OF_OUTPUT_WORKERS=12 -e NUM_OF_SHARDS=6 -e NUM_OF_REPLICAS=1 elastic/filebeat:7.0.0
+
+c0a824a815f0dfc6e710e1ed419dfef2d51debd1bbc9afb9763bb8f3931913fb
