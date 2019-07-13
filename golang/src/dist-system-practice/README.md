@@ -201,6 +201,8 @@ dist-system-practice/-
                      |       |      | run.sh                    # web、service、consumer 三个应用的启动脚本
                      |       | prod /-
                      |       |       | cluster /-
+                     |       |       |          | output        # 集群部署时产生的一系列输出信息
+                     |       |       |          | report        # 测试报告
                      |       |       |          | cluster.sh    # prod 环境自动化脚本
                      | conf /-
                      |       | dev      # dev 环境配置文件
