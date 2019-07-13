@@ -127,12 +127,18 @@ OVH BHS (CA):         17.60 MiB/s
 
 ```
 
-## 5. 结论
+## 5. 分析 & 结论
+### 5.1 分析
+
+
+### 5.2 结论
 
 
 ## 6. Elasticsearch数据
 ### 6.1 All Web requests
 ![](./images/kibana_web.png)
+
+请求数量1800000符合压测客户端给出的数值；√✗
 
 ### 6.2 All Consumer requests
 ![](./images/kibana_consumer.png)
@@ -157,7 +163,7 @@ OVH BHS (CA):         17.60 MiB/s
 ### 6.6 PlanWork
 ![](./images/kibana_plan_work.png)
 
-与Consumer计数匹配；√✗
+请求数量90434与Consumer消费计数匹配；√✗
 
 ## 7. Jaeger数据
 ### 7.1 GetWork
