@@ -15,7 +15,7 @@
     "handlebars": "4.1.2",
     "mkdirp": "0.5.1",
     "mz": "2.7.0",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.1",
     "shelljs": "0.8.3",
     "ssh2": "0.8.4"
   },
